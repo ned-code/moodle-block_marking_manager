@@ -1,0 +1,63 @@
+<div id="marking-interface">
+<table width="100%" class="markingmanagercontainer" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td valign="top" align="left" class="left-sec">            
+            <table width="100%" border="0" valign="top" align="center" class="fnmarkingblock">
+                <thead><tr>
+                    <th valign="top" align="LEFT" nowrap="nowrap" class="header topline" colspan="2">
+                        Marking Status
+                    </th>
+                </tr>
+                <?php
+                if (!empty($showform)) {
+                    echo '<tr><th valign="top" align="LEFT" nowrap="nowrap" class="header bottomline" colspan="2">';
+                    echo $showform.'</th></tr>';
+                }
+                ?>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach ($columnhtml as $index => $column) {
+                        if (strstr($column, 'mid='.$mid.'"')) {
+                            $extra = ' class="highlight"';
+                        } else {
+                            $extra = ' class="normal"';
+                        }                      
+                         
+                        if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! isset($_POST['nosaveandnext']))) {
+                            $columnungraded[$index] -= 1; 
+                            $totungraded -= 1; 
+                        }                        
+                        
+                        if (($columnungraded[$index] < 0.1) && ($view == 'less')){                            
+                            continue;
+                        } else {
+                            echo "<tr $extra>" .
+                            '<td style="color: red">' . $columnungraded[$index] . '</td>' . 
+                            "<td>$column</td>" . 
+                            '</tr>';
+                        }
+
+                   }
+                    ?>
+                <tr class="total">
+                    <td style="color: red"><?php echo $totungraded; ?></td>
+                    <td>Total <?php echo $showopts[$show]; ?></td>
+                </tr>
+                </tbody>
+            </table>
+		</td>
+		<td align="left" valign="top" class="right-sec">
+            <?php
+                if (!empty($selectedfunction)) {
+                    $iid = $selectedmod->id; 
+                    include $selectedfunction;
+                }
+                else {
+                    echo '<div class="no-assign">No selected assignment</div>';
+                }
+            ?>
+		</td>
+	</tr>
+</table>
+</div>
