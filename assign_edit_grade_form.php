@@ -475,16 +475,16 @@ class mod_assign_grading_form_fn extends moodleform {
         
         $mform->addElement('html', '</td>');
 
-        $mform->addElement('html', '<td width="100%" valign="top" align="left" nowrap="nowrap" class="markingmanager-head">');
+        $mform->addElement('html', '<td width="100%" valign="top" align="left" class="markingmanager-head">');
 
         $mform->addElement('html', '<table cellpadding="0" cellspacing="0" border="0" width="100%" class="name-date">');
         $mform->addElement('html', '<tr>');
-        $mform->addElement('html', '<td valign="middle" width="40%" class="leftSide">');
+        $mform->addElement('html', '<td valign="middle" width="65%" class="leftSide">');
         $mform->addElement('html', '<a target="_blank" class="marking_header_link" href="'.$CFG->wwwroot.'/user/view.php?id='.$user->id.'&course='.$courseid.'">' . fullname($user, true) . '</a>'. $groupname);
         $mform->addElement('html', '<br / >Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$cm->id.'">' .$name.'</a>');
         $mform->addElement('html', '</td>');
         
-        $mform->addElement('html', '<td width="60%" align="right" class="rightSide">');
+        $mform->addElement('html', '<td width="35%" align="right" class="rightSide">');
         
         $buttonarray=array();
         if (isset( $params['readonly'])){
