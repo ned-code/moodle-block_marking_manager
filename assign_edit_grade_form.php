@@ -95,7 +95,7 @@ class mod_assign_grading_form_fn extends moodleform {
         }else{
             $grade = $assignment->get_user_grade($userid, false);
         }
-
+        
         // add advanced grading
         $gradingdisabled = $assignment->grading_disabled($userid);
         $gradinginstance = fn_get_grading_instance($userid, $gradingdisabled, $assignment);
@@ -194,14 +194,15 @@ class mod_assign_grading_form_fn extends moodleform {
           
         $feedbackplugins = fn_load_plugins('assignfeedback', $assignment);
         
-        foreach ($feedbackplugins as $plugin) {
+        foreach ($feedbackplugins as $plugin) {  
             if ($plugin->is_enabled() && $plugin->is_visible()) {
-                //$mform->addElement('header', 'header_' . $plugin->get_type(), $plugin->get_name());
+                
                 if($plugin->get_type() == 'file'){
                     $mform->addElement('html', '<br /><div style="text-align: left; font-weight: bold;">Feedback files </div>');
                 } 
-                if (!$plugin->get_form_elements_for_user($grade, $mform, $data, $userid)) {
-                    //$mform->removeElement('header_' . $plugin->get_type());
+                
+                if ($plugin->get_form_elements_for_user($grade, $mform, $data, $userid)) {
+                 //print_r($data);die;   
                 }
             }
         }
@@ -441,6 +442,10 @@ class mod_assign_grading_form_fn extends moodleform {
             //$mform->addElement('hidden', 'maxsubmissionnum', $params['maxsubmissionnum']);
             //$mform->setType('maxsubmissionnum', PARAM_RAW); 
         }
+        
+        if ($data) {
+            $this->set_data($data);
+        }
 
         
     }
@@ -482,7 +487,11 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<td width="60%" align="right" class="rightSide">');
         
         $buttonarray=array();
-        if (! $params['readonly']){
+        if (isset( $params['readonly'])){
+            if (! $params['readonly']){
+                $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('savechanges', 'assign'));
+            }
+        }else{
             $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('savechanges', 'assign'));
         }
         /*

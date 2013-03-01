@@ -16,9 +16,11 @@ table.fnmarkingblock tr.normal {
 
 }
 
-table.fnmarkingblock tr.total {
+table.fnmarkingblock tr.marking-total {
 
-	background-color: #FFA3B1;
+	background-color: #787878;
+	
+	color: white;
 
 }
 
@@ -82,7 +84,7 @@ span.fn_summaries {
 
 #marking-interface {
 
-	width: 850px;
+	min-width: 850px;
 
 	margin: 0 auto;
 
@@ -96,7 +98,9 @@ span.fn_summaries {
 
 	padding: 15px 15px 0 15px;
 
-	width: 200px;
+	max-width: 200px;
+	
+	min-width: 170px
 
 }
 

@@ -379,7 +379,7 @@ $button = '<tr><td>' . $groupform . '&nbsp;&nbsp;</td>' .
         '</tr>';
 print_header_simple($strgrades, $course->fullname . ': ' . $strgrades, $navigation, '', '', true, $button, '');
 
-echo '<table width="100%" border="0" cellpadding="5" cellspacing="0"><tr><td>';
+echo '<table border="0" cellpadding="5" cellspacing="0" style="margin: auto;"><tr><td>';
 include_once('fn_gradebook.html');
 echo '</td></tr></table>';
 

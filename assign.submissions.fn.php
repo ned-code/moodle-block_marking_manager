@@ -46,11 +46,7 @@
                 
                 $action = 'grade';
                 if (fn_process_save_grade($mform, $assign, $ctx, $course, $pageparams)) {
-                    $action = 'grade';
-                    /* $redirect = new moodle_url('fn_gradebook.php', $pageparams);
-       
-                       redirect($redirect);
-                       break;*/                
+                    $action = 'grade';             
                 }
             } else {
                 //cancel button
@@ -67,13 +63,15 @@
         if (isset($_POST['onlinetext'])){
             unset($_POST['onlinetext']);
         }
-        
+
         // Now show the right view page.
         if ($action == 'previousgrade') {  
-            $mform = null;
+            $mform = null;  
+            $_POST = null; 
             $o .= fn_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
         } else if ($action == 'nextgrade') {   
-            $mform = null;
+            $mform = null;  
+            $_POST = null; 
             $o .= fn_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
         } else if ($action == 'grade') { 
             $mform = null;  
