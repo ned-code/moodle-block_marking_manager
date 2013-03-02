@@ -769,3 +769,16 @@ a.marking_header_link, a.marking_header_link:visited, a.marking_header_link:hove
 	margin: 0 !important;
 
 }
+
+div#marking-interface table.markingmanagercontainer  td.left-sec table.fnmarkingblock div.singleselect {
+	margin: 0 0 0 0;
+}
+
+
+div#marking-interface table.markingmanagercontainer  td.left-sec table.fnmarkingblock div.singleselect select.singleselect{
+	margin: 0 0 0 0;
+}
+
+div.navbar div.navbutton div.singleselect select.singleselect{
+	margin: 5px 0 0 0;
+}

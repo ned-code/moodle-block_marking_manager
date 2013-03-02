@@ -1436,7 +1436,8 @@ function fn_view_submissions($mform, $offset=0, $showsubmissionnum=null, $assign
         $last = true;
     }
     if (!$userid) {
-        throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
+        return 'There is no user.';
+        //throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
     }
     
     if ($pageparams['show']=='unsubmitted'){
@@ -1590,7 +1591,10 @@ function fn_view_submissions($mform, $offset=0, $showsubmissionnum=null, $assign
                                                                   $assign->get_context(),
                                                                   $assign->is_blind_marking(),
                                                                   ''),
-                                                                  $assign);            
+                                                                  $assign, 
+                                                                  $user,
+                                                                  $grade,
+                                                                  $assign->get_renderer());            
             }
             
             
@@ -2222,13 +2226,81 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
  * @param assign_submission_status $status
  * @return string
  */
-function fn_render_assign_submission_status(assign_submission_status $status, $assign) {
-    global $OUTPUT;
+function fn_render_assign_submission_status(assign_submission_status $status, $assign, $user, $grade, $assign_renderer) {
+    global $OUTPUT, $DB, $CFG, $pageparams;
     $o = '';
-    $o .= $OUTPUT->container_start('submissionstatustable');
-    $o .= $OUTPUT->heading(get_string('submissionstatusheading', 'assign'), 3);
-    $time = time();
+    
+    
+    if ($user) {
+        $viewfullnames = has_capability('moodle/site:viewfullnames', $assign->get_course_context());
+        $summary = new assign_user_summary($user,
+                                               $assign->get_course()->id,
+                                               $viewfullnames,
+                                               $assign->is_blind_marking(),
+                                               $assign->get_uniqueid_for_user($user->id),
+                                               NULL);
+        
+        //$modulename =  $assign->get_course_module()->modname;
+        $gradeitem = $DB->get_record('grade_items', array('itemtype'=>'mod', 'itemmodule'=>'assign', 'iteminstance'=>$assign->get_instance()->id));
+       
+        
+        
+     
+        
+        
+        if ($assign->get_instance()->teamsubmission) {
 
+            $submissiongroup = $assign->get_submission_group($user->id);
+            if (isset($submissiongroup->name)){
+                $groupname = ' ('.$submissiongroup->name.')';
+            }else{
+                $groupname = ' (Default group)';
+            }
+            
+
+        }else{
+            $groupname = '';
+        }        
+           
+           
+           
+           
+           
+           
+                                                          
+      
+        $header = '<table class="headertable"><tr>';
+   
+        if ($summary->blindmarking) {
+            $header .= '<td>'.get_string('hiddenuser', 'assign') . $summary->uniqueidforuser;
+            $header .= '<br />Assignment ' .$assign->get_instance()->name.'</td>';
+        } else {
+            $header .= '<td width="35px">'.$OUTPUT->user_picture($summary->user).'</td>';
+            //$header .= $OUTPUT->spacer(array('width'=>30));
+            $urlparams = array('id' => $summary->user->id, 'course'=>$summary->courseid);
+            $url = new moodle_url('/user/view.php', $urlparams);
+            
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank')). $groupname. '</div>';
+            $header .= '<div style="margin-top:5px; color:white;">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
+        }
+        $header .= '</tr></table>';
+                                                       
+        
+    }
+ 
+    
+     //echo $header;die;
+    
+    
+    
+    
+    
+    
+    
+    //$o .= $OUTPUT->container_start('submissionstatustable');
+    //$o .= $OUTPUT->heading(get_string('submissionstatusheading', 'assign'), 3);
+    $time = time();
+    /*
     if ($status->allowsubmissionsfromdate &&
             $time <= $status->allowsubmissionsfromdate) {
         $o .= $OUTPUT->box_start('generalbox boxaligncenter submissionsalloweddates');
@@ -2239,10 +2311,23 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
         }
         $o .= $OUTPUT->box_end();
     }
-    $o .= $OUTPUT->box_start('boxaligncenter submissionsummarytable');
+    */
+    //$o .= $OUTPUT->box_start('boxaligncenter submissionsummarytable');
 
     $t = new html_table();
+    $t->attributes['class'] = 'generaltable historytable';
+    $cell = new html_table_cell($header);
+    $cell->attributes['class'] = 'historyheader';
+    $cell->colspan = 3;
+    $t->data[] = new html_table_row(array($cell));        
+    
 
+    
+    $submitted_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/text.gif" valign="absmiddle"> ';
+    $marked_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
+    $saved_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
+    $marked_icon_incomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    /* 
     if ($status->teamsubmissionenabled) {
         $row = new html_table_row();
         $cell1 = new html_table_cell(get_string('submissionteam', 'assign'));
@@ -2255,7 +2340,7 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
         $row->cells = array($cell1, $cell2);
         $t->data[] = $row;
     }
-
+    
     $row = new html_table_row();
     $cell1 = new html_table_cell(get_string('submissionstatus', 'assign'));
     if (!$status->teamsubmissionenabled) {
@@ -2443,11 +2528,60 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
             }
         }
     }
+    */
+    
+    
+    
+        $grade->gradefordisplay = $assign->display_grade($grade->grade, false);
+        
+        $submission = $assign->get_user_submission($user->id, false); 
+    
+        if ($grade) { 
+            
+            $cell1 = new html_table_cell($grade->gradefordisplay);
+            $cell1->rowspan = 2;
+          
+            
+            
+            if ($submission->status == 'draft'){
+                $cell2 = new html_table_cell($saved_icon . 'Draft');
+            }else{
+                $cell2 = new html_table_cell($submitted_icon . get_string('submitted', 'assign'));
+            }
+            
+            $cell3 = new html_table_cell(userdate($submission->timemodified));
+            $lastsubmission_class = '';
+            if (true){
+                $cell3->text = '<div style="float:left;">'.$cell3->text.'
+                                </div>
+                                <div style="float:right;">
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&userid='.$user->id.'">
+                                <img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
+                                </a>
+                                </div>';
+                $cell2->attributes['class'] = $lastsubmission_class;
+                $cell3->attributes['class'] = $lastsubmission_class;
+            }
+                        
+            $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
+
+            
+            
+            $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
+            $cell2 = new html_table_cell(userdate($grade->timemodified));
+            if (true){
+                $cell1->attributes['class'] = $lastsubmission_class;
+                $cell2->attributes['class'] = $lastsubmission_class;
+            }            
+            $t->data[] = new html_table_row(array($cell1, $cell2));
 
 
-    $o .= html_writer::table($t);
-    $o .= $OUTPUT->box_end();
 
+        }       
+
+    $historyout = html_writer::table($t);
+    //$o .= $OUTPUT->box_end();
+    /*
     // Links.
     if ($status->view == assign_submission_status::STUDENT_VIEW) {
         if ($status->canedit) {
@@ -2473,6 +2607,19 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
     }
 
     $o .= $OUTPUT->container_end();
-    return $o;
+    */
+    
+            
+    $o = '';
+    if ($historyout) {
+        $o .= $assign_renderer->box_start('generalbox submissionhistory_summary');
+        //$o .= $assign_renderer->heading(get_string('submissionhistory', 'assign'), 3);
+
+        $o .= $historyout;
+
+        $o .= $assign_renderer->box_end();
+    }
+
+    return $o;    
 }
 
