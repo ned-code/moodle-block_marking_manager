@@ -1457,8 +1457,16 @@ function fn_view_submissions($mform, $offset=0, $showsubmissionnum=null, $assign
             }
         }
         
-        if(count($unsubmitted)>0){                
-            echo '<p class="headTxt"><strong>The following students have not submitted this assignment:</strong></p>';           
+        if(count($unsubmitted)>0){
+                
+            $image = "<A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\"> <IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$cm->modname/pix/icon.gif\" " .
+                    "HEIGHT=16 WIDTH=16 ALT=\"$cm->modname\"></A>";
+                                             
+            $o .= '<div class="unsubmitted_header">' . $image .
+                                        " Assignment: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" . $assign->get_instance()->name . '</a></div>';            
+            
+                                 
+            $o .= '<p class="unsubmitted_msg">The following students have not submitted this assignment:</p>';           
             
             foreach ($unsubmitted as $userid) {
             /// Check that this user hasn't submitted before.             

@@ -777,8 +777,28 @@ div#marking-interface table.markingmanagercontainer  td.left-sec table.fnmarking
 
 div#marking-interface table.markingmanagercontainer  td.left-sec table.fnmarkingblock div.singleselect select.singleselect{
 	margin: 0 0 0 0;
+	text-align: left;
 }
 
 div.navbar div.navbutton div.singleselect select.singleselect{
 	margin: 5px 0 0 0;
+	text-align: left;
+}
+.unsubmitted_header{
+	background-color: #7092BE;
+	padding:10px 10px 10px 25px;
+	color: white;
+	font-size: 16px;
+	margin-bottom: 10px;
+	margin-top: 5px;
+}
+.unsubmitted_header a:link, .unsubmitted_header a:visited, .unsubmitted_header a:hover, .unsubmitted_header a:active {
+	color: yellow;
+	font-weight: bold;
+	text-decoration: none;
+}
+p.unsubmitted_msg{
+	font-weight: bold;
+	font-size: 14px;
+	margin: 0 0 10px 0;
 }

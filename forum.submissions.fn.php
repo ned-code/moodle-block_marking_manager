@@ -38,11 +38,12 @@
     
     /// Print settings and things in a table across the top
     $forum->intro = trim($forum->intro);
+    /*
     if ((!empty($forum->intro)) && ($show !=='saved' )) {
         echo $OUTPUT->box(format_text($forum->intro), 'box generalbox generalboxcontent boxaligncenter', 'intro');
     }
     echo '<br />';
-   
+    */
     $student_id_list = implode(',', array_keys($students));
 
     //Get students from forum_posts
@@ -56,11 +57,24 @@
                       
      // show all the unsubmitted users                            
     if($show == 'unsubmitted'){
-        if($students){        
+        if($students){    
+            
+            $image = "<A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\"> <IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$cm->modname/pix/icon.gif\" " .
+                    "HEIGHT=16 WIDTH=16 ALT=\"$cm->modname\"></A>";
+                                             
+            echo '<div class="unsubmitted_header">' . $image .
+                                        " Forum: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" . $forum->name . '</a></div>';            
+            
+                                 
+            echo '<p class="unsubmitted_msg">Following students have not yet posted to this forum:</p>';         
+             
+            /* 
             echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted" width="100%">';
                                 echo "\n<tr>";
                                 echo "<td width=\"100%\" class=\"rightName\"><strong>Following students have not yet posted to this forum</strong></td>\n";              
                                 echo "</tr></table>\n";
+             */                   
+                                
             foreach ($students as $student) {
                 if (!is_array($st_posts) || !array_key_exists($student->id, $st_posts)) {
                     
