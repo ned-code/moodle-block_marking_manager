@@ -20,8 +20,8 @@
  *
  * @package    block
  * @subpackage fn_marking
- * @copyright  2011 MoodleFn
- * @author     MoodleFn
+ * @copyright  2013 MoodleFn
+ * @author     MoodleFN
  */
 
 $plugin->version = 2013022601;
