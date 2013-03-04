@@ -27,10 +27,9 @@ class block_fn_marking extends block_list {
     public function specialization() {
 
         global $course;
-
+      
         /// Need the bigger course object.
         $this->course = $course;
-        $this->config = new stdClass();
 
         if (empty($this->config->title)) {
             $this->title = get_string('pluginname', 'block_fn_marking');

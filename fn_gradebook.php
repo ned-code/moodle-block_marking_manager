@@ -9,7 +9,8 @@ require_once('lib.php');
 require_once($CFG->dirroot . '/lib/outputrenderers.php');
 require_once($CFG->dirroot . '/mod/forum/lib.php');
 $PAGE->requires->js('/mod/assignment/assignment.js');
-//$PAGE->requires->css('/blocks/fn_marking/styles.css');
+$PAGE->set_pagelayout('markingmanager');
+
 
 global $DB, $OUTPUT, $course;
 
@@ -370,7 +371,7 @@ if (!empty($cm)) {
 }
 
 /// Print header
-global $PAGE;
+global $PAGE; 
 $navlinks = array(array('name' => $strgrades, 'link' => '', 'type' => 'misc'));
 $navigation = build_navigation($navlinks);
 $button = '<tr><td>' . $groupform . '&nbsp;&nbsp;</td>' .
