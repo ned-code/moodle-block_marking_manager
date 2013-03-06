@@ -25,8 +25,10 @@
                         }                      
                          
                         if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! isset($_POST['nosaveandnext']))) {
-                            $columnungraded[$index] -= 1; 
-                            $totungraded -= 1; 
+                            if($_POST['nosaveandnext'] <> 'marked'){
+                                $columnungraded[$index] -= 1; 
+                                $totungraded -= 1; 
+                            }
                         }                        
                         
                         if (($columnungraded[$index] < 0.1) && ($view == 'less')){                            
