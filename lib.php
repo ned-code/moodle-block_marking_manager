@@ -1196,6 +1196,7 @@ function fn_process_save_grade(&$mform, $assign, $context, $course, $pageparams)
     $pageparams['useridlist'] = $useridlist;
     $pageparams['last']       = $last;
     $pageparams['savegrade']  = true;
+    
     if($pageparams['resubmission']){
         $pageparams['submissionnum'] = optional_param('submissionnum', null, PARAM_INT);
         //$pageparams['maxsubmissionnum'] = $maxsubmissionnum;
@@ -1269,13 +1270,21 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
     }
     
 
-    $rownum = optional_param('rownum', 0, PARAM_INT) + $offset;
+    $rownum = $pageparams['rownum'] + $offset;
     
     
     if($pageparams['userid']){         
-        $userid = $pageparams['userid'];
-        $last = true;
-        $useridlist[] = $userid;
+        $userid = $pageparams['userid'];        
+        
+        $arruser = count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['resubmission']);
+        $useridlist = $arruser;
+        $last = false;
+        
+        $rownum = array_search($userid, $useridlist); 
+        if ($rownum == count($useridlist) - 1) {
+            $last = true;
+        }
+       
     }else{    
         $arruser = count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['resubmission']);
         $useridlist = optional_param('useridlist', '', PARAM_TEXT);
@@ -1356,7 +1365,7 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         $pageparams['rownum']     = $rownum;
         $pageparams['useridlist'] = $useridlist;
         $pageparams['last']       = $last;
-        $pageparams['readonly']       = $readonly;
+        $pageparams['readonly']   = $readonly;        
          if($pageparams['resubmission']){
              $pageparams['submissionnum'] = $submissionnum;
              $pageparams['maxsubmissionnum'] = $maxsubmissionnum;
@@ -2061,9 +2070,9 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
                 }
                 
             } else if ($resubtype == assign::RESUBMISSION_FAILEDGRADE) {
-                $gradepass = $gradinginfo->items[0]->gradepass;
+                $gradepass = $gradeitem->gradepass;
                 if ($gradeitem->gradepass > 0) {
-                    $resubstatus = get_string('resubmissiononfailedgrade', 'assign', $gradepass);
+                    $resubstatus = get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1));
                 }
             }
         }
@@ -2103,16 +2112,16 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             $urlparams = array('id' => $summary->user->id, 'course'=>$summary->courseid);
             $url = new moodle_url('/user/view.php', $urlparams);
             
-            $header .= '<td><div>'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank')). $groupname. '</div>';
-            $header .= '<div style="margin-top:5px">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
-            $header .= '<td align="right">'.$resubstatus.'</td>';
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank', 'class'=>'userlink')). $groupname. '</div>';
+            $header .= '<div style="margin-top:5px; color:white;">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
+            $header .= '<td align="right" style="color:white;">'.$resubstatus.'</td>';
         }
         $header .= '</tr></table>';
                                                        
         
     }
     
-    $t = new html_table();
+    $t = new html_table();               
     $t->attributes['class'] = 'generaltable historytable';
     $cell = new html_table_cell($header);
     $cell->attributes['class'] = 'historyheader';
@@ -2184,7 +2193,7 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
                 $cell3->text = '<div style="float:left;">'.$cell3->text.'
                                 </div>
                                 <div style="float:right;">
-                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&userid='.$user->id.'">
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&expand=1&userid='.$user->id.'">
                                 <img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
@@ -2288,7 +2297,7 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
             $urlparams = array('id' => $summary->user->id, 'course'=>$summary->courseid);
             $url = new moodle_url('/user/view.php', $urlparams);
             
-            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank')). $groupname. '</div>';
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank', 'class'=>'userlink')). $groupname. '</div>';
             $header .= '<div style="margin-top:5px; color:white;">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
         }
         $header .= '</tr></table>';
@@ -2563,7 +2572,7 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
                 $cell3->text = '<div style="float:left;">'.$cell3->text.'
                                 </div>
                                 <div style="float:right;">
-                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&userid='.$user->id.'">
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&expand=1&userid='.$user->id.'">
                                 <img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
