@@ -80,15 +80,26 @@
         } 
         echo $o;
         
-    }elseif ($show == 'marked'){
-        if($userid){
-            $mform = null;  
-            $_POST = null;  
-            $o .= fn_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);            
-        }else{
-            if ($action == 'submitgrade') {
+    }elseif ($show == 'marked'){                            
+        if($expand){
+             if (($action == 'submitgrade')  && (optional_param('savegrade', null, PARAM_RAW))) { 
                 fn_process_save_grade($mform, $assign, $ctx, $course, $pageparams);
+             }
+             if (optional_param('nosaveandprevious', null, PARAM_RAW)) {
+                $mform = null;  
+                $_POST = null;                 
+                $o .= fn_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
+            } else if (optional_param('nosaveandnext', null, PARAM_RAW)) {
+                $mform = null;  
+                $_POST = null;                 
+                $o .= fn_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
+            }else{
+                $mform = null;  
+                $_POST = null;                 
+                $o .= fn_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
             }
+                        
+        }else{
             $o .= fn_view_submissions($mform, $offset=0, $showsubmissionnum=null, $assign, $ctx, $cm, $course, $pageparams);
         }                                                                                                                          
         
