@@ -176,8 +176,10 @@ class mod_assign_grading_form_fn extends moodleform {
                 } else if ($resubtype == assign::RESUBMISSION_FAILEDGRADE) {
                     $gradepass = $gradinginfo->items[0]->gradepass;
                     if ($gradepass > 0) {
+                        $mform->addElement('html', '<span style="font-size: 11px;">');
                         $mform->addElement('static', 'staticresubmission', get_string('resubmission', 'assign'),
-                                           get_string('resubmissiononfailedgrade', 'assign', $gradepass));
+                                           get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1)));
+                        $mform->addElement('html', '</span>');                                           
                     }
                 }
             }
@@ -434,7 +436,11 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('hidden', 'view', $params['view']);
         $mform->setType('view', PARAM_RAW);
-                                                      
+        
+        $mform->addElement('hidden', 'expand', $params['expand']);
+        $mform->setType('expand', PARAM_INT);
+         
+                                                     
         if ($params['resubmission']){                                                        
             $mform->addElement('hidden', 'submissionnum', $params['submissionnum']);
             $mform->setType('submissionnum', PARAM_INT);   
