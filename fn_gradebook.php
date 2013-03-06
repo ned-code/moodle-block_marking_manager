@@ -46,6 +46,8 @@ $view = optional_param('view', 'less', PARAM_ALPHA);
 
 $userid = optional_param('userid', 0, PARAM_INT);
 $group = optional_param('group', 0, PARAM_INT);
+$expand = optional_param('expand', 0, PARAM_INT);
+$rownum = optional_param('rownum', 0, PARAM_INT);
 
 set_current_group($courseid, $group);
 
@@ -64,6 +66,8 @@ $pageparams = array('courseid'=>$courseid,
                     'group' => $group,
                     'timenow' => $timenow,
                     'action' => $action,
+                    'expand' => $expand,
+                    'rownum' => $rownum,
                     'page' => $page,
                     'perpage' => $perpage,
                     'menushow' => $menushow,
@@ -158,7 +162,7 @@ if (($view == 'less') || ($view == 'more')) {
     }
 
     $urlshow = new moodle_url('fn_gradebook.php', array('courseid' => $courseid, 'mid' => $mid, 'dir' => $dir, 'sort' => $sort, 'view' => $view));
-    $showform = 'Show: ' . $OUTPUT->single_select($urlshow, 'show', $showopts, $selected = $show, '', $formid = 'fnshow');
+    $showform = $OUTPUT->single_select($urlshow, 'show', $showopts, $selected = $show, '', $formid = 'fnshow');
 }
 
 
