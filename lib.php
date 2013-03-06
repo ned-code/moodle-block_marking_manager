@@ -2639,4 +2639,3 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
 
     return $o;    
 }
-
