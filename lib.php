@@ -71,7 +71,7 @@ function assignment_count_ungraded($assignment, $graded, $students, $show='unmar
  * @return count the upgraded assign
  */
 function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $extra=false, $instance, $resubmission=false) {
-    global $DB;
+    global $DB, $CFG;
 
     $studentlist = implode(',', array_keys($students));   
     
@@ -141,8 +141,8 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
         if($resubmission){
             $sql = "SELECT COUNT(DISTINCT s.id)
                     FROM
-                    mdl_assign_submission AS s
-                    LEFT JOIN mdl_assign_grades AS g ON s.assignment = g.assignment AND s.userid = g.userid AND s.submissionnum = g.submissionnum
+                    {$CFG->prefix}assign_submission AS s
+                    LEFT JOIN {$CFG->prefix}assign_grades AS g ON s.assignment = g.assignment AND s.userid = g.userid AND s.submissionnum = g.submissionnum
                     WHERE
                     s.assignment = $assign AND
                     (s.userid IN ($studentlist)) AND
@@ -254,8 +254,8 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                     $sqlDraft = "SELECT s.id,
                                         s.timemodified AS submissiontime,
                                         g.timemodified AS gradetime
-                                   FROM mdl_assign_submission as s 
-                              LEFT JOIN mdl_assign_grades as g 
+                                   FROM {$CFG->prefix}assign_submission as s 
+                              LEFT JOIN {$CFG->prefix}assign_grades as g 
                                      ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
                                   WHERE s.assignment = $assign 
                                     AND s.userid IN ($studentlist)
@@ -339,8 +339,8 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                 $sqlDraft = "SELECT s.userid,
                                     s.timemodified AS submissiontime,
                                     g.timemodified AS gradetime
-                               FROM mdl_assign_submission as s 
-                          LEFT JOIN mdl_assign_grades as g 
+                               FROM {$CFG->prefix}assign_submission as s 
+                          LEFT JOIN {$CFG->prefix}assign_grades as g 
                                  ON (s.assignment=g.assignment and s.userid=g.userid)
                               WHERE s.assignment = $assign 
                                 AND s.userid IN ($studentlist)
@@ -434,8 +434,8 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
             $sqlDraft = "SELECT s.userid,
                                 s.timemodified AS submissiontime,
                                 g.timemodified AS gradetime
-                           FROM mdl_assign_submission as s 
-                      LEFT JOIN mdl_assign_grades as g 
+                           FROM {$CFG->prefix}assign_submission as s 
+                      LEFT JOIN {$CFG->prefix}assign_grades as g 
                              ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
                           WHERE s.assignment = $assign 
                             AND s.userid IN ($studentlist)

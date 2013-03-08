@@ -66,6 +66,7 @@ table.markingmanagercontainer td.right-sec .saprate-table {
 }
 .saprate-table td.yellowcell {
 	background: #ffff99;
+	padding-top: 1px !important;
 }
 .saprate-table td.bluecell {
 	background: #cbd7e7;
@@ -85,7 +86,7 @@ td.markingmanager-head .name-date td {
 	color: #FFF;
 }
 td.markingmanager-head .name-date td.leftSide {
-	font-size: 15px;
+	font-size: 14px;
 }
 td.markingmanager-head .name-date td.rightSide {
 	font-size: 11px;
@@ -353,6 +354,10 @@ a.userlink, a.userlink:visited, a.userlink:hover, a.userlink:active {
 a.marking_header_link, a.marking_header_link:visited, a.marking_header_link:hover, a.marking_header_link:active {
 	color: yellow;
 	text-decoration: none;
+	font-size: 12px;
+}
+span.marking_header_link{
+	font-size: 12px;
 }
 .teacherfeedback, .studentsubmission {
 	margin: 0 !important;
@@ -385,4 +390,7 @@ p.unsubmitted_msg {
 	font-weight: bold;
 	font-size: 14px;
 	margin: 0 0 10px 0;
+}
+span.teacher_feedback_info{
+	font-size: 12px;
 }

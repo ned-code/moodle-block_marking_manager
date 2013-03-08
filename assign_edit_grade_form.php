@@ -64,6 +64,13 @@ class mod_assign_grading_form_fn extends moodleform {
         
         ///  start the table
         $mform->addElement('html', '<span style="text-align: right;"');
+                if ($rownum > 0) {
+            $buttonarray[] = $mform->createElement('submit', 'nosaveandprevious', get_string('previous','assign'));
+        }
+        
+        if (!$last) {
+            $buttonarray[] = $mform->createElement('submit', 'nosaveandnext', get_string('nosavebutnext', 'assign'));
+        }  
         $mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
         $mform->addElement('html', '</span>');
         $mform->addElement('html', '<table border="0" cellpadding="0" cellspacing="0" border="1" width="100%" class="saprate-table">');
@@ -117,7 +124,8 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<table class="teacherfeedback" border="0" cellpadding="0" cellspacing="0" width="100%">');
         $mform->addElement('html', '<tr>');
         $mform->addElement('html', '<td width="50%" align="left">');
-        $mform->addElement('html', '<b>Teacher\'s Feedback </b> <br /> '.$USER->firstname.' '.$USER->lastname.' <br /> '.userdate(time()));
+        $mform->addElement('html', '<b>Teacher\'s Feedback </b> <br /> <span class="teacher_feedback_info">'.$USER->firstname.' '.$USER->lastname.' <br /> '.userdate(time()));
+        $mform->addElement('html', '</span>');        
         $mform->addElement('html', '</td>');        
         $mform->addElement('html', '<td width="50%" align="right">');
         
@@ -487,7 +495,7 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<tr>');
         $mform->addElement('html', '<td valign="middle" width="65%" class="leftSide">');
         $mform->addElement('html', '<a target="_blank" class="marking_header_link" href="'.$CFG->wwwroot.'/user/view.php?id='.$user->id.'&course='.$courseid.'">' . fullname($user, true) . '</a>'. $groupname);
-        $mform->addElement('html', '<br / >Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$cm->id.'">' .$name.'</a>');
+        $mform->addElement('html', '<br / ><span class="marking_header_link">Assignment: </span><a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$cm->id.'">' .$name.'</a>');
         $mform->addElement('html', '</td>');
         
         $mform->addElement('html', '<td width="35%" align="right" class="rightSide">');
@@ -495,10 +503,10 @@ class mod_assign_grading_form_fn extends moodleform {
         $buttonarray=array();
         if (isset( $params['readonly'])){
             if (! $params['readonly']){
-                $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('savechanges', 'assign'));
+                $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
             }
         }else{
-            $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('savechanges', 'assign'));
+            $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
         }
         /*
         if (!$last) {
@@ -518,7 +526,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         if (!$last) {
             $buttonarray[] = $mform->createElement('submit', 'nosaveandnext', get_string('nosavebutnext', 'assign'));
-        }
+        } 
         if (!empty($buttonarray)) {
             $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
         }
