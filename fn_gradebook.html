@@ -24,8 +24,8 @@
                             $extra = ' class="normal"';
                         }                      
                          
-                        if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! isset($_POST['nosaveandnext']))) {
-                            if($_POST['nosaveandnext'] <> 'marked'){
+                        if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! @isset($_POST['nosaveandnext'])) && (! @isset($_POST['nosaveandprevious']))) {
+                            if($show <> 'marked'){
                                 $columnungraded[$index] -= 1; 
                                 $totungraded -= 1; 
                             }

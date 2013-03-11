@@ -43,7 +43,7 @@ $string['overallfailinggrade'] = ' have an overall grade less than ';
 //$string['unmarked'] = '$a Unmarked Activities';
 
 
-$string['gradingstudentprogress'] = 'Showing < {$a->index} of {$a->count} >';
+$string['gradingstudentprogress'] = 'Showing {$a->index} of {$a->count}';
 $string['grade'] = '<b>Grade: </b>';
 
 $string['config_title'] = 'Instance title';

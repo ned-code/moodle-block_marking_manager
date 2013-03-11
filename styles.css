@@ -394,3 +394,11 @@ p.unsubmitted_msg {
 span.teacher_feedback_info{
 	font-size: 12px;
 }
+div#marking-interface td.markingmanager-head fieldset.hidden{
+	background: transparent !important;
+   border: 0px solid #DADADA !important;
+   margin: 0 !important;
+}
+div#marking-interface td.markingmanager-head fieldset.hidden div{
+	margin: 0 !important;
+}

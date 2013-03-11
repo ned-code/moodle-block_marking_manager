@@ -63,16 +63,25 @@ class mod_assign_grading_form_fn extends moodleform {
         
         
         ///  start the table
-        $mform->addElement('html', '<span style="text-align: right;"');
-                if ($rownum > 0) {
-            $buttonarray[] = $mform->createElement('submit', 'nosaveandprevious', get_string('previous','assign'));
+        $mform->addElement('html', '<div style="text-align:center; font-size:11px; margin-bottom:3px;">');
+        
+        if ($rownum > 0) {
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="Previous" name="nosaveandprevious"> ');
+        }else{
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="Previous" name="nosaveandprevious" disabled="disabled"> ');
         }
+        $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
+        //$mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
         
         if (!$last) {
-            $buttonarray[] = $mform->createElement('submit', 'nosaveandnext', get_string('nosavebutnext', 'assign'));
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="Next" name="nosaveandnext"> ');
+        }else{
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="Next" name="nosaveandnext" disabled="disabled"> ');
+            
         }  
-        $mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
-        $mform->addElement('html', '</span>');
+                
+        $mform->addElement('html', '</div>'); 
+        
         $mform->addElement('html', '<table border="0" cellpadding="0" cellspacing="0" border="1" width="100%" class="saprate-table">');
 
         //print the marking header in first tr
@@ -507,7 +516,7 @@ class mod_assign_grading_form_fn extends moodleform {
             }
         }else{
             $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
-        }
+        } 
         /*
         if (!$last) {
             $buttonarray[] = $mform->createElement('submit', 'saveandshownext', get_string('savenext','assign'));
@@ -519,7 +528,7 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->closeHeaderBefore('buttonar');
         
         $buttonarray=array();
-        */
+         
         if ($rownum > 0) {
             $buttonarray[] = $mform->createElement('submit', 'nosaveandprevious', get_string('previous','assign'));
         }
@@ -527,6 +536,7 @@ class mod_assign_grading_form_fn extends moodleform {
         if (!$last) {
             $buttonarray[] = $mform->createElement('submit', 'nosaveandnext', get_string('nosavebutnext', 'assign'));
         } 
+        */
         if (!empty($buttonarray)) {
             $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
         }
