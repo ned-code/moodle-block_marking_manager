@@ -402,3 +402,7 @@ div#marking-interface td.markingmanager-head fieldset.hidden{
 div#marking-interface td.markingmanager-head fieldset.hidden div{
 	margin: 0 !important;
 }
+.markingmanager-head input#id_savegrade{
+	 font-size: 15px;
+    padding: 1px;
+}
