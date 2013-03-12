@@ -27,6 +27,10 @@ class block_fn_marking extends block_list {
     public function specialization() {
 
         global $course;
+        
+        if (! isset($this->config)){
+            $this->config = new object;
+        }
       
         /// Need the bigger course object.
         $this->course = $course;
