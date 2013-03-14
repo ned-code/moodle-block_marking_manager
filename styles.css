@@ -352,9 +352,12 @@ a.userlink, a.userlink:visited, a.userlink:hover, a.userlink:active {
 	font-weight: bold;
 }
 a.marking_header_link, a.marking_header_link:visited, a.marking_header_link:hover, a.marking_header_link:active {
-	color: yellow;
-	text-decoration: none;
-	font-size: 12px;
+	color: yellow !important;
+	text-decoration: none !important;
+	font-size: 12px !important;
+}
+a.assignmentlist, a.assignmentlist:visited, a.assignmentlist:hover, a.assignmentlist:active {
+	color: #375FAF !important;
 }
 span.marking_header_link{
 	font-size: 12px;
@@ -405,4 +408,8 @@ div#marking-interface td.markingmanager-head fieldset.hidden div{
 .markingmanager-head input#id_savegrade{
 	 font-size: 15px;
     padding: 1px;
+}
+td.markingmanager-head {
+    line-height: 14px;
+    padding: 3px;
 }

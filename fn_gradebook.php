@@ -338,11 +338,11 @@ for ($i = 0; $i < sizeof($sections); $i++) {
                             }
                             if ($mod->visible) {
                                 $columnhtml[] = '<div style="font-size: 85%">' . $image . ' ' .
-                                        '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
+                                        '<a class="assignmentlist" href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                                         $course->id . '&show=' . $show . '&sort=' . $sort . '&view=' . $view . '&mid=' . $mod->id . '">' . $name . '</a></div>';
                             } else {
                                 $columnhtml[] = '<div style="font-size: 85%">' . $image . ' ' .
-                                        '<a class="dimmed" href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
+                                        '<a class="dimmed assignmentlist" href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                                         $course->id . '&show=' . $show . '&sort=' . $sort . '&view=' . $view . '&mid=' . $mod->id . '">' . $name . '</a></div>';
                             }
                         }
