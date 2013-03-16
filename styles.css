@@ -347,7 +347,7 @@ table.headertable {
 	padding: 0px;
 }
 a.userlink, a.userlink:visited, a.userlink:hover, a.userlink:active {
-	color: yellow;
+	color: yellow !important;
 	text-decoration: none;
 	font-weight: bold;
 }
@@ -412,4 +412,19 @@ div#marking-interface td.markingmanager-head fieldset.hidden div{
 td.markingmanager-head {
     line-height: 14px;
     padding: 3px;
+}
+.teacherfeedback td {
+    padding: 0;
+}
+
+.studentsubmission td {
+    padding: 0;
+}
+
+.headertable td {
+    line-height: 13px;
+    padding: 0;
+}
+.headertable div {
+    margin-left: 5px;
 }
