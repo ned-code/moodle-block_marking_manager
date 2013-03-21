@@ -86,12 +86,12 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and  s.submissionnum = g.submissionnum)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is null";
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null OR g.grade = -1)";
         }else{
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is null";
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null OR g.grade = -1)";
         }
         return $DB->count_records_sql($sql);    
     
@@ -116,15 +116,15 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
             $sql = "SELECT COUNT(DISTINCT s.userid)
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
-                     WHERE ((s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status IN ('submitted', 'resub') AND g.grade is not null) 
-                        OR (s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='draft' AND g.grade is not null AND g.timemodified > s.timemodified))"; 
+                     WHERE ((s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status IN ('submitted', 'resub') AND g.grade is not null  AND g.grade <> -1) 
+                        OR (s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='draft' AND g.grade is not null  AND g.grade <> -1 AND g.timemodified > s.timemodified))"; 
                      
            //  echo $sql;die;        
         }else{
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null";
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1";   
         }
         return $DB->count_records_sql($sql);
     
@@ -184,12 +184,12 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
             $sql = "SELECT DISTINCT s.userid
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is null";                  
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null OR g.grade = -1)";                  
         }else{            
             $sql = "SELECT DISTINCT s.userid
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is null"; 
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null OR g.grade = -1)"; 
         }
         
         if($data = $DB->get_records_sql($sql)){
@@ -212,7 +212,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
             $sqlunmarked = "SELECT s.userid
                       FROM {assign_submission} s
                       LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and  s.submissionnum = g.submissionnum)
-                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is null";
+                     WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null  OR g.grade = -1";
             
             if($unmarkedstus =  $DB->get_records_sql($sqlunmarked)){
                 
@@ -234,7 +234,8 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
                      WHERE s.assignment=$assign 
                        AND (s.userid in ($studentlist)) 
-                       AND g.grade is not null
+                       AND g.grade is not null  
+                       AND g.grade <> -1
                   GROUP BY s.userid";                  
          
          
@@ -365,7 +366,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         $sql = "SELECT DISTINCT s.userid
                                   FROM {assign_submission} s
                                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null
+                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null  AND g.grade <> -1
                                  ORDER BY g.grade ASC";   
                         break;
                 
@@ -373,7 +374,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         $sql = "SELECT DISTINCT s.userid
                                   FROM {assign_submission} s
                                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null
+                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null  AND g.grade <> -1
                                  ORDER BY g.grade DESC";  
                         break;
                 
@@ -381,7 +382,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         $sql = "SELECT DISTINCT s.userid
                                   FROM {assign_submission} s
                                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null
+                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1
                                  ORDER BY s.timemodified DESC";  
                         break;
                 
@@ -389,7 +390,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         $sql = "SELECT DISTINCT s.userid
                                   FROM {assign_submission} s
                                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null";  
+                                 WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null  AND g.grade <> -1";  
                         break;
                 }                 
                 
@@ -398,7 +399,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                 $sql = "SELECT DISTINCT s.userid
                           FROM {assign_submission} s
                           LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-                         WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null";                
+                         WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1";                
             }             
             
             if($data = $DB->get_records_sql($sql)){
