@@ -7,8 +7,8 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/lib/plagiarismlib.php');
 require_once('lib.php');
 require_once($CFG->dirroot . '/lib/outputrenderers.php');
-require_once($CFG->dirroot . '/mod/forum/lib.php');
-$PAGE->requires->js('/mod/assignment/assignment.js');
+require_once($CFG->dirroot . '/mod/forum/lib.php'); 
+$PAGE->requires->js('/mod/assignment/assignment.js'); 
 $PAGE->set_pagelayout('markingmanager');
 
 
@@ -223,12 +223,34 @@ $cobject->modnamesplural = &$modnamesplural;
 $cobject->modnamesused = &$modnamesused;
 $cobject->sections = &$sections;
 
+
+  //FIND CURRENT WEEK            
+    $courseformatoptions = course_get_format($course)->get_format_options();
+    $course_numsections = $courseformatoptions['numsections']; 
+    
+    $timenow = time();
+    $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
+    $weekdate += 7200;                 // Add two hours to avoid possible DST problems
+
+    $weekofseconds = 604800;
+    $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
+
+    //  Calculate the current week based on today's date and the starting date of the course.
+    $currentweek = ($timenow > $course->startdate) ? (int) ((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
+    $currentweek = min($currentweek, $course_numsections);
+
+
 /// Search through all the modules, pulling out grade data
 //$sections = get_all_sections($course->id); // Sort everything the same as the course    
 $sections = get_fast_modinfo($course->id)->get_section_info_all();
 
-//for ($i = 0; $i <= $course->numsections; $i++) {
-for ($i = 0; $i < sizeof($sections); $i++) {
+if ($view == "less"){
+    $upto = min($currentweek+1, sizeof($sections));
+}else{
+    $upto = sizeof($sections);
+}
+
+for ($i = 0; $i < $upto; $i++) {
     
     if (isset($sections[$i])) {   // should always be true
         $section = $sections[$i];

@@ -174,15 +174,12 @@ class block_fn_marking extends block_list {
         $modinfo = get_fast_modinfo($this->course->id);
         $mods = $modinfo->get_cms();
         $modnamesused = $modinfo->get_used_module_names();
-        
                  
         //$sections = get_all_sections($this->course->id); 
-        $sections = get_fast_modinfo($this->course->id)->get_section_info_all();        
-        
-        
+        $sections = get_fast_modinfo($this->course->id)->get_section_info_all();
                
-        $mod_array = array ($mods, $modnames, $modnamesplural, $modnamesused);        
-
+        $mod_array = array ($mods, $modnames, $modnamesplural, $modnamesused);
+        
         ///Course Teacher Menu:
         if (($this->course->id != SITEID)) {
             

@@ -619,7 +619,7 @@ function count_unmarked_students(&$course, $mod, $info='unmarked', $resubmission
     
     
 }  
-
+$view = optional_param('view', 'less', PARAM_ALPHA);
 
 /**
  *
@@ -636,8 +636,20 @@ function count_unmarked_activities(&$course, $info='unmarked', $resubmission=fal
     $isteacheredit = has_capability('moodle/course:update', $context);
     $marker = has_capability('moodle/grade:viewall', $context);
 
+  //FIND CURRENT WEEK            
+    $courseformatoptions = course_get_format($course)->get_format_options();
+    $course_numsections = $courseformatoptions['numsections']; 
+    
+    $timenow = time();
+    $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
+    $weekdate += 7200;                 // Add two hours to avoid possible DST problems
 
+    $weekofseconds = 604800;
+    $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
 
+    //  Calculate the current week based on today's date and the starting date of the course.
+    $currentweek = ($timenow > $course->startdate) ? (int) ((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
+    $currentweek = min($currentweek, $course_numsections);
     
     $totungraded = 0;
 
@@ -660,8 +672,9 @@ function count_unmarked_activities(&$course, $info='unmarked', $resubmission=fal
     //$sections = get_all_sections($course->id); // Sort everything the same as the course
     $sections = get_fast_modinfo($course->id)->get_section_info_all();
 
-    //for ($i = 0; $i <= $course->numsections; $i++) {
-    for ($i = 0; $i < sizeof($sections); $i++) {
+    $upto = min($currentweek+1, sizeof($sections));
+    
+    for ($i = 0; $i < $upto; $i++) {
         if (isset($sections[$i])) {   // should always be true
             $section = $sections[$i];
             if ($section->sequence) {
@@ -672,7 +685,7 @@ function count_unmarked_activities(&$course, $info='unmarked', $resubmission=fal
                     }
                     $mod = $mods[$sectionmod];
                     
-                    $currentgroup = groups_get_activity_group($mod, true); //print_r($currentgroup);die;
+                    $currentgroup = groups_get_activity_group($mod, true);
                     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id'); 
     
 
@@ -1485,7 +1498,7 @@ function fn_view_submissions($mform, $offset=0, $showsubmissionnum=null, $assign
                 $o .= "\n<tr>";
                 $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";                 
                 $user = $DB->get_record('user',array('id'=>$userid));
-                $o .= $OUTPUT->user_picture($user, array('courseid'=>$course->id));
+                $o .= $OUTPUT->user_picture($user, array('courseid'=>$course->id, 'size'=>20));
                 $o .= "</td>";
                 $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
                 $o .= "</tr></table>\n";
