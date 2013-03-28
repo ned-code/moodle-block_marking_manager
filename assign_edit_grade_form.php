@@ -158,7 +158,7 @@ class mod_assign_grading_form_fn extends moodleform {
                 }
                         
                 $grademenu = make_grades_menu($assignment->get_instance()->grade);
-                $grademenu['-1'] = get_string('nograde');
+                $grademenu['-1'] = 'Select';
                 $mform->addElement('select', 'grade', get_string('grade', 'block_fn_marking'), $grademenu, $attributes);
                 $mform->setDefault('grade', $stu_grade); //@fixme some bug when element called 'grade' makes it break
                 $mform->setType('grade', PARAM_INT);                
@@ -517,6 +517,7 @@ class mod_assign_grading_form_fn extends moodleform {
         }else{
             $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
         } 
+ 
         /*
         if (!$last) {
             $buttonarray[] = $mform->createElement('submit', 'saveandshownext', get_string('savenext','assign'));
@@ -539,6 +540,7 @@ class mod_assign_grading_form_fn extends moodleform {
         */
         if (!empty($buttonarray)) {
             $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
+            $mform->disabledIf('navar', 'grade', 'eq', -1);
         }
         $mform->addElement('html', '&nbsp;</td>');
         
