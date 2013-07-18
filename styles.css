@@ -443,6 +443,7 @@ table.simplegradebook {
 	border-collapse: collapse;
 	border: 1px black solid;
 	margin-top: 10px;
+
 }
 table.simplegradebook td {
 	background-color: #CCC;
@@ -512,4 +513,6 @@ div.menuwrapper div.groupselector div.singleselect .singleselect{
 div.tablecontainer{
 	margin: auto;
 	display: table;
+	display: block;
+	overflow: auto;
 }

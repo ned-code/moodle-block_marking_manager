@@ -275,7 +275,7 @@
     } // a new Moodle nesting record? ;-)      
     
     //print_r($weekactivitycount);
-    print_r($simplegradebook);
+    //print_r($simplegradebook);
 
     $PAGE->set_title("Simple Gradebook");
     $PAGE->set_heading($SITE->fullname);                          
