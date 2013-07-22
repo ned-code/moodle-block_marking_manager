@@ -187,9 +187,7 @@ h4.head-title {
 .block_fn_marking.block.list_block .content ul.unlist li {
 	margin-bottom: 0px;
 }
-.block_fn_marking .content ul.unlist li .icon {
-	margin-right: 3px;
-}
+
 .markingmanagercontainer td.generalbox {
 	background-color: #9dbb61;
 }

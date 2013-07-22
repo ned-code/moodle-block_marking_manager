@@ -189,7 +189,7 @@ class block_fn_marking extends block_list {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=unmarked' .
                          '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/unmarked.gif"
-                                                height="16" width="16" alt="">';
+                                                class="icon" alt="">';
             }            
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
@@ -198,7 +198,7 @@ class block_fn_marking extends block_list {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=marked' .
                         '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/graded.gif"
-                                                height="16" width="16" alt="">';
+                                                class="icon" alt="">';
             }
             
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
@@ -207,7 +207,7 @@ class block_fn_marking extends block_list {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=unsubmitted' .
                         '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/not_submitted.gif"
-                                                height="16" width="16" alt="">';
+                                                class="icon" alt="">';
             }
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
@@ -216,7 +216,7 @@ class block_fn_marking extends block_list {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=saved' .
                         '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/saved.gif"
-                                                height="16" width="16" alt="">';
+                                                class="icon" alt="">';
             }
             
             $this->content->items[] = "<div style='width:156px;'><hr /></div>";

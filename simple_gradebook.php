@@ -164,8 +164,11 @@
                     if (empty($mods[$sectionmod])) {
                         continue;
                     }
-                    $mod = $mods[$sectionmod];
                     
+                    $mod = $mods[$sectionmod];
+                    if(! isset($mod_grades_array[$mod->modname])){
+                        continue;
+                    }
                     /// Don't count it if you can't see it.
                     $mcontext = get_context_instance(CONTEXT_MODULE, $mod->id);
                     if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
@@ -176,8 +179,7 @@
                     $item = $DB->get_record('grade_items', array("itemtype" => 'mod', "itemmodule" => $mod->modname, "iteminstance" => $mod->instance));
                     //print_r($instance);
                     //print_r($item->gradepass);
-                    
-                    
+
                     $libfile = $CFG->dirroot . '/mod/' . $mod->modname . '/lib.php';
                     if (file_exists($libfile)) {
                         require_once($libfile);
@@ -193,15 +195,16 @@
                             if (function_exists($gradefunction)) {
                                 ++$numberofitem;
                                 if ($mod->modname == 'quiz'){
-                                    $image = "<A HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/blocks/fn_marking/pix/quiz.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
+                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/blocks/fn_marking/pix/quiz.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
                                 }else{
-                                    $image = "<A HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";                                  
+                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";                                  
                                 }
                                 
                                 $weekactivitycount[$i]['mod'][] = $image;
                                 foreach ($simplegradebook as $key => $value) {
                                 
                                     if ($mod->modname == 'quiz'){
+                                     
                                         
                                         if($grade = $gradefunction($instance, $key)){
                                             if ($item->gradepass > 0){
@@ -334,7 +337,7 @@
             $studentClass =  "odd";
         }
         echo '<tr>';
-        echo '<td class="'.$studentClass.' name"><a target="_blank" href='.$CFG->wwwroot.'/grade/report/user/index.php?userid='.$studentid.'&id='.$course->id.'">'.$studentreport['name'].'</a></td>';
+        echo '<td nowrap="nowrap" class="'.$studentClass.' name"><a target="_blank" href='.$CFG->wwwroot.'/grade/report/user/index.php?userid='.$studentid.'&id='.$course->id.'">'.$studentreport['name'].'</a></td>';
         //echo $studentreport['courseavg'];
         $gradetot = 0;
         $grademaxtot = 0;
