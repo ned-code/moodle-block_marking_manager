@@ -101,7 +101,10 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
             }
             $studentlist = implode(',', $students);
         }
-
+        
+        if (empty($studentlist)) {
+            return 0;
+        }
                  
         $sql = "SELECT COUNT(DISTINCT s.userid)
                   FROM {assign_submission} s
