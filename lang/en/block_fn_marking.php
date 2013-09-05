@@ -99,8 +99,24 @@ $string['config_days_help'] = '<p>This setting allows to set  </p>
 $string['config_percent'] = 'Set the percent of marks';
 $string['config_percent_help'] = '<p>This setting allows to set  </p>
 <p>the percent of marks and after setting the percent you will see the number of student marks below x percent.</p>';
-$string['fn_marking:addinstance'] = 'Add instance'; 
+$string['fn_marking:addinstance'] = 'Add instance';
 $string['fn_marking:viewblock'] = 'View block';
-$string['fn_marking:viewreadonly'] = 'View readonly'; 
-$string['simplegradebook'] = 'Gradebook'; 
-$string['moodlegradebook'] = 'Open Moodle Gradebook'; 
+$string['fn_marking:viewreadonly'] = 'View readonly';
+$string['simplegradebook'] = 'Gradebook';
+$string['moodlegradebook'] = 'Open Moodle Gradebook';
+
+$string['descconfig'] = '<p>Activate this option to hide all blocks when viewing the Marking Manager interface
+and provide a less cluttered look. Note that before activating this option, you will need to add this code
+to <b><em>yourmoodlesite/theme/base/config.php</em>.</b></p>
+<p></p>
+<pre><code style="font-size:12px; color:#FF7600;">
+// Hide left and right block columns when viewing the Marking Manager
+\'markingmanager\' => array(
+      \'file\' => \'general.php\',
+      \'regions\' => array(),
+      \'options\' => array(\'noblocks\'=>true),
+),
+</code></pre>
+After you add the above code, your file should look like the image <a href="http://moodlefn.com/docs/marking_manager_no_blocks.png">shown here</a>.  ';
+
+$string['labelnoblocks'] = 'Hide all blocks';
