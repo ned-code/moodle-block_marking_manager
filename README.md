@@ -1,8 +1,6 @@
-MoodleFN - Marking Manager
+MoodleFN - Marking Manager (2.4)
 ============================================
-See this PDF document for more information about this plugin:
-
-https://github.com/fernandooliveira/moodle-block_marking_manager/blob/MOODLE_24_STABLE/Marking_Manager_readme.pdf?raw=true
+See this PDF document for more information about this plugin: http://moodlefn.com/docs/
 
 ============================================
 
