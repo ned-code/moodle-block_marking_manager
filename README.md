@@ -7,8 +7,9 @@ https://github.com/fernandooliveira/moodle-format_fntabs/blob/MOODLE_25_STABLE/M
 
 ============================================
 
-Name: Tabs Format
-Type: Course Format
-Moodle version required: 2.5
-Git Repository: https://github.com/fernandooliveira/moodle-format_fntabs
-Support and Feedback: www.moodlefn.knet.ca 
+- Name: Tabs Format
+- Type: Course Format
+- Moodle version required: 2.5
+- Git Repository: https://github.com/fernandooliveira/moodle-format_fntabs
+- Support and Feedback: www.moodlefn.knet.ca 
+
