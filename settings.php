@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * Keeps track of the version number
+ * recurringcourses block caps.
  *
- * @package    block
- * @subpackage fn_marking
- * @author     Fernando Oliveira - MoodleFN {@link http://moodlefn.knet.ca}
+ * @package    block_recurringcourses
+ * @copyright  Daniel Neis <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2013083102;
-$plugin->requires = 2013051400; // 2.5
-$plugin->maturity = MATURITY_RC;
-$plugin->component = 'block_fn_marking';
-$plugin->release = '2.5';
+
+$settings->add(new admin_setting_configcheckbox('noblocks',
+                                                get_string('labelnoblocks', 'block_fn_marking'),
+                                                '',
+                                                '0'));
+$settings->add(new admin_setting_heading('sampleheader', '', get_string('descconfig', 'block_fn_marking')));
