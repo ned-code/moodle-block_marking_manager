@@ -58,7 +58,17 @@
     //$PAGE->requires->js($validateJS);
 
     $PAGE->set_url('/simple_gradebook.php', array('courseid' => $courseid));
-    $PAGE->set_pagelayout('markingmanager');
+
+    if (isset($CFG->noblocks)){
+        if ($CFG->noblocks){
+            $PAGE->set_pagelayout('markingmanager');
+        }else{
+            $PAGE->set_pagelayout('course');
+        }
+    }else{
+        $PAGE->set_pagelayout('course');
+    }   
+    
     $PAGE->set_context($context);
 
 
