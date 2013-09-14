@@ -1874,6 +1874,7 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
     $marked_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $saved_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
     $marked_icon_incomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    $marked_icon_graded = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/graded.gif" valign="absmiddle"> ';
     // print_r($history);die;
     for ($i=$history->maxsubmissionnum; $i>=0; $i--) {
         /*
@@ -1943,9 +1944,17 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
 
             $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
 
+            $iconGrade = $marked_icon_graded;
 
+            if($gradeitem->gradepass > 0){
+                if($grade->grade >= $gradeitem->gradepass){
+                     $iconGrade = $marked_icon;
+                }else{
+                    $iconGrade = $marked_icon_incomplete;
+                }
+            }
 
-            $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
+            $cell1 = new html_table_cell($iconGrade. 'Marked');
             $cell2 = new html_table_cell(userdate($grade->timemodified));
             if ($i == $history->maxsubmissionnum){
                 $cell1->attributes['class'] = $lastsubmission_class;
