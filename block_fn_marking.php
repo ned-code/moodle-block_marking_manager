@@ -254,11 +254,12 @@ class block_fn_marking extends block_list {
                 $this->content->items[] = "<div style='width:156px;'><hr /></div>";
             }
 
+            $strstudents = get_string('students');
             if (isset($this->config->shownotloggedinuser) && $this->config->shownotloggedinuser) {
 
                 $numnotloggedin = fn_count_notloggedin($this->course, $days);
                 $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=notloggedin'.
-                                        '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' Students </a>'.get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
+                                        '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' '.$strstudents.' </a>'.get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
             }
 
             if ($this->config->showstudentnotsubmittedassignment) {
@@ -266,14 +267,14 @@ class block_fn_marking extends block_list {
                 $lastweek = $now - (60*60*24*$days);
                 $numnotsubmittedany = fn_get_notsubmittedany($this->course, $lastweek, true, $sections, $mod_array, NULL);
                 $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=notsubmittedany'.
-                                        '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' Students </a>'.get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
+                                        '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' '.$strstudents.' </a>'.get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
             }
 
             if ($this->config->showstudentmarkslessthanfiftypercent) {
 
                 $numfailing = fn_count_failing($this->course,$percent);
                 $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=failing'.
-                                        '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' Students</a>'.get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
+                                        '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' '.$strstudents.'</a>'.get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
                 $this->content->icons[] = '';
             }
         }
