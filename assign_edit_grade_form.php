@@ -65,20 +65,23 @@ class mod_assign_grading_form_fn extends moodleform {
         ///  start the table
         $mform->addElement('html', '<div style="text-align:center; font-size:11px; margin-bottom:3px;">');
         
+        $strprevious = get_string('previous');
+        $strnext = get_string('next');
         if ($rownum > 0) {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="Previous" name="nosaveandprevious"> ');
-        }else{
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="Previous" name="nosaveandprevious" disabled="disabled"> ');
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="'.$strprevious.'" name="nosaveandprevious"> ');
+        } else {
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="'.$strprevious.'" name="nosaveandprevious" disabled="disabled"> ');
         }
         $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
         //$mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
-        
+
         if (!$last) {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="Next" name="nosaveandnext"> ');
-        }else{
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="Next" name="nosaveandnext" disabled="disabled"> ');
-            
-        }  
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="'.$strnext.'" name="nosaveandnext"> ');
+        } else {
+            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="'.$strnext.'" name="nosaveandnext" disabled="disabled"> ');
+
+        }
+ 
                 
         $mform->addElement('html', '</div>'); 
         
