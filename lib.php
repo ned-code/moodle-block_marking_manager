@@ -7,7 +7,6 @@ require_once($CFG->dirroot . '/lib/grade/constants.php');
 require_once($CFG->dirroot . '/lib/grade/grade_grade.php');
 require_once($CFG->dirroot . '/lib/grade/grade_item.php');
 require_once($CFG->dirroot . '/blocks/fn_marking/locallib.php');
-require_once($CFG->dirroot.'/mod/assignment/lib.php');
 
 
 function assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
@@ -798,20 +797,17 @@ function fn_get_active_mods($which = 'grades') {
     /// Array of functions to call for grading purposes for modules.
     $mod_grades_array = array(
         'assignment' => 'assignment.submissions.fn.html',
-        'forum' => 'forum.submissions.fn.html',
-        'assign' => 'assign.submissions.fn.html'
+        'forum' => 'forum.submissions.fn.html'
     );
 
     /// Array of functions to call to display grades for modules.
     $mod_gradedisp_array = array(
         'assignment' => 'grades.fn.html',
-        'assignment' => 'assign.fn.html',
         'forum' => 'grades.fn.html'
     );
 
     $mod_array = array(
         'assignment',
-        'assign',
         'forum'
     );
 
@@ -1124,6 +1120,7 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
     $rownum = $pageparams['rownum'] + $offset;
     $useridlistid = optional_param('useridlistid', time(), PARAM_INT);
     $attemptnumber = optional_param('attemptnumber', -1, PARAM_INT);
+    
 
     if($pageparams['userid']){
         $userid = $pageparams['userid'];
@@ -1148,8 +1145,17 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         //
         $useridlist = $arruser;
         $last = false;
+        
+        //BIG ROW NUMBER FIXER
+        $numofuser = count($useridlist);
+        if ($numofuser > 0){
+            if ($rownum > $numofuser - 1) {
+                $rownum = $numofuser - 1;
+            }        
+        }        
         $userid = $useridlist[$rownum];
-        if ($rownum == count($useridlist) - 1) {
+        
+        if ($rownum == $numofuser - 1) {
             $last = true;
         }
         if (!$userid) {
@@ -1875,7 +1881,6 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
     $marked_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $saved_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
     $marked_icon_incomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
-    $marked_icon_graded = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/graded.gif" valign="absmiddle"> ';
     // print_r($history);die;
     for ($i=$history->maxsubmissionnum; $i>=0; $i--) {
         /*
@@ -1945,17 +1950,9 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
 
             $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
 
-            $iconGrade = $marked_icon_graded;
 
-            if($gradeitem->gradepass > 0){
-                if($grade->grade >= $gradeitem->gradepass){
-                     $iconGrade = $marked_icon;
-                }else{
-                    $iconGrade = $marked_icon_incomplete;
-                }
-            }
 
-            $cell1 = new html_table_cell($iconGrade. 'Marked');
+            $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
             $cell2 = new html_table_cell(userdate($grade->timemodified));
             if ($i == $history->maxsubmissionnum){
                 $cell1->attributes['class'] = $lastsubmission_class;
@@ -2760,123 +2757,4 @@ function fn_reached_resubmission_limit($submissionnum, $assign) {
         return false;
     }
     return ($submissionnum >= $maxresub);
-}
-function assignment_status_($mod, $userid) {
-    global $CFG, $DB, $USER, $SESSION;
-
-    if(isset($SESSION->completioncache)){
-        unset($SESSION->completioncache);
-    }
-
-    if ($mod->modname == 'assignment') {
-        if  (!($assignment = $DB->get_record('assignment', array('id' => $mod->instance)))) {
-
-            return false;   // Doesn't exist... wtf?
-        }
-        require_once ($CFG->dirroot.'/mod/assignment/type/'.$assignment->assignmenttype.'/assignment.class.php');
-        $assignmentclass = "assignment_$assignment->assignmenttype";
-        $assignmentinstance = new $assignmentclass($mod->id, $assignment, $mod);
-
-        if (!($submission = $assignmentinstance->get_submission($userid)) || empty($submission->timemodified)) {
-            return false;
-        }
-
-        switch ($assignment->assignmenttype) {
-            case "upload":
-                if($assignment->var4){ //if var4 enable then assignment can be saved
-                    if(!empty($submission->timemodified)
-                            && (empty($submission->data2))
-                            && (empty($submission->timemarked))){
-                        return 'saved';
-
-                    }
-                    else if(!empty($submission->timemodified)
-                            && ($submission->data2='submitted')
-                            && empty($submission->timemarked)){
-                        return 'submitted';
-                    }
-                    else if(!empty($submission->timemodified)
-                            && ($submission->data2='submitted')
-                            && ($submission->grade==-1)){
-                        return 'submitted';
-
-                    }
-                }
-                else if(empty($submission->timemarked)){
-                    return 'submitted';
-                }
-                break;
-            case "uploadsingle":
-                if(empty($submission->timemarked)){
-                     return 'submitted';
-                }
-                break;
-            case "online":
-                if(empty($submission->timemarked)){
-                     return 'submitted';
-                }
-                break;
-            case "offline":
-                if(empty($submission->timemarked)){
-                     return 'submitted';
-                }
-                break;
-        }
-    } else if ($mod->modname == 'assign') {
-        if  (!($assignment = $DB->get_record('assign', array('id' => $mod->instance)))) {
-            return false; // Doesn't exist
-        }
-
-        if (!$submission = $DB->get_records('assign_submission', array('assignment'=>$assignment->id, 'userid'=>$userid), 'attemptnumber DESC', '*', 0, 1)) {
-            return false;
-        }else{
-            $submission = reset($submission);
-        }
-
-        $attemptnumber = $submission->attemptnumber;
-
-        if (($submission->status == 'reopened') && ($submission->attemptnumber > 0)){
-            $attemptnumber = $submission->attemptnumber - 1;
-        }
-
-        if ($submissionisgraded = $DB->get_records('assign_grades', array('assignment'=>$assignment->id, 'userid'=>$userid, 'attemptnumber' => $attemptnumber), 'attemptnumber DESC', '*', 0, 1)) {
-            $submissionisgraded = reset($submissionisgraded);
-            if ($submissionisgraded->grade > -1){
-              if ($submission->timemodified > $submissionisgraded->timemodified) {
-                    $graded = false;
-                }else{
-                    $graded = true;
-                }
-            }else{
-                $graded = false;
-            }
-        }else {
-            $graded = false;
-        }
-
-
-        if ($submission->status == 'draft') {
-            if($graded){
-                return 'submitted';
-            }else{
-                return 'saved';
-            }
-        }
-        if ($submission->status == 'reopened') {
-            if($graded){
-                return 'submitted';
-            }else{
-                return 'waitinggrade';
-            }
-        }
-        if ($submission->status == 'submitted') {
-            if($graded){
-                return 'submitted';
-            }else{
-                return 'waitinggrade';
-            }
-        }
-    } else {
-        return false;
-    }
 }
