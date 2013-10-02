@@ -1280,7 +1280,7 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
     }
     $useridlist = $arruser;
     $last = false;
-    $userid = $useridlist[$rownum];
+    $userid = (isset($useridlist[$rownum])) ? $useridlist[$rownum] : NULL;
     if ($rownum == count($useridlist) - 1) {
         $last = true;
     }
