@@ -1819,7 +1819,8 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             } else if ($resubtype == ASSIGN_ATTEMPT_REOPEN_METHOD_UNTILPASS) {
                 $gradepass = $gradeitem->gradepass;
                 if ($gradeitem->gradepass > 0) {
-                    $resubstatus = get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1));
+                    //$resubstatus = get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1));
+                    $resubstatus = get_string('attemptreopenmethod_untilpass', 'assign');
                 }
             }
         }
