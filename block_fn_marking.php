@@ -85,6 +85,10 @@ class block_fn_marking extends block_list {
         }
     }
 
+    function has_config() {
+        return true;
+    }
+
     /**
      * Constrols the block title based on instance configuration
      *
