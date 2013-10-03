@@ -5,6 +5,7 @@
     require_once('lib.php');
     require_once($CFG->dirroot . '/lib/outputrenderers.php');
     require_once($CFG->dirroot . '/mod/forum/lib.php');
+    require_once($CFG->dirroot . '/blocks/fn_myprogress/lib.php');
 
     /// One of these is necessary!
     $courseid = optional_param('id', 0, PARAM_INT);
@@ -63,9 +64,9 @@
             $PAGE->set_pagelayout('markingmanager');
         }else{
             $PAGE->set_pagelayout('course');
-        }
+       }
     }else{
-        $PAGE->set_pagelayout('course');
+       $PAGE->set_pagelayout('course');
     }
 
     $PAGE->set_context($context);
@@ -212,8 +213,7 @@
                                 $weekactivitycount[$i]['mod'][] = $image;
                                 foreach ($simplegradebook as $key => $value) {
 
-                                    if ($mod->modname == 'quiz'){
-
+                                    if (($mod->modname == 'quiz')||($mod->modname == 'forum')){
 
                                         if($grade = $gradefunction($instance, $key)){
                                             if ($item->gradepass > 0){
@@ -234,10 +234,7 @@
                                                 $simplegradebook[$key]['avg'][]=array('grade'=>0, 'grademax'=>$item->grademax);
                                             }
                                         }
-                                    }
-
-                                    else
-                                    if ($modstatus = assignment_status_($mod, $key, true)){
+                                    } else if ($modstatus = assignment_status($mod, $key, true)){
 
                                         switch ($modstatus) {
                                             case 'submitted':
