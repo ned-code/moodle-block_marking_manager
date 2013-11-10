@@ -41,6 +41,14 @@ span.fn_summaries {
 }
 /**** overright***/
 
+#marking-topmessage {
+	min-width: 850px;
+	margin: 0px auto 10px;
+	background: #ff8c00;
+	padding: 10px;
+	color:white;
+}
+
 #marking-interface {
 	min-width: 850px;
 	margin: 0 auto;
