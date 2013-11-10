@@ -108,12 +108,21 @@ class block_fn_marking_edit_form extends block_edit_form {
         for ($i = 1; $i <= 100; $i++) {
             $numberofpercent[$i] = $i;
         }
-        
+
         //set the percent of marks
         $mform->addElement('select', 'config_percent',
                             get_string('setpercentmarks', 'block_fn_marking'), $numberofpercent);
         $mform->setDefault('config_percent', $numberofpercent[50]);
         $mform->addHelpButton('config_percent', 'config_percent', 'block_fn_marking');
+
+          //set the number of days
+        $mform->addElement('select', 'config_showtopmessage',
+                            get_string('showtopmessage', 'block_fn_marking'), array('0'=>'No', '1'=>'Yes'));
+        $mform->setDefault('config_showtopmessage', 0);
+
+        $mform->addElement('editor', 'config_topmessage', get_string('topmessage', 'block_fn_marking'));
+        $mform->setType('config_topmessage', PARAM_RAW);
+
     }
 
 }
