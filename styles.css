@@ -41,6 +41,14 @@ span.fn_summaries {
 }
 /**** overright***/
 
+#marking-topmessage {
+	min-width: 850px;
+	margin: 0px auto 10px;
+	background: #ff8c00;
+	padding: 10px;
+	color:white;
+}
+
 #marking-interface {
 	min-width: 850px;
 	margin: 0 auto;
@@ -187,9 +195,7 @@ h4.head-title {
 .block_fn_marking.block.list_block .content ul.unlist li {
 	margin-bottom: 0px;
 }
-.block_fn_marking .content ul.unlist li .icon {
-	margin-right: 3px;
-}
+
 .markingmanagercontainer td.generalbox {
 	background-color: #9dbb61;
 }
@@ -270,10 +276,10 @@ div.fn_plugin_wrapper {
 	margin-left: auto;
 	margin-right: auto;
 }
-.gradeform #fitem_id_resubmission .fitemtitle {
+.gradeform #fitem_id_addattempt .fitemtitle {
 	width: 90% !important;
 }
-.gradeform #fitem_id_resubmission .felement {
+.gradeform #fitem_id_addattempt .felement {
 	margin-left:91% !important;
 	width: 9% !important;
 }
@@ -429,4 +435,90 @@ td.markingmanager-head {
 }
 .headertable div {
     margin-left: 5px;
+}
+
+
+table.simplegradebook {
+	text-align: center;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 11px;
+	color: #fff;;
+	background-color: #666;
+	border: 0px;
+	border-collapse: collapse;
+	border: 1px black solid;
+	margin-top: 10px;
+
+}
+table.simplegradebook td {
+	background-color: #CCC;
+	color: #000;
+	padding: 4px;
+	text-align: left;
+	border: 1px black solid;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 11px;
+}
+table.simplegradebook td.name {
+	
+}
+table.simplegradebook td.odd {
+	background-color: #FFEDC9;
+}
+table.simplegradebook td.even {
+	background-color: #FFFFD9;
+}
+table.simplegradebook td.green {
+	background-color: #C2D69B;
+}
+table.simplegradebook td.red {
+	background-color: #E5B8B7;
+}
+table.simplegradebook td.icon {
+	text-align: center;
+}
+table.simplegradebook th {
+	background-color: #7F7F7F;
+	color: #fff;
+	padding: 4px;
+	text-align: center;
+	border: 1px black solid;
+	font-size: 12px;
+	font-weight: bold;
+}
+table.simplegradebook td.mod-icon {
+	background-color: #F2F2F2;
+	color: #fff;
+	padding: 4px;
+	text-align: center;
+	border: 1px black solid;
+	font-size: 12px;
+	font-weight: bold;
+}
+table.simplegradebook td.empty-week {
+	background-color: #D9D9D9;
+	color: #fff;
+	padding: 4px;
+	text-align: center;
+	border: 1px black solid;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.menuwrapper {
+    text-align: right;
+}
+div.menuwrapper div.groupselector div.singleselect{
+	margin: 1px 0 !important;
+}
+div.menuwrapper div.groupselector div.singleselect .singleselect{
+	margin: 0 !important;
+}
+div.tablecontainer{
+	margin: auto;
+	display: table;
+	display: block;
+	overflow: auto;
 }
