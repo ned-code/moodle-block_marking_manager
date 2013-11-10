@@ -120,3 +120,5 @@ to <b><em>yourmoodlesite/theme/base/config.php</em>.</b></p>
 After you add the above code, your file should look like the image <a href="http://moodlefn.com/docs/marking_manager_no_blocks.png">shown here</a>.  ';
 
 $string['labelnoblocks'] = 'Hide all blocks';
+$string['showtopmessage'] = 'Show message above interface';
+$string['topmessage'] = 'Message to show';
