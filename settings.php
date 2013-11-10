@@ -15,10 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * recurringcourses block caps.
- *
- * @package    block_recurringcourses
- * @copyright  Daniel Neis <danielneis@gmail.com>
+ * @package    block_fn_marking
+ * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,3 +28,13 @@ $settings->add(new admin_setting_configcheckbox('noblocks',
                                                 '',
                                                 '0'));
 $settings->add(new admin_setting_heading('sampleheader', '', get_string('descconfig', 'block_fn_marking')));
+
+
+$settings->add(new admin_setting_configselect('block_fn_marking/showtopmessage', get_string('showtopmessage', 'block_fn_marking'), '', 0, array('0'=>'No', '1'=>'Yes')));
+
+
+$settings->add(new admin_setting_confightmleditor('block_fn_marking/topmessage',
+                                            get_string('topmessage', 'block_fn_marking'),
+                                            '',
+                                            ''
+                                            ));
