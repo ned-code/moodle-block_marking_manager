@@ -62,14 +62,22 @@ function forum_get_notsubmittedany($courseid, $forumid="0", $users = NULL, $time
     if ($users) {
         $userids = array_keys($users);
         $userselect = ' AND u.id IN (' . implode(',', $userids) . ')';
-        $students_with_posts = $DB->get_records_sql("SELECT DISTINCT u.id as userid, u.firstname, u.lastname, u.email, u.picture, u.imagealt
-                                     FROM {forum_posts} p
-                                          JOIN {forum_discussions} d ON d.id = p.discussion
-                                          JOIN {forum} f             ON f.id = d.forum
-                                          JOIN {user} u              ON u.id = p.userid
-                                    WHERE p.created > $timestart AND f.id = $forumid
-                                          $userselect
-                                 ORDER BY p.id ASC");
+        $students_with_posts = $DB->get_records_sql("SELECT DISTINCT u.id as userid,
+                                                                     u.firstname,
+                                                                     u.lastname,
+                                                                     u.email,
+                                                                     u.picture,
+                                                                     u.imagealt
+                                                                FROM {forum_posts} p
+                                                                JOIN {forum_discussions} d
+                                                                  ON d.id = p.discussion
+                                                                JOIN {forum} f
+                                                                  ON f.id = d.forum
+                                                                JOIN {user} u
+                                                                  ON u.id = p.userid
+                                                               WHERE p.created > $timestart
+                                                                 AND f.id = $forumid
+                                                                     $userselect");
 
         return $students_with_posts;
     }
