@@ -7,6 +7,7 @@ require_once($CFG->dirroot . '/lib/grade/constants.php');
 require_once($CFG->dirroot . '/lib/grade/grade_grade.php');
 require_once($CFG->dirroot . '/lib/grade/grade_item.php');
 require_once($CFG->dirroot . '/blocks/fn_marking/locallib.php');
+require_once($CFG->dirroot . '/mod/assignment/lib.php');
 
 
 function assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
@@ -140,7 +141,7 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
                 WHERE
                 s.assignment = $assign AND
                 (s.userid IN ($studentlist)) AND
-                s.`status` = 'draft' AND
+                s.status = 'draft' AND
                 (s.timemodified >= g.timemodified OR
                 g.grade IS NULL)";
 
@@ -237,7 +238,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                                  ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
                               WHERE s.assignment = $assign
                                 AND s.userid IN ($studentlist)
-                                AND s.`status` = 'draft'";
+                                AND s.status = 'draft'";
 
                 if($draftGrades =  $DB->get_records_sql($sqlDraft)){
                     foreach ($draftGrades as $draftGrade){
@@ -333,7 +334,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                          ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
                       WHERE s.assignment = $assign
                         AND s.userid IN ($studentlist)
-                        AND s.`status` = 'draft'
+                        AND s.status = 'draft'
                         AND g.grade IS NOT NULL
                         AND g.timemodified > s.timemodified";
 
@@ -592,7 +593,7 @@ function count_unmarked_activities(&$course, $info='unmarked') {
                                            AND asub.assignment = ag.assignment
                                            AND asub.attemptnumber = ag.attemptnumber
                                          WHERE asub.assignment = {$instance->id}
-                                           AND asub.`status` = 'submitted'";
+                                           AND asub.status = 'submitted'";
 
                                 if($gradedSunmissions = $DB->get_records_sql($sql)){
                                     foreach ($gradedSunmissions as $gradedSunmission) {
@@ -1120,7 +1121,7 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
     $rownum = $pageparams['rownum'] + $offset;
     $useridlistid = optional_param('useridlistid', time(), PARAM_INT);
     $attemptnumber = optional_param('attemptnumber', -1, PARAM_INT);
-    
+
 
     if($pageparams['userid']){
         $userid = $pageparams['userid'];
@@ -1145,16 +1146,16 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         //
         $useridlist = $arruser;
         $last = false;
-        
+
         //BIG ROW NUMBER FIXER
         $numofuser = count($useridlist);
         if ($numofuser > 0){
             if ($rownum > $numofuser - 1) {
                 $rownum = $numofuser - 1;
-            }        
-        }        
+            }
+        }
         $userid = $useridlist[$rownum];
-        
+
         if ($rownum == $numofuser - 1) {
             $last = true;
         }
@@ -2758,4 +2759,125 @@ function fn_reached_resubmission_limit($submissionnum, $assign) {
         return false;
     }
     return ($submissionnum >= $maxresub);
+}
+
+
+function assignment_status($mod, $userid) {
+    global $CFG, $DB, $USER, $SESSION;
+
+    if(isset($SESSION->completioncache)){
+        unset($SESSION->completioncache);
+    }
+
+    if ($mod->modname == 'assignment') {
+        if  (!($assignment = $DB->get_record('assignment', array('id' => $mod->instance)))) {
+
+            return false;   // Doesn't exist... wtf?
+        }
+        require_once ($CFG->dirroot.'/mod/assignment/type/'.$assignment->assignmenttype.'/assignment.class.php');
+        $assignmentclass = "assignment_$assignment->assignmenttype";
+        $assignmentinstance = new $assignmentclass($mod->id, $assignment, $mod);
+
+        if (!($submission = $assignmentinstance->get_submission($userid)) || empty($submission->timemodified)) {
+            return false;
+        }
+
+        switch ($assignment->assignmenttype) {
+            case "upload":
+                if($assignment->var4){ //if var4 enable then assignment can be saved
+                    if(!empty($submission->timemodified)
+                            && (empty($submission->data2))
+                            && (empty($submission->timemarked))){
+                        return 'saved';
+
+                    }
+                    else if(!empty($submission->timemodified)
+                            && ($submission->data2='submitted')
+                            && empty($submission->timemarked)){
+                        return 'submitted';
+                    }
+                    else if(!empty($submission->timemodified)
+                            && ($submission->data2='submitted')
+                            && ($submission->grade==-1)){
+                        return 'submitted';
+
+                    }
+                }
+                else if(empty($submission->timemarked)){
+                    return 'submitted';
+                }
+                break;
+            case "uploadsingle":
+                if(empty($submission->timemarked)){
+                     return 'submitted';
+                }
+                break;
+            case "online":
+                if(empty($submission->timemarked)){
+                     return 'submitted';
+                }
+                break;
+            case "offline":
+                if(empty($submission->timemarked)){
+                     return 'submitted';
+                }
+                break;
+        }
+    } else if ($mod->modname == 'assign') {
+        if  (!($assignment = $DB->get_record('assign', array('id' => $mod->instance)))) {
+            return false; // Doesn't exist
+        }
+
+        if (!$submission = $DB->get_records('assign_submission', array('assignment'=>$assignment->id, 'userid'=>$userid), 'attemptnumber DESC', '*', 0, 1)) {
+            return false;
+        }else{
+            $submission = reset($submission);
+        }
+
+        $attemptnumber = $submission->attemptnumber;
+
+        if (($submission->status == 'reopened') && ($submission->attemptnumber > 0)){
+            $attemptnumber = $submission->attemptnumber - 1;
+        }
+
+        if ($submissionisgraded = $DB->get_records('assign_grades', array('assignment'=>$assignment->id, 'userid'=>$userid, 'attemptnumber' => $attemptnumber), 'attemptnumber DESC', '*', 0, 1)) {
+            $submissionisgraded = reset($submissionisgraded);
+            if ($submissionisgraded->grade > -1){
+              if ($submission->timemodified > $submissionisgraded->timemodified) {
+                    $graded = false;
+                }else{
+                    $graded = true;
+                }
+            }else{
+                $graded = false;
+            }
+        }else {
+            $graded = false;
+        }
+
+
+        if ($submission->status == 'draft') {
+            if($graded){
+                return 'submitted';
+            }else{
+                return 'saved';
+            }
+        }
+        if ($submission->status == 'reopened') {
+            if($graded){
+                return 'submitted';
+            }else{
+                return 'waitinggrade';
+            }
+        }
+        if ($submission->status == 'submitted') {
+            if($graded){
+                return 'submitted';
+            }else{
+                return 'waitinggrade';
+            }
+        }
+    } else {
+        return false;
+    }
 }
