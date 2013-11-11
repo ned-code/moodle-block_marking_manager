@@ -5,7 +5,6 @@
     require_once('lib.php');
     require_once($CFG->dirroot . '/lib/outputrenderers.php');
     require_once($CFG->dirroot . '/mod/forum/lib.php');
-    require_once($CFG->dirroot . '/blocks/fn_myprogress/lib.php');
 
     /// One of these is necessary!
     $courseid = optional_param('id', 0, PARAM_INT);
