@@ -7,23 +7,36 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/lib/plagiarismlib.php');
 require_once('lib.php');
 require_once($CFG->dirroot . '/lib/outputrenderers.php');
-require_once($CFG->dirroot . '/mod/forum/lib.php'); 
-$PAGE->requires->js('/mod/assignment/assignment.js'); 
-$PAGE->set_pagelayout('markingmanager');
+require_once($CFG->dirroot . '/mod/forum/lib.php');
+$PAGE->requires->js('/mod/assignment/assignment.js');
+
+if (isset($CFG->noblocks)){
+    if ($CFG->noblocks){
+        $PAGE->set_pagelayout('markingmanager');
+    }else{
+        $PAGE->set_pagelayout('course');
+    }
+}else{
+    $PAGE->set_pagelayout('course');
+}
+
 
 
 global $DB, $OUTPUT, $course;
 
 $courseid = required_param('courseid', PARAM_INT);      // course id
-$mid = optional_param('mid', 0, PARAM_INT); // mod id to look at    
+$mid = optional_param('mid', 0, PARAM_INT); // mod id to look at
 $cmid = 0;                                 // If no mid is specified, we'll select one in this variable.
 
 //Check sesubmission plugin
-if ($assignCheck = $DB->get_record_sql("SELECT * FROM {$CFG->prefix}assign LIMIT 0, 1")){
-    if(isset($assignCheck->resubmission)){
-        $resubmission = true;
-    }else{
-        $resubmission = false;
+if ($assignChecks = $DB->get_records_sql("SELECT * FROM {$CFG->prefix}assign")){
+    foreach ($assignChecks as $assignCheck) {
+        if(isset($assignCheck->resubmission)){
+            $resubmission = true;
+            break;
+        }else{
+            $resubmission = false;
+        }
     }
 }else{
     $resubmission = false;
@@ -53,11 +66,11 @@ set_current_group($courseid, $group);
 
 $PAGE->set_url('/fn_gradebook.php', array(
     'courseid' => $courseid,
-    'mid' => $mid,                                                                                  
+    'mid' => $mid,
     'view' => $view,
     'show' => $show,
     'dir' => $dir));
-    
+
 $pageparams = array('courseid'=>$courseid,
                     'resubmission' => $resubmission,
                     'userid' => $userid,
@@ -74,7 +87,7 @@ $pageparams = array('courseid'=>$courseid,
                     'sort' => $sort,
                     'view' => $view,
                     'show' => $show,
-                    'dir' => $dir);    
+                    'dir' => $dir);
 
 if (!$course = $DB->get_record("course", array("id" => $courseid))) {
     print_error("Course ID was incorrect");
@@ -186,7 +199,7 @@ if ($mid) {
     $users = get_enrolled_users($modcontext, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 } else {
     // if comes from course page
-    $currentgroup = get_current_group($course->id);    
+    $currentgroup = get_current_group($course->id);
 }
 
 
@@ -224,10 +237,10 @@ $cobject->modnamesused = &$modnamesused;
 $cobject->sections = &$sections;
 
 
-  //FIND CURRENT WEEK            
+  //FIND CURRENT WEEK
     $courseformatoptions = course_get_format($course)->get_format_options();
-    $course_numsections = $courseformatoptions['numsections']; 
-    
+    $course_numsections = $courseformatoptions['numsections'];
+
     $timenow = time();
     $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
     $weekdate += 7200;                 // Add two hours to avoid possible DST problems
@@ -241,7 +254,7 @@ $cobject->sections = &$sections;
 
 
 /// Search through all the modules, pulling out grade data
-//$sections = get_all_sections($course->id); // Sort everything the same as the course    
+//$sections = get_all_sections($course->id); // Sort everything the same as the course
 $sections = get_fast_modinfo($course->id)->get_section_info_all();
 
 if ($view == "less"){
@@ -251,7 +264,7 @@ if ($view == "less"){
 }
 
 for ($i = 0; $i < $upto; $i++) {
-    
+
     if (isset($sections[$i])) {   // should always be true
         $section = $sections[$i];
         if ($section->sequence) {
@@ -261,9 +274,9 @@ for ($i = 0; $i < $upto; $i++) {
                     continue;
                 }
                 $mod = $mods[$sectionmod];
-                
+
                 $currentgroup = groups_get_activity_group($mod, true); //print_r($currentgroup);die;
-                $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');                 
+                $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 
                 /// Don't count it if you can't see it.
                 $mcontext = get_context_instance(CONTEXT_MODULE, $mod->id);
@@ -282,11 +295,11 @@ for ($i = 0; $i < $upto; $i++) {
                         if (!function_exists($gradefunction) || !($modgrades->grades = $gradefunction($instance))) {
                             $modgrades->grades = array();
                         }
-                        
+
                         if (!empty($modgrades)) {
                             /// Store the number of ungraded entries for this group.
                             if (is_array($modgrades->grades)) {
-                                $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));                                
+                                $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                                 $numgraded = count($gradedarray);
                                 $numstudents = count($students);
                                 $ungradedfunction = $mod->modname . '_count_ungraded';
@@ -297,7 +310,7 @@ for ($i = 0; $i < $upto; $i++) {
                                     }else{
                                         $ung = $ungradedfunction($instance->id, $gradedarray, $students, $show, $extra, $instance);
                                     }
-                                    
+
                                 } else if ($show == 'unmarked') {
                                     $ung = $numstudents - $numgraded;
                                 } else if ($show == 'marked') {
@@ -373,7 +386,7 @@ for ($i = 0; $i < $upto; $i++) {
             }
         }
     }
-    
+
 } // a new Moodle nesting record? ;-)
 /// Set mid to cmid if there wasn't a mid and there is a cmid.
 if (empty($mid) && !empty($cmid)) {
@@ -385,8 +398,8 @@ $button = '';
 
 /// Check to see if groups are being used in this assignment
 if (!empty($cm)) {
-    if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used       
-        //$currentgroup = groups_get_activity_group($cm, true);     
+    if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used
+        //$currentgroup = groups_get_activity_group($cm, true);
         $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/fn_marking/' . "fn_gradebook.php?courseid=$courseid&mid=$mid&show=$show&sort=$sort&dir=$dir&mode=single&view=$view", true);
     } else {
         $currentgroup = false;
@@ -397,7 +410,7 @@ if (!empty($cm)) {
 }
 
 /// Print header
-global $PAGE; 
+global $PAGE;
 $navlinks = array(array('name' => $strgrades, 'link' => '', 'type' => 'misc'));
 $navigation = build_navigation($navlinks);
 $button = '<tr><td>' . $groupform . '&nbsp;&nbsp;</td>' .
