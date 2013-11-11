@@ -152,11 +152,14 @@ class block_fn_marking extends block_list {
         global $course, $DB, $USER, $CFG, $THEME, $SESSION, $PAGE,$OUTPUT;
 
         //Check sesubmission plugin
-        if ($assignCheck = $DB->get_record_sql("SELECT * FROM {$CFG->prefix}assign LIMIT 0, 1")){
-            if(isset($assignCheck->resubmission)){
-                $resubmission = true;
-            }else{
-                $resubmission = false;
+        if ($assignChecks = $DB->get_records_sql("SELECT * FROM {$CFG->prefix}assign")){
+            foreach ($assignChecks as $assignCheck) {
+                if(isset($assignCheck->resubmission)){
+                    $resubmission = true;
+                    break;
+                }else{
+                    $resubmission = false;
+                }
             }
         }else{
             $resubmission = false;
