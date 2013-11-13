@@ -19,8 +19,7 @@ function assignment_get_notsubmittedany($courseid, $id="0", $users = NULL, $time
                                                 JOIN {assignment} a      ON a.id = asb.assignment
                                                 JOIN {user} u            ON u.id = asb.userid
                                           WHERE asb.timemodified > $timestart AND a.id = $id
-                                                $userselect
-                                       ORDER BY asb.timemodified ASC");
+                                                $userselect");
         return $students_with_submissions;
     }
 }
