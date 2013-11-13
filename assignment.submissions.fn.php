@@ -169,7 +169,7 @@
         $unmarked = array();
         $marked = array();
         $unsubmitted = array();
-        $saved = array(); print_r($submissions);die;              
+        $saved = array();              
         foreach ($submissions as $submission) {               
             /// If the submission isn't from one of the users we care about then ignore.
             if (!isset($users[$submission->userid])) {
