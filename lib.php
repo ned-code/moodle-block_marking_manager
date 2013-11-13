@@ -529,7 +529,7 @@ function forum_count_ungraded($forumid, $graded, $students, $show='unmarked') {
     global $CFG, $DB;
 
     //Get students from forum_posts
-    $fusers = $DB->get_records_sql("SELECT DISTINCT u.*
+    $fusers = $DB->get_records_sql("SELECT DISTINCT u.id
 FROM {forum_discussions} d
 INNER JOIN {forum_posts} p ON p.discussion = d.id
 INNER JOIN {user} u ON u.id = p.userid
