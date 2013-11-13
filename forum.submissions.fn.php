@@ -47,7 +47,7 @@
     $student_id_list = implode(',', array_keys($students));
 
     //Get students from forum_posts
-    $st_posts = $DB->get_records_sql("SELECT DISTINCT u.*
+    $st_posts = $DB->get_records_sql("SELECT DISTINCT u.id, u.firstname, u.lastname
                                  FROM {forum_discussions} d
                                  INNER JOIN {forum_posts} p ON p.discussion = d.id
                                  INNER JOIN {user} u ON u.id = p.userid
