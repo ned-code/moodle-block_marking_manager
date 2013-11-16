@@ -354,16 +354,16 @@ ORDER BY u.lastname ASC";
 
                 //CHECK DRAFT is_Graded
                 $sqlDraft = "SELECT s.userid,
-s.timemodified AS submissiontime,
-g.timemodified AS gradetime
-FROM {$CFG->prefix}assign_submission as s
-LEFT JOIN {$CFG->prefix}assign_grades as g
-ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment = $assign
-AND s.userid IN ($studentlist)
-AND s.status = 'draft'
-AND g.grade IS NOT NULL
-AND g.timemodified > s.timemodified";
+                                    s.timemodified AS submissiontime,
+                                    g.timemodified AS gradetime
+                               FROM {$CFG->prefix}assign_submission as s
+                          LEFT JOIN {$CFG->prefix}assign_grades as g
+                                 ON (s.assignment=g.assignment and s.userid=g.userid)
+                              WHERE s.assignment = $assign
+                                AND s.userid IN ($studentlist)
+                                AND s.status = 'draft'
+                                AND g.grade IS NOT NULL
+                                AND g.timemodified > s.timemodified";
 
                 $studentlist = explode(',', $studentlist);
 
@@ -379,52 +379,87 @@ AND g.timemodified > s.timemodified";
 
                 switch ($sort) {
                     case 'lowest':
-                        $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1 AND g.timemodified > s.timemodified
-ORDER BY g.grade ASC";
+                        $sql = "SELECT s.id,
+                                       s.userid
+                                  FROM {assign_submission} s
+                             LEFT JOIN {assign_grades} g
+                                    ON (s.assignment=g.assignment and s.userid=g.userid)
+                                 WHERE s.assignment=$assign
+                                   AND (s.userid in ($studentlist))
+                                   AND s.status='submitted'
+                                   AND g.grade is not null
+                                   AND g.grade <> -1
+                                   AND g.timemodified > s.timemodified
+                              ORDER BY g.grade ASC";
                         break;
 
                     case 'highest':
-                        $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1 AND g.timemodified > s.timemodified
-ORDER BY g.grade DESC";
+                        $sql = "SELECT s.id,
+                                       s.userid
+                                 FROM {assign_submission} s
+                            LEFT JOIN {assign_grades} g
+                                   ON (s.assignment=g.assignment and s.userid=g.userid)
+                                WHERE s.assignment=$assign
+                                  AND (s.userid in ($studentlist))
+                                  AND s.status='submitted'
+                                  AND g.grade is not null
+                                  AND g.grade <> -1
+                                  AND g.timemodified > s.timemodified
+                             ORDER BY g.grade DESC";
                         break;
 
                     case 'date':
-                        $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1 AND g.timemodified > s.timemodified
-ORDER BY s.timemodified DESC";
+                        $sql = "SELECT s.id,
+                                       s.userid
+                                  FROM {assign_submission} s
+                             LEFT JOIN {assign_grades} g
+                                    ON (s.assignment=g.assignment and s.userid=g.userid)
+                                 WHERE s.assignment=$assign
+                                   AND (s.userid in ($studentlist))
+                                   AND s.status='submitted'
+                                   AND g.grade is not null
+                                   AND g.grade <> -1
+                                   AND g.timemodified > s.timemodified
+                              ORDER BY s.timemodified DESC";
                         break;
 
                     case 'alpha':
-                        $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1 AND g.timemodified > s.timemodified";
+                        $sql = "SELECT s.id,
+                                       s.userid
+                                  FROM {assign_submission} s
+                             LEFT JOIN {assign_grades} g
+                                    ON (s.assignment=g.assignment and s.userid=g.userid)
+                                 WHERE s.assignment=$assign
+                                   AND (s.userid in ($studentlist))
+                                   AND s.status='submitted'
+                                   AND g.grade is not null
+                                   AND g.grade <> -1
+                                   AND g.timemodified > s.timemodified";
                         break;
                 }
 
 
             }else{
-                $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid)
-WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND g.grade is not null AND g.grade <> -1 AND g.timemodified > s.timemodified";
+                $sql = "SELECT s.id,
+                               s.userid
+                          FROM {assign_submission} s
+                     LEFT JOIN {assign_grades} g
+                            ON (s.assignment=g.assignment and s.userid=g.userid)
+                         WHERE s.assignment=$assign
+                           AND (s.userid in ($studentlist))
+                           AND s.status='submitted'
+                           AND g.grade is not null
+                           AND g.grade <> -1
+                           AND g.timemodified > s.timemodified";
             }
 
             if($data = $DB->get_records_sql($sql)){
                 $arr = array();
                 foreach ($data as $value) {
-                    $arr[] = $value->userid;
+                    $arr[$value->userid] = $value->userid;
                 }
 
-                return $arr;
+                return (array_values($arr));
             }else{
                 return false;
             }
@@ -436,8 +471,11 @@ WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submit
 
     } else if ($show == 'unsubmitted') {
         $sql = "SELECT DISTINCT s.userid
-FROM {assign_submission} s
-WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
+                           FROM {assign_submission} s
+                          WHERE assignment=$assign
+                            AND (userid in ($studentlist))
+                            AND status='submitted'";
+
         $subbed = $DB->get_records_sql($sql); //print_r($subbed);print_r($students);
 
         $unsubmitted= array_diff(array_keys($students), array_keys($subbed)); //print_r($gradedarray);die;
@@ -449,16 +487,16 @@ WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
         if($resubmission){
             //CHECK DRAFT is_Graded
             $sqlDraft = "SELECT s.userid,
-s.timemodified AS submissiontime,
-g.timemodified AS gradetime
-FROM {$CFG->prefix}assign_submission as s
-LEFT JOIN {$CFG->prefix}assign_grades as g
-ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
-WHERE s.assignment = $assign
-AND s.userid IN ($studentlist)
-AND s.status = 'draft'
-AND g.grade IS NOT NULL
-AND g.timemodified > s.timemodified";
+                s.timemodified AS submissiontime,
+                g.timemodified AS gradetime
+                FROM {$CFG->prefix}assign_submission as s
+                LEFT JOIN {$CFG->prefix}assign_grades as g
+                ON (s.assignment=g.assignment and s.userid=g.userid and s.submissionnum = g.submissionnum)
+                WHERE s.assignment = $assign
+                AND s.userid IN ($studentlist)
+                AND s.status = 'draft'
+                AND g.grade IS NOT NULL
+                AND g.timemodified > s.timemodified";
 
             $studentlist = explode(',', $studentlist);
 
@@ -732,15 +770,15 @@ function count_unmarked_activities(&$course, $info='unmarked', $resubmission=fal
                                 //////////////////////////////////
                                 if ($resubmission){
                                     $sql = "SELECT asub.id,
-asub.userid,
-ag.grade
-FROM {$CFG->prefix}assign_submission AS asub
-LEFT JOIN {$CFG->prefix}assign_grades AS ag
-ON asub.userid = ag.userid
-AND asub.assignment = ag.assignment
-AND asub.submissionnum = ag.submissionnum
-WHERE asub.assignment = {$instance->id}
-AND asub.status = 'submitted'";
+                                                   asub.userid,
+                                                   ag.grade
+                                              FROM {$CFG->prefix}assign_submission AS asub
+                                         LEFT JOIN {$CFG->prefix}assign_grades AS ag
+                                                ON asub.userid = ag.userid
+                                               AND asub.assignment = ag.assignment
+                                               AND asub.submissionnum = ag.submissionnum
+                                             WHERE asub.assignment = {$instance->id}
+                                               AND asub.status = 'submitted'";
 
                                     if($gradedSunmissions = $DB->get_records_sql($sql)){
                                         foreach ($gradedSunmissions as $gradedSunmission) {
