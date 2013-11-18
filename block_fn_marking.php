@@ -236,7 +236,7 @@ class block_fn_marking extends block_list {
                         '&navlevel=top">' . get_string('gradeslink', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
                 */
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/simple_gradebook.php?id=' . $this->course->id .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $this->course->id .
                         '">' . get_string('simplegradebook', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
             }
