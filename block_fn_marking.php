@@ -244,7 +244,7 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showreportslink) && $this->config->showreportslink) {
 
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/report.php?id=' . $this->course->id .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/report/log/index.php?id=' . $this->course->id .
                         '&navlevel=top">' . get_string('reportslink', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/log') . "\" class=\"icon\" alt=\"\" />";
             }
