@@ -233,7 +233,7 @@
                                                 $simplegradebook[$key]['avg'][]=array('grade'=>0, 'grademax'=>$item->grademax);
                                             }
                                         }
-                                    } else if ($modstatus = assignment_status($mod, $key, true)){
+                                    } else if ($modstatus = _assignment_status($mod, $key, true)){
 
                                         switch ($modstatus) {
                                             case 'submitted':
