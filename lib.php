@@ -2762,7 +2762,7 @@ function fn_reached_resubmission_limit($submissionnum, $assign) {
 }
 
 
-function assignment_status($mod, $userid) {
+function _assignment_status($mod, $userid) {
     global $CFG, $DB, $USER, $SESSION;
 
     if(isset($SESSION->completioncache)){
