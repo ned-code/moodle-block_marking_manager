@@ -1232,18 +1232,31 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
                                                array('class'=>'gradeform'));
     }
     $o .= $assign->get_renderer()->render(new assign_form('gradingform', $mform));
-
+    $version = explode('.', $CFG->version);
+    $version = reset($version);
 
     if (count($allsubmissions) > 1 && $attemptnumber == -1) {
         $allgrades = fn_get_all_grades($userid, $assign);
-        $history = new assign_attempt_history($allsubmissions,
-                                              $allgrades,
-                                              $assign->get_submission_plugins(),
-                                              $assign->get_feedback_plugins(),
-                                              $assign->get_course_module()->id,
-                                              $assign->get_return_action(),
-                                              $assign->get_return_params(),
-                                              true);
+
+        if ($version >= 2013051405) {
+            $history = new assign_attempt_history($allsubmissions,
+                                                  $allgrades,
+                                                  $assign->get_submission_plugins(),
+                                                  $assign->get_feedback_plugins(),
+                                                  $assign->get_course_module()->id,
+                                                  $assign->get_return_action(),
+                                                  $assign->get_return_params(),
+                                                  true,null,null);
+        } else {
+            $history = new assign_attempt_history($allsubmissions,
+                                                  $allgrades,
+                                                  $assign->get_submission_plugins(),
+                                                  $assign->get_feedback_plugins(),
+                                                  $assign->get_course_module()->id,
+                                                  $assign->get_return_action(),
+                                                  $assign->get_return_params(),
+                                                  true);
+        }
 
         $o .= $assign->get_renderer()->render($history);
     }
