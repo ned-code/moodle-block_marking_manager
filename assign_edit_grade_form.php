@@ -142,7 +142,6 @@ class mod_assign_grading_form_fn extends moodleform {
 
 
         if ($gradinginstance) {
-
             $gradingelement = $mform->addElement('grading', 'advancedgrading', get_string('grade').':', array('gradinginstance' => $gradinginstance));
             if ($gradingdisabled) {
                 $gradingelement->freeze();
@@ -160,7 +159,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
                 $grademenu = make_grades_menu($assignment->get_instance()->grade);
                 $grademenu['-1'] = 'Select';
-                $mform->addElement('select', 'grade', get_string('grade', 'block_fn_marking'), $grademenu, $attributes);
+                $gradingelement = $mform->addElement('select', 'grade', get_string('grade', 'block_fn_marking'), $grademenu, $attributes);
                 $mform->setDefault('grade', $stu_grade); //@fixme some bug when element called 'grade' makes it break
                 $mform->setType('grade', PARAM_INT);
 
