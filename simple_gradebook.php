@@ -179,7 +179,7 @@
                         continue;
                     }
                     /// Don't count it if you can't see it.
-                    $mcontext = get_context_instance(CONTEXT_MODULE, $mod->id);
+                    $mcontext = context_module::instance($mod->id);
                     if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
                         continue;
                     }
@@ -204,9 +204,9 @@
                             if (function_exists($gradefunction)) {
                                 ++$numberofitem;
                                 if ($mod->modname == 'quiz'){
-                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/blocks/fn_marking/pix/quiz.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
+                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
                                 }else{
-                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.gif\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
+                                    $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"   TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\" HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
                                 }
 
                                 $weekactivitycount[$i]['mod'][] = $image;

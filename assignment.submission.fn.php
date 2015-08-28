@@ -156,12 +156,18 @@
                 $submissions = array();
             }
 
-            add_to_log($course->id, "assignment", "update grades", "submissions.php?id={$assignment->assignment->id}", "$count users", $cm->id); 
+            $manager = get_log_manager();
+            if (method_exists($manager, 'legacy_add_to_log')) {
+                $manager->legacy_add_to_log($course->id, "assignment", "update grades", "submissions.php?id={$assignment->assignment->id}", "$count users", $cm->id);
+            }
           
 	     echo $OUTPUT->notification('Submissions feedback updated for '.fullname($users[$assignment->submission->userid]).'.');
         }
     } else {
-        add_to_log($course->id, "assignment", "view submission", "submissions.php?id={$assignment->assignment->id}", "{$assignment->assignment->id}", $cm->id);
+        $manager = get_log_manager();
+        if (method_exists($manager, 'legacy_add_to_log')) {
+            $manager->legacy_add_to_log($course->id, "assignment", "view submission", "submissions.php?id={$assignment->assignment->id}", "{$assignment->assignment->id}", $cm->id);
+        }
     }
 
     if (!$done) {   

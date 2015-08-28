@@ -26,14 +26,9 @@ class block_fn_marking extends block_list {
      */
     public function specialization() {
 
-        global $course;
-
         if (! isset($this->config)){
-            $this->config = new object;
+            $this->config = new stdClass;
         }
-
-        /// Need the bigger course object.
-        $this->course = $course;
 
         if (empty($this->config->title)) {
             $this->title = get_string('pluginname', 'block_fn_marking');
@@ -52,8 +47,9 @@ class block_fn_marking extends block_list {
         if (!isset($this->config->showunsubmitted)) {
             $this->config->showunsubmitted = 1;
         }
-        if (!isset($this->config->showsaved)) {
-            $this->config->showsaved = 1;
+
+        if (!isset($this->config->keepseparate)) {
+            $this->config->keepseparate = 1;
         }
 
         if (!isset($this->config->showreportslink)) {
@@ -106,12 +102,8 @@ class block_fn_marking extends block_list {
     public function get_content() {
 
         global $course, $CFG, $USER, $DB, $OUTPUT, $SESSION;
-//        if(isset($SESSION->currentgroup)){
-//            unset($SESSION->currentgroup);
-//        }
-        /// Need the bigger course object.
-        $this->course = $course;
-
+        
+        /// Need the bigger course stdClass.
         if ($this->content !== null) {
             return $this->content;
         }
@@ -120,14 +112,13 @@ class block_fn_marking extends block_list {
         $this->content->items = array();
         $this->content->icons = array();
         $this->content->footer = '';
-        $context = get_context_instance(CONTEXT_COURSE, $this->course->id);
-        $isteacher = has_capability('moodle/grade:viewall', $context);
 
-        if (!$isteacher) {
-            return $this->content;
+        if($this->page->course->id == SITEID) {
+            $this->get_frontpage_content();
+        } else {
+            $this->get_standard_content();
         }
 
-        $this->get_standard_content();
         return $this->content;
     }
 
@@ -139,7 +130,9 @@ class block_fn_marking extends block_list {
     public function applicable_formats() {
 
         // Default case: the block can be used in all course types
-        return array('all' => false,
+        return array(
+            'all' => false,
+            'site' => true,
             'course-*' => true);
     }
 
@@ -151,49 +144,39 @@ class block_fn_marking extends block_list {
 
         global $course, $DB, $USER, $CFG, $THEME, $SESSION, $PAGE,$OUTPUT;
 
-        //Check sesubmission plugin
-        if ($assignChecks = $DB->get_records_sql("SELECT * FROM {$CFG->prefix}assign")){
-            foreach ($assignChecks as $assignCheck) {
-                if(isset($assignCheck->resubmission)){
-                    $resubmission = true;
-                    break;
-                }else{
-                    $resubmission = false;
-                }
-            }
-        }else{
-            $resubmission = false;
-        }
-        /// Need the bigger course object.
-        $this->course = $course;
         require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
 
         $days = $this->config->days;
         $percent = $this->config->percent;
-        $context = get_context_instance(CONTEXT_COURSE, $this->course->id);
-        $isteacheredit = has_capability('moodle/course:update', $context);
+        $context = context_course::instance($this->page->course->id);
+        //$isteacheredit = has_capability('moodle/course:update', $context);
+        $isteacher = has_capability('moodle/grade:viewall', $context);
+
+        if (!$isteacher) {
+            return $this->content;
+        }
 
         // preload mods and sections
         // grab modules
         $modnames = get_module_types_names();
         $modnamesplural = get_module_types_names(true);
-        $modinfo = get_fast_modinfo($this->course->id);
+        $modinfo = get_fast_modinfo($this->page->course->id);
         $mods = $modinfo->get_cms();
         $modnamesused = $modinfo->get_used_module_names();
 
-        //$sections = get_all_sections($this->course->id);
-        $sections = get_fast_modinfo($this->course->id)->get_section_info_all();
+        //$sections = get_all_sections($this->page->course->id);
+        $sections = get_fast_modinfo($this->page->course->id)->get_section_info_all();
 
         $mod_array = array ($mods, $modnames, $modnamesplural, $modnamesused);
 
         ///Course Teacher Menu:
-        if (($this->course->id != SITEID)) {
+        if (($this->page->course->id != SITEID)) {
 
             if (isset($this->config->showunmarked) && $this->config->showunmarked) {
 
-                $numunmarked = count_unmarked_activities($this->course, 'unmarked', $resubmission);
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=unmarked' .
+                $numunmarked = count_unmarked_activities($this->page->course, 'unmarked');
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->page->course->id . '&show=unmarked' .
                          '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/unmarked.gif"
                                                 class="icon" alt="">';
@@ -201,8 +184,8 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
 
-                $nummarked = count_unmarked_activities($this->course, 'marked', $resubmission);
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=marked' .
+                $nummarked = count_unmarked_activities($this->page->course, 'marked');
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->page->course->id . '&show=marked' .
                         '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/graded.gif"
                                                 class="icon" alt="">';
@@ -210,8 +193,8 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
 
-                $numunsubmitted = count_unmarked_activities($this->course, 'unsubmitted', $resubmission);
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=unsubmitted' .
+                $numunsubmitted = count_unmarked_activities($this->page->course, 'unsubmitted');
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->page->course->id . '&show=unsubmitted' .
                         '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/not_submitted.gif"
                                                 class="icon" alt="">';
@@ -219,8 +202,8 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
 
-                $numsaved= count_unmarked_activities($this->course, 'saved', $resubmission);
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->course->id . '&show=saved' .
+                $numsaved= count_unmarked_activities($this->page->course, 'saved');
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->page->course->id . '&show=saved' .
                         '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/saved.gif"
                                                 class="icon" alt="">';
@@ -232,11 +215,11 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showgradeslink) && $this->config->showgradeslink) {
                 /*
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/grade/report/index.php?id=' . $this->course->id .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/grade/report/index.php?id=' . $this->page->course->id .
                         '&navlevel=top">' . get_string('gradeslink', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
                 */
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/simple_gradebook.php?id=' . $this->course->id .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/simple_gradebook.php?id=' . $this->page->course->id .
                         '">' . get_string('simplegradebook', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
             }
@@ -244,44 +227,132 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showreportslink) && $this->config->showreportslink) {
 
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/report.php?id=' . $this->course->id .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/report.php?id=' . $this->page->course->id .
                         '&navlevel=top">' . get_string('reportslink', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/log') . "\" class=\"icon\" alt=\"\" />";
             }
 
 
-
-
             if (($this->config->shownotloggedinuser || $this->config->showstudentnotsubmittedassignment
                     || $this->config->showstudentmarkslessthanfiftypercent)) {
                 $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+                $this->content->icons[] = '';
             }
 
             $strstudents = get_string('students');
 
             if (isset($this->config->shownotloggedinuser) && $this->config->shownotloggedinuser) {
 
-                $numnotloggedin = fn_count_notloggedin($this->course, $days);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=notloggedin'.
+                $numnotloggedin = fn_count_notloggedin($this->page->course, $days);
+                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
                                         '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' '.$strstudents.' </a>'.get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt="">';
             }
 
             if ($this->config->showstudentnotsubmittedassignment) {
                 $now = time();
                 $lastweek = $now - (60*60*24*$days);
-                $numnotsubmittedany = fn_get_notsubmittedany($this->course, $lastweek, true, $sections, $mod_array, NULL);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=notsubmittedany'.
+                $numnotsubmittedany = fn_get_notsubmittedany($this->page->course, $lastweek, true, $sections, $mod_array, NULL);
+                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
                                         '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' '.$strstudents.' </a>'.get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt="">';
             }
 
             if ($this->config->showstudentmarkslessthanfiftypercent) {
 
-                $numfailing = fn_count_failing($this->course,$percent);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->course->id.'&show=failing'.
+                $numfailing = fn_count_failing($this->page->course,$percent);
+                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
                                         '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' '.$strstudents.'</a>'.get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
-                $this->content->icons[] = '';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt="">';
             }
         }
+        return $this->content;
+    }
+
+    private function get_frontpage_content() {
+
+        global $DB, $USER, $CFG;
+
+        require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
+        require_once($CFG->dirroot . '/mod/forum/lib.php');
+
+        $modnames = get_module_types_names();
+        $modnamesplural = get_module_types_names(true);
+
+        $supported_modules = array('assign', 'forum', 'quiz');
+
+        $isadmin   = is_siteadmin($USER->id);
+
+        // COURSES - ADMIN
+        if ($isadmin) {
+            $sqlCourse = "SELECT c.*
+                            FROM {course} c
+                           WHERE c.id > ?
+                             AND c.visible = ?";
+            $total_course_number = $DB->count_records_sql('SELECT COUNT(c.id) FROM {course} c WHERE c.id > ? AND c.visible = ?', array(1, 1));
+
+            if ($courses = $DB->get_records_sql($sqlCourse, array(1, 1), 0, 10)) {
+                foreach ($courses as  $course) {
+
+                    $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/view.php?id=' . $course->id . '">'. $course->shortname.'</a>';
+                    $this->content->icons[] = '';
+
+                    foreach ($supported_modules as $supported_module) {
+
+                        $numunmarked = count_unmarked_activities($course, 'unmarked', $supported_module);
+                        $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $course->id . '&show=unmarked' .
+                            '&navlevel=top">' . $modnamesplural[$supported_module] . ' (' . $numunmarked . ')</a>';
+                        $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/mod/'.$supported_module.'/pix/icon.png" class="icon" alt="">';
+                    }
+
+
+                    $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+                    $this->content->icons[] = '';
+
+                }
+                if ($total_course_number > 10) {
+                    $this->content->items[] = "<div class='fn-admin-warning' >".get_string('morethan10', 'block_fn_marking')."</div>";
+                    $this->content->icons[] = '';
+                }
+            }
+        } else {
+
+            $sql = "SELECT ctx.id,
+                       ctx.instanceid AS courseid
+                  FROM {context} ctx
+            INNER JOIN {role_assignments} ra
+                    ON ctx.id = ra.contextid
+                 WHERE ctx.contextlevel = 50
+                   AND ra.roleid = 3
+                   AND ra.userid = ?";
+
+            if ($teacher_courses = $DB->get_records_sql($sql, array($USER->id))) {
+                foreach ($teacher_courses as $teacher_course) {
+
+                    $course = $DB->get_record('course', array('id' => $teacher_course->courseid));
+
+                    $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/view.php?id=' . $course->id . '">' . $course->shortname . '</a>';
+                    $this->content->icons[] = '';
+
+                    foreach ($supported_modules as $supported_module) {
+
+                        $numunmarked = count_unmarked_activities($course, 'unmarked', $supported_module);
+                        $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $course->id . '&show=unmarked' .
+                            '&navlevel=top">' . $modnamesplural[$supported_module] . ' (' . $numunmarked . ')</a>';
+                        $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/mod/' . $supported_module . '/pix/icon.png" class="icon" alt="">';
+
+
+                    }
+
+
+                    $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+                    $this->content->icons[] = '';
+
+                }
+            }
+        }
+
+
         return $this->content;
     }
 }

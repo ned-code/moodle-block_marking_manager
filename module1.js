@@ -15,7 +15,7 @@ M.show_forum_panel = {
     showforumpanel: function() {        
         var Y = this.Y; 
 //        var div = Y.one('#iframediv');
-         var url = M.cfg.wwwroot+"/mod/forum/view.php?id="+this.mid;
+         var url = M.cfg.wwwroot+"/blocks/fn_marking/forum_view.php?id="+this.mid;
         // create div
         var div = Y.Node.create('</div><div/>');//Y.one('#iframediv');
         div.set("id", "forumiframecontainer");

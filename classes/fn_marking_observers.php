@@ -14,19 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_fn_marking;
+defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
 
-/**
- * Keeps track of the version number
- *
- * @package    block
- * @subpackage fn_marking
- * @author     Fernando Oliveira - MoodleFN {@link http://moodlefn.knet.ca}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-
-$plugin->version = 2015080902;
-$plugin->requires = 2014051200; // 2.7
-$plugin->maturity = MATURITY_RC;
-$plugin->component = 'block_fn_marking';
-$plugin->release = '2.7';
+class fn_marking_observers {
+    public static function fn_update_submission_status($event) {
+        //fn_update_submission_status($event);
+    }
+}

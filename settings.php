@@ -22,19 +22,44 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
-$settings->add(new admin_setting_configcheckbox('noblocks',
-                                                get_string('labelnoblocks', 'block_fn_marking'),
-                                                '',
-                                                '0'));
-$settings->add(new admin_setting_heading('sampleheader', '', get_string('descconfig', 'block_fn_marking')));
-
-
-$settings->add(new admin_setting_configselect('block_fn_marking/showtopmessage', get_string('showtopmessage', 'block_fn_marking'), '', 0, array('0'=>'No', '1'=>'Yes')));
-
-
-$settings->add(new admin_setting_confightmleditor('block_fn_marking/topmessage',
-                                            get_string('topmessage', 'block_fn_marking'),
-                                            '',
-                                            ''
-                                            ));
+$settings->add(
+    new admin_setting_configcheckbox(
+        'noblocks',
+        get_string('labelnoblocks','block_fn_marking'),
+        '',
+        '0'
+    )
+);
+$settings->add(
+    new admin_setting_heading(
+        'sampleheader',
+        '',
+        get_string('descconfig', 'block_fn_marking')
+    )
+);
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/showtopmessage',
+        get_string('showtopmessage', 'block_fn_marking'),
+        '',
+        0,
+        array('0'=>'No', '1'=>'Yes')
+    )
+);
+$settings->add(
+    new admin_setting_confightmleditor(
+        'block_fn_marking/topmessage',
+        get_string('topmessage', 'block_fn_marking'),
+        '',
+        ''
+    )
+);
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/include_orphaned',
+        get_string('include_orphaned', 'block_fn_marking'),
+        '',
+        0,
+        array('0'=>'No', '1'=>'Yes')
+    )
+);

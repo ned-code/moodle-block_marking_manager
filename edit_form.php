@@ -30,11 +30,12 @@ class block_fn_marking_edit_form extends block_edit_form {
         //Config title for the block.
         $mform->addElement('text', 'config_title',
                             get_string('setblocktitle', 'block_fn_marking'));
-        $mform->setType('config_title', PARAM_MULTILANG);
+        $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_title', get_string('pluginname', 'block_fn_marking'));
         $mform->addHelpButton('config_title', 'config_title', 'block_fn_marking');
 
         $hideshow = array(0 => get_string('hide'), 1 => get_string('show'));
+        $yesno = array(0 => get_string('no'), 1 => get_string('yes'));
 
         // control the visibility of the unmarked activities
         $mform->addElement('select', 'config_showunmarked',
@@ -55,10 +56,10 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addHelpButton('config_showunsubmitted', 'config_unsubmitted', 'block_fn_marking');
 
         // control the visibility of the saved activities
-        $mform->addElement('select', 'config_showsaved',
-                            get_string('showsaved', 'block_fn_marking'), $hideshow);
-        $mform->setDefault('config_showsaved', 1);
-        $mform->addHelpButton('config_showsaved', 'config_showsaved', 'block_fn_marking');
+        $mform->addElement('select', 'config_keepseparate',
+                            get_string('keepseparate', 'block_fn_marking'), $yesno);
+        $mform->setDefault('config_keepseparate', 1);
+        //$mform->addHelpButton('config_keepseparate', 'config_keepseparate', 'block_fn_marking');
 
         // control the visibility of the grade link activities
         $mform->addElement('select', 'config_showgradeslink',

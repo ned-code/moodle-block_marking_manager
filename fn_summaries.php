@@ -37,7 +37,7 @@ if (!$course = $DB->get_record("course", array("id" => $id))) {
 require_login($course);
 
 //grab context
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
+$context = context_course::instance($course->id);
 $cobject = new Object();
 $cobject->course = $course;
 
@@ -49,10 +49,11 @@ if (!$isteacher) {
 }
 
 $isteacheredit = has_capability('moodle/course:update', $context);
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
+$context = context_course::instance($course->id);
 $viewallgroups = has_capability('moodle/site:accessallgroups', $context);
 
-$currentgroup = get_current_group($course->id);
+//$groupmode    = groups_get_course_groupmode($course);   // Groups are being used.
+$currentgroup = groups_get_course_group($course, true);
 $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 
 /// Get a list of all students
@@ -103,10 +104,11 @@ switch ($show) {
 }
 
 /// Print header
-$navlinks = array(array('name' => $name, 'link' => '', 'type' => 'misc'));
-$navigation = build_navigation($navlinks);
 $heading = $course->fullname;
-print_header_simple($title, $heading, $navigation, '', '', true, '', '');
+$PAGE->navbar->add($name);
+$PAGE->set_title($title);
+$PAGE->set_heading($heading);
+echo $OUTPUT->header();
 
 echo "<div id='marking-interface'>";
 echo "<h4 class='head-title'>$title</h4>\n";
@@ -123,17 +125,15 @@ echo '<table  width="100%" border="0" cellpadding="0" cellspacing="0">';
 // iterate through students
 if ($show == 'notloggedin' || $show == 'notsubmittedany') {
     echo "<tr>";
-    echo "<th align='center' width='15%'><strong>User Picture </strong></th>";
-    echo "<th align='left' width='67%' style='text-align:left;'><strong>Name </strong></th>";
-    echo "<th align='center' width='18%'><strong>Last access <strong></th>";
+    echo "<th>Student</th>";
+    echo "<th>Last access</th>";
     echo "</tr>";
 }
 
 if ($show == 'failing') {
     echo "<tr>";
-    echo "<th align='center' width='15%'><strong>User picture </strong></th>";
-    echo "<th align='left' width='67%' style='text-align:left;'><strong>Name </strong></th>";
-    echo "<th align='center' width='18%'><strong>Overall grade <strong></th>";
+    echo "<th>Student</th>";
+    echo "<th>Last access</th>";
     echo "</tr>";
 }
 
@@ -147,18 +147,14 @@ for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $tot
         // convert grade to int
         // does this round up/down?
         $grade = (int) $grade_obj->grade;
-        echo "<tr><td align='center'>\n";
+        echo "<tr>\n";
         $user = $DB->get_record('user', array('id' => $student->id));
-        echo $OUTPUT->user_picture($user, array('courseid' => $course->id));
         $fullname = fullname($student, true);
-
-        echo "</td>\n";
-        echo "<td align='left'><strong><a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a></strong></td>\n";
+        echo "<td align='left'>".$OUTPUT->user_picture($user, array('courseid' => $course->id))." <a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a></td>\n";
         echo "<td align='center'>$grade%</td></tr>\n";
     } else if ($show == 'notsubmittedany') {
-        echo("<tr><td align='center'>");
+        echo("<tr>");
         $user = $DB->get_record('user', array('id' => $student->id));
-        echo $OUTPUT->user_picture($user, array('courseid' => $course->id));
         $fullname = fullname($student, true);
         $lastaccess = format_time(time() - $student->lastaccess, $datestring);
         if (!$student->lastaccess) {
@@ -170,14 +166,13 @@ for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $tot
 							WHERE courseid = ?
 							AND userid=?
 							AND timeaccess != 0', array($course->id, $student->id));
-            $minlastaccess = userdate($lastaccessincourse) . "&nbsp;<br /> (" . format_time(time() - $lastaccessincourse, $datestring) . ")";
+            $minlastaccess = userdate($lastaccessincourse) . "&nbsp;(" . format_time(time() - $lastaccessincourse, $datestring) . ")";
         }
-        echo "</td><td align='left'><strong><a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a><strong></td>";
+        echo "<td align='left'>".$OUTPUT->user_picture($user, array('courseid' => $course->id))."<a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a></td>";
         echo "<td align='center'>" . $minlastaccess . "</td></tr>\n";
     } else {
-        echo "<tr><td align='center'>";
+        echo "<tr>";
         $user = $DB->get_record('user', array('id' => $student->id));
-        echo $OUTPUT->user_picture($user, array('courseid' => $course->id));
         $fullname = fullname($student, true);
         $lastaccess = format_time(time() - $student->lastaccess, $datestring);
         if (!$student->lastaccess) {
@@ -189,9 +184,9 @@ for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $tot
 								WHERE courseid = ?
 								AND userid=?
 								AND timeaccess != 0', array($course->id, $student->id));
-            $minlastaccess = userdate($lastaccessincourse) . "&nbsp;<br /> (" . format_time(time() - $lastaccessincourse, $datestring) . ")";
+            $minlastaccess = userdate($lastaccessincourse) . "&nbsp;(" . format_time(time() - $lastaccessincourse, $datestring) . ")";
         }
-        echo"</td><td align='left'><strong><a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a></strong></td>";
+        echo"<td align='left'>".$OUTPUT->user_picture($user, array('courseid' => $course->id))."<a href='" . $CFG->wwwroot . "/user/view.php?id=$user->id&course=$COURSE->id'>" . $fullname . "</a></td>";
         echo "<td align='center'>" . $minlastaccess . "</td></tr>\n";
     }
 }

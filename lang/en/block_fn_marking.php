@@ -2,6 +2,7 @@
 
 //$Id: block_fn_admin.php,v 1.4 2009/08/19 20:58:16 mchurch Exp $
 $string['showsaved'] = 'Show draft activities';
+$string['keepseparate'] = 'Keep draft assignments separate';
 $string['setnumberofdays'] = 'Set number of days';
 $string['setpercentmarks'] = 'Set percent of marks';
 $string['shownotloggedinuser'] = 'Show not logged in user';
@@ -122,3 +123,18 @@ After you add the above code, your file should look like the image <a href="http
 $string['labelnoblocks'] = 'Hide all blocks';
 $string['showtopmessage'] = 'Show message above interface';
 $string['topmessage'] = 'Message to show';
+$string['include_orphaned'] = 'Include orphaned activities';
+$string['forum'] = 'Forum';
+$string['quiz'] = 'Quiz';
+$string['assign'] = 'Assignment';
+$string['type'] = 'Type';
+$string['scale'] = 'Scale';
+$string['whocanrate'] = 'Who can rate';
+$string['aggregatetype'] = 'Aggregate type';
+$string['student_have_posted'] = 'The following students have posted to this forum:';
+$string['student'] = 'Student';
+$string['posts'] = 'Posts';
+$string['replies'] = 'Replies';
+$string['rating'] = 'Rating';
+$string['morethan10'] = 'There are more than 10 courses with ungraded work.';
+$string['student'] = 'Student';
