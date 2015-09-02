@@ -1,4 +1,5 @@
 <?php
+require_once('../../config.php');
 $version = explode('.', $CFG->version);
 $version = reset($version);
 

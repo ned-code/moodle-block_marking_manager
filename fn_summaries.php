@@ -110,6 +110,7 @@ $PAGE->set_title($title);
 $PAGE->set_heading($heading);
 echo $OUTPUT->header();
 
+echo '<div class="menuwrapper"><a class="btn" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.get_string('close', 'block_fn_marking').'</a></div>';
 echo "<div id='marking-interface'>";
 echo "<h4 class='head-title'>$title</h4>\n";
 
@@ -118,6 +119,7 @@ $totalcount = count($students_result);
 $baseurl = 'fn_summaries.php?id=' . $id . '&show=' . $show . '&navlevel=top&days=' . $days . '&percent=' . $percent . '';
 $pagingbar = new paging_bar($totalcount, $page, $perpage, $baseurl, 'page');
 echo $OUTPUT->render($pagingbar);
+
 
 echo '<table width="96%" class="markingmanagercontainerList" border="0" cellpadding="0" cellspacing="0" align="center">' . '<tr><td class="intd">';
 

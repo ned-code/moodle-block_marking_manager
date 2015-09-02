@@ -31,7 +31,7 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_title',
                             get_string('setblocktitle', 'block_fn_marking'));
         $mform->setType('config_title', PARAM_TEXT);
-        $mform->setDefault('config_title', get_string('pluginname', 'block_fn_marking'));
+        $mform->setDefault('config_title', get_string('plugintitle', 'block_fn_marking'));
         $mform->addHelpButton('config_title', 'config_title', 'block_fn_marking');
 
         $hideshow = array(0 => get_string('hide'), 1 => get_string('show'));

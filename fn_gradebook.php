@@ -114,6 +114,15 @@ $mod_grades_array = array(
     'forum' => 'forum.submissions.fn.php',
 );
 
+//Filter modules
+if ($activity_type) {
+    foreach ($mod_grades_array as $key => $value) {
+        if ($activity_type <> $key) {
+            unset($mod_grades_array[$key]);
+        }
+    }
+}
+
 /// Array of functions to call to display grades for modules.
 $mod_gradedisp_array = array(
     'assignment' => 'grades.fn.html',
@@ -283,11 +292,6 @@ if ($view == "less"){
     $upto = $course_numsections;
 }
 
-//echo 'Current week: ' . $currentweek . '<br>';
-//echo 'Course numsections: ' . $course_numsections . '<br>';
-//echo 'Size of sections: ' . sizeof($sections) . '<br>';
-//echo 'upto: ' . $upto . '<br>';
-
 $selected_section = array();
 for ($i = 0; $i <= $upto; $i++) {
     $selected_section[] = $i;
@@ -309,24 +313,25 @@ foreach ($selected_section as $section_num) {
                     continue;
                 }
                 $mod = $mods[$sectionmod];
-                //Filter Activites by type
-                if ($activity_type && ($mod->modname <> $activity_type)) {
-                    continue;
-                }
-
                 $currentgroup = groups_get_activity_group($mod, true);
                 //Filter if individual user selected
 
-                if ($participants) {
+                if ($participants && $group) {
+                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                     if (isset($group_members[5]->users[$participants])) {
                         $students = array();
-                        $students[$participants] = $DB->get_record('user', array('id'=>$participants));;
+                        $students[$participants] = $DB->get_record('user', array('id'=>$participants));
                     } else {
                         $participants = 0;
                         $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                     }
+                } elseif ($participants && !$group) {
+                    $students = array();
+                    $students[$participants] = $DB->get_record('user', array('id'=>$participants));
+                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                 } else {
                     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                 }
 
                 /// Don't count it if you can't see it.
@@ -384,6 +389,8 @@ foreach ($selected_section as $section_num) {
                                         $selectedfunction = $mod_grades_array[$mod->modname];
                                         $cm = $mod;
                                     }
+                                } else {
+                                    $mid = $mod->id;
                                 }
                             }
 
@@ -486,7 +493,7 @@ $activity_type_url = new moodle_url(
     'fn_gradebook.php',
     array(
         'courseid' => $courseid,
-        'mid' => $mid,
+        'mid' => 0,
         'dir' => $dir,
         'sort' => $sort,
         'show' => $show,
@@ -509,7 +516,7 @@ if ($group_members) {
         $participants_opts[$group_member->id] = fullname($group_member);
     }
 } else {
-    foreach ($students as $group_member) {
+    foreach ($participants_arr as $group_member) {
         $participants_opts[$group_member->id] = fullname($group_member);
     }
 }
@@ -600,7 +607,7 @@ echo '
                     echo '</thead><tbody>';
 
                     foreach ($columnhtml as $index => $column) {
-                        if (strstr($column, 'mid='.$mid.'"')) {
+                        if (strstr($column, 'mid='.$mid.'&')) {
                             $extra = ' class="highlight"';
                         } else {
                             $extra = ' class="normal"';
