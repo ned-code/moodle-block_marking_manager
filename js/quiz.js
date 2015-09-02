@@ -15,7 +15,8 @@ $( document ).ready(function() {
         $('.markingmanagercontainer-footer-link').popupWindow({
             height:600,
             width:800,
-            centerScreen:1
+            centerScreen:1,
+            scrollbars:1
         });
     });
 });
