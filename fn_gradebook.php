@@ -11,6 +11,7 @@ require_once($CFG->dirroot . '/mod/forum/lib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 
 $PAGE->requires->jquery();
+$PAGE->requires->js('/blocks/fn_marking/js/popup.js');
 $PAGE->requires->js('/blocks/fn_marking/js/quiz.js');
 
 if (isset($CFG->noblocks)){
