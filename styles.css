@@ -1,3 +1,6 @@
+.fn-highlighted {
+    background-color: #C7FF00 !important;
+}
 table.fnmarkingblock td {
 	border: 1px solid #555555;
 }
@@ -10,6 +13,7 @@ table.fnmarkingblock tr.normal {
 table.fnmarkingblock tr.marking-total {
 	background-color: #787878;
 	color: white;
+	font-size: 14px;
 }
 table.fnmarkingblock th.header {
 	background: none;
@@ -23,13 +27,13 @@ table.fnmarkingblock th.topline {
 	border-left: 1px solid #555555;
 	border-right: 1px solid #555555;
 	border-top: 1px solid #555555;
+	padding: 7px 0;
 }
 table.fnmarkingblock th.bottomline {
 	border-left: 1px solid #555555;
 	border-right: 1px solid #555555;
 	border-bottom: 1px solid #555555;
-	padding-left: 0;
-	padding-right: 0;
+	padding: 5px 0;
 	font-weight: normal;
 }
 span.fn_summaries {
@@ -43,7 +47,7 @@ span.fn_summaries {
 
 #marking-topmessage {
 	width: 850px;
-	margin: 0px auto 10px;
+	margin: 0 auto 10px;
 	background: #ff8c00;
 	padding: 10px;
 	color:white;
@@ -56,7 +60,7 @@ span.fn_summaries {
 	border: 1px solid #a7a7a7;
 }
 #marking-interface table.markingmanagercontainer td.left-sec {
-	padding: 15px 15px 0 15px;
+	padding: 15px;
 	max-width: 200px;
 	min-width: 170px
 }
@@ -74,7 +78,7 @@ table.markingmanagercontainer td.right-sec .saprate-table {
 }
 .saprate-table td.yellowcell {
 	background: #ffff99;
-	padding-top: 1px !important;
+	padding: 7px;
 }
 .saprate-table td.bluecell {
 	background: #cbd7e7;
@@ -112,7 +116,7 @@ table.saprate-table td.markingmanager-headB table.resourse-tab #Submission {
 .activity-name {
 	text-align: center;
 	font-weight: bold;
-	padding: 0px 5px 10px 5px;
+	padding: 0 5px 10px 5px;
 }
 table.saprate-table .grade-filter {
 	margin: 0.5em 0 0.3em 0;
@@ -140,6 +144,7 @@ table.saprate-table .teacher-comments .comment-boxs textarea {
 }
 .fnmarkingblock thead, .fnmarkingblock tbody td {
 	border: 1px solid #555555 !important;
+	padding: 5px;
 }
 .no-assign {
 	text-align: center;
@@ -162,38 +167,37 @@ table.not-submitted td.rightName {
 	font-weight: bold;
 }
 h4.head-title {
-	padding: 10px 10px 0;
-	text-align: center;
+    padding: 10px 10px 0;
+    text-align: center;
+    font-size: 14px;
 }
 .markingmanagercontainerList {
-	background: #C7E1FE;
+
 }
 .markingmanagercontainerList .intd {
 	padding: 0;
 }
 .markingmanagercontainerList table {
-	margin-bottom: 0;
-	border: 1px solid #A7A7A7;
+    border: 1px solid #bbb;
+    margin-bottom: 18px;
 }
 .markingmanagercontainerList table td {
 	margin-bottom: 0;
-	border: 1px solid #A7A7A7;
+	border: 1px solid #BBB;
+    padding: 5px;
 }
 .markingmanagercontainerList table th {
-	background: #787878;
-	border: 1px solid #A7A7A7;
-	color: #FFF;
-	font-size: 15px;
+	border: 1px solid #BBB;
+	font-size: 14px;
+    text-align: center;
+    padding: 5px;
 }
-/**** overright***/
-
-
 
 .block_fn_marking .content {
 	padding: 10px !important;
 }
 .block_fn_marking.block.list_block .content ul.unlist li {
-	margin-bottom: 0px;
+	margin-bottom: 0;
 }
 
 .markingmanagercontainer td.generalbox {
@@ -204,11 +208,9 @@ h4.head-title {
 }
 #marking-interface table.markingmanagercontainer table.forumheaderlist {
 	border-collapse: separate;
-	border-style: solid;
-	border-width: 1px;
 	margin-top: 10px;
 	width: 100%;
-	border-color: #DDDDDD;
+	border: 1px solid #DDDDDD;
 }
 #marking-interface table.markingmanagercontainer table.forumheaderlist tbody td {
 	border-color: #FFFFFF;
@@ -218,17 +220,18 @@ h4.head-title {
 }
 #page-fn_gradebook .fitem_feditor .fitemtitle {
 	width: 1% !important;
+	display: none;
 }
 .saprate-table #fitem_id_submitbutton .felement.fsubmit {
 	margin-left: 36%;
 	width: 50%;
 }
 #marking-interface .feditor {
-	margin-left: 0% !important;
+	margin-left: 0 !important;
 	width: 100% !important;
 }
 .ffilemanager {
-	margin-left: 0% !important;
+	margin-left: 0 !important;
 	width: 100% !important;
 }
 div.fn_plugin_wrapper {
@@ -304,8 +307,8 @@ div.fn_plugin_wrapper {
 	color:red;
 }
 div.submissionhistory_summary {
-	padding: 0px !important;
-	border: 0px !important;
+	padding: 0 !important;
+	border: 0 !important;
 	margin-top: 5px !important;
 }
 .submissionhistory_summary {
@@ -344,15 +347,19 @@ div.submissionhistory_summary {
 }
 table.headertable {
 	width: 100% !important;
-	border: 0px !important;
+	border: 0 !important;
 	margin-bottom: 0 !important;
 }
 .headertable td {
-	border: 0px solid #dddddd !important;
+	border: 0 solid #dddddd !important;
 	vertical-align: top;
+	background-color: #7092be !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 16px !important;
 }
 .historyheader.cell.c0.lastcol {
-	padding: 0px;
+	padding: 0;
 }
 a.userlink, a.userlink:visited, a.userlink:hover, a.userlink:active {
 	color: yellow !important;
@@ -407,7 +414,7 @@ span.teacher_feedback_info{
 }
 div#marking-interface td.markingmanager-head fieldset.hidden{
 	background: transparent !important;
-   border: 0px solid #DADADA !important;
+   border: 0 solid #DADADA !important;
    margin: 0 !important;
 }
 div#marking-interface td.markingmanager-head fieldset.hidden div{
@@ -445,7 +452,6 @@ table.simplegradebook {
 	font-size: 11px;
 	color: #fff;;
 	background-color: #666;
-	border: 0px;
 	border-collapse: collapse;
 	border: 1px black solid;
 	margin-top: 10px;
@@ -506,9 +512,13 @@ table.simplegradebook td.empty-week {
 	font-size: 12px;
 	font-weight: bold;
 }
-
+#page-simple_gradebook .groupselector {
+	margin-left: 15px;
+}
 .menuwrapper {
     text-align: right;
+    margin: 0 auto 10px;
+    width: 852px;
 }
 div.menuwrapper div.groupselector div.singleselect{
 	margin: 1px 0 !important;
@@ -516,9 +526,254 @@ div.menuwrapper div.groupselector div.singleselect{
 div.menuwrapper div.groupselector div.singleselect .singleselect{
 	margin: 0 !important;
 }
-div.tablecontainer{
-	margin: auto;
+div.tablecontainer {
 	display: table;
-	display: block;
+	margin: 0 auto 25px;
 	overflow: auto;
+}
+.fn_quiz_header {
+	background-color: #7092be;
+	color: white;
+	font-size: 16px;
+	overflow: hidden;
+	padding: 10px 15px;
+}.fn_forum_header {
+	background-color: #7092be;
+	color: white;
+	font-size: 16px;
+	overflow: hidden;
+	padding: 5px 1px;
+}
+.fn_quiz_header > img {
+	margin: 0 5px 0 0;
+}
+.quiz-top-menu {
+	overflow: hidden;
+	padding: 8px 9px 12px 5px;
+}
+.qall-participants {
+	float: right;
+	margin-right: 40px;
+}
+.qdefault-view {
+	 float: right;
+ }
+table#forum-header-tbl {
+	font-size: 12px;
+	width: 100%;
+}
+td.forum-header-data {
+	color: yellow;
+}
+.fn-forum-numberofpost {
+	float: left;
+	width: 60px;
+	font-weight: bold;
+	padding: 8px 0;
+	text-align: center;
+}
+.fn-forum-numberofreplies {
+	float: left;
+	width: 60px;
+	font-weight: bold;
+	padding: 8px 0;
+	text-align: center;
+}
+.fn-forum-rating {
+	float: left;
+	width: 80px;
+	font-weight: bold;
+	padding: 8px 0;
+	text-align: center;
+}
+.fn-forum-student {
+	 float: left;
+	 font-weight: bold;
+	 margin-left: 50px;
+	 padding: 8px 0;
+	 text-align: center;
+	 width: 80px;
+ }
+table.fn-forum-list-header {
+	background: #EDEDED none repeat scroll 0 0 !important;
+	border: 1px solid #a7a7a7;
+	margin-bottom: 4px !important;
+}
+#page-fn_gradebook .fitem_f .fitemtitle {
+	display: none;
+}
+#page-fn_gradebook .fitem_f .felement.f{
+	margin-left: 0 !important;
+	width: 100% !important;
+}
+.markingmanagercontainer-footer {
+    background-color: #a7a7a7;
+    color: white;
+}
+.markingmanagercontainer-footer > div {
+	font-size: 12px;
+	margin: 5px;
+	text-align: center;
+}
+.markingmanagercontainer-footer-title {
+    color: black;
+}
+a.markingmanagercontainer-footer-link {
+    color: #0000EE;
+}
+.fn-admin-warning {
+	color: red;
+}
+#fn-quiz-grading {
+    border: 1px solid #BBB;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+#fn-quiz-grading td, #fn-quiz-grading th {
+    text-align: center !important;
+    border: 1px solid #BBB !important;
+    padding: 3px;
+    vertical-align: middle;
+    min-width: 28px;
+}
+img.fn-icon {
+    height: 16px;
+    padding-right: 0 !important;
+    vertical-align: text-bottom;
+    width: 16px;
+}
+#fn-quiz-grading .header {
+	font-weight: normal;
+	font-size: 12px;
+}
+.header.cname,
+.header.cinstitution,
+.header.csumgrades {
+	font-weight: bold !important;
+}
+#fn-quiz-grading .cell.c1,
+#fn-quiz-grading .cell.c2,
+#fn-quiz-grading .cell.c3 {
+	font-size: 12px;
+}
+#fn-forum-grading {
+    border: 1px solid #BBB;
+    border-collapse: collapse;
+}
+#fn-forum-grading th {
+    font-size: 12px;
+}
+td.fn-posts, td.fn-replies, td.fn-rating,
+th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
+    text-align: center !important;
+    border: 1px solid #BBB !important;
+}
+.block_fn_marking .content {
+	font-size: 1em !important;
+	padding: 0 4px 4px 4px;
+}
+
+.block_fn_marking dl,
+.block_fn_marking dt,
+.block_fn_marking dd,
+.block_fn_marking ul,
+.block_fn_marking li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.block_fn_marking .gm_icon {
+	width: 16px;
+	height: 16px;
+	float: left;
+	margin-right: 4px;
+}
+
+.block_fn_marking .cmod {
+	line-height: 16px;
+	margin: 6px 0 2px 0;
+}
+
+.block_fn_marking .module {
+	line-height: 16px;
+	position: relative;
+	padding: 3px 0 3px 20px;
+}
+
+.block_fn_marking .toggle {
+	position: relative;
+	left: 0;
+	display: block;
+	width: 16px;
+	height: 16px;
+	float: left;
+	cursor: pointer;
+	background: transparent url('[[pix:block_fn_marking|closed]]') no-repeat 50% 50%;
+}
+
+.block_fn_marking .bullet {
+	position: relative;
+	left: 0;
+	display: block;
+	width: 16px;
+	height: 16px;
+	float: left;
+	cursor: pointer;
+	background: transparent url('[[pix:block_fn_marking|navigationitem]]') no-repeat 50% 50%;
+}
+
+.block_fn_marking .toggle.open {
+	background: transparent url('[[pix:block_fn_marking|open]]') no-repeat 50% 50% !important;
+}
+
+.jsenabled .block_fn_marking_hide {
+	display: none;
+}
+
+.block_fn_marking .cloakable {
+	line-height: 1em;
+	margin: 0 0 3px 0;
+	border-top: 1px dotted #ccc;
+}
+
+.block_fn_marking .gradable {
+	padding: 2px 0;
+	border-bottom: 1px dotted #ccc;
+}
+
+.block_fn_marking .gradable .gm_icon {
+	margin-top: 1px;
+}
+
+.block_fn_marking .cloakable * {
+	font-size: 9px;
+}
+
+.block_fn_marking .empty {
+	line-height: 15px;
+}
+
+.block_fn_marking .empty img {
+	width: 15px;
+	height: 15px;
+	float: left;
+	margin-right: 4px;
+}
+
+.block_fn_marking .excess {
+	margin-top: 4px;
+	padding: 4px 16px;
+	text-align: center;
+	font-weight: bold;
+	color: rgb(205,0,0);
+}
+.fn-expand-btn {
+	text-align: right;
+}
+.block_fn_marking ul {
+	margin-left: 30px;
+}
+.block_fn_marking .fn-full-width {
+	width: 100%;
 }
