@@ -12,5 +12,10 @@ $( document ).ready(function() {
                 window.location.href= item.data("target-off")
             }
         });
+        $('.markingmanagercontainer-footer-link').popupWindow({
+            height:600,
+            width:800,
+            centerScreen:1
+        });
     });
 });

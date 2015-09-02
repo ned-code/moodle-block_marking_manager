@@ -3083,7 +3083,7 @@ function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='
 
         foreach ($courses as $course) {
             $courseicon = $OUTPUT->pix_icon('i/course', '', null, array('class' => 'gm_icon'));
-            $courselink = $CFG->wwwroot . '/course/view.php?id=' . $course->id;
+            $courselink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $course->id . '&show=unmarked' . '&navlevel=top&mid=0';
 
             $total_ungraded = 0;
             $module_text = '';
