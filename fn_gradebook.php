@@ -256,17 +256,17 @@ $totungraded = 0;
 /// Collect modules data
 $modnames = get_module_types_names();
 $modnamesplural = get_module_types_names(true);
-$modinfo = get_fast_modinfo($course->id);
-$mods = $modinfo->get_cms();
-$modnamesused = $modinfo->get_used_module_names();
+//$modinfo = get_fast_modinfo($course->id);
+//$mods = $modinfo->get_cms();
+//$modnamesused = $modinfo->get_used_module_names();
 
-$mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
+//$mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
 
-$cobject->mods = &$mods;
-$cobject->modnames = &$modnames;
-$cobject->modnamesplural = &$modnamesplural;
-$cobject->modnamesused = &$modnamesused;
-$cobject->sections = &$sections;
+//$cobject->mods = &$mods;
+//$cobject->modnames = &$modnames;
+//$cobject->modnamesplural = &$modnamesplural;
+//$cobject->modnamesused = &$modnamesused;
+//$cobject->sections = &$sections;
 
 //FIND CURRENT WEEK
 $courseformatoptions = course_get_format($course)->get_format_options();
@@ -285,7 +285,7 @@ $currentweek = min($currentweek, $course_numsections);
 
 
 /// Search through all the modules, pulling out grade data
-$sections = $modinfo->get_section_info_all();
+$sections = $DB->get_records('course_sections', array('course'=>$course->id), 'section ASC', 'section, sequence');
 
 if ($view == "less"){
     $upto = min($currentweek, $course_numsections);
@@ -310,10 +310,7 @@ foreach ($selected_section as $section_num) {
         if ($section->sequence) {
             $sectionmods = explode(",", $section->sequence);
             foreach ($sectionmods as $sectionmod) {
-                if (empty($mods[$sectionmod])) {
-                    continue;
-                }
-                $mod = $mods[$sectionmod];
+                $mod = get_coursemodule_from_id('',$sectionmod, $course->id);
                 $currentgroup = groups_get_activity_group($mod, true);
                 //Filter if individual user selected
 
@@ -416,9 +413,9 @@ foreach ($selected_section as $section_num) {
                             }
 
                             $image = "<a href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"" .
-                                    "   title=\"$mod->modfullname\">" .
+                                    "   title=\"$mod->name\">" .
                                     "<IMG border=0 VALIGN=absmiddle src=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\" " .
-                                    "height=16 width=16 alt=\"$mod->modfullname\"></a>";
+                                    "height=16 width=16 alt=\"$mod->name\"></a>";
                             if (($view == 'less') && (strlen($instance->name) > 16)) {
                                 $name = substr($instance->name, 0, 16) . '&hellip;';
                             } else {

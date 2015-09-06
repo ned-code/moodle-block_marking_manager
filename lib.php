@@ -103,7 +103,6 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
         return $DB->count_records_sql($sql);
 
     } else if ($show == 'marked') {
-
         $sqlunmarked = "SELECT s.userid
                   FROM {assign_submission} s
                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and  s.attemptnumber = g.attemptnumber)
@@ -112,11 +111,10 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
                    AND s.status='submitted'
                   AND g.grade is null";
 
-        if($unmarkedstus =  $DB->get_records_sql($sqlunmarked)){
+        if($unmarkedstus =  $DB->get_records_sql($sqlunmarked)) {
             $students = explode(',', $studentlist);
 
-            foreach ($unmarkedstus as $unmarkedstu)
-            {
+            foreach ($unmarkedstus as $unmarkedstu) {
                 $students = array_diff($students, array($unmarkedstu->userid));
             }
             $studentlist = implode(',', $students);
@@ -146,7 +144,7 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
     } else if ($show == 'unsubmitted') {
         $sql = "SELECT COUNT(DISTINCT userid)
                   FROM {assign_submission}
-                 WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'"; //echo $sql;die;
+                 WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
         $subbed = $DB->count_records_sql($sql);
         $unsubbed = abs(count($students) - $subbed);
         return ($unsubbed);
@@ -198,7 +196,7 @@ function quiz_count_ungraded($quizid, $graded, $students, $show='unmarked', $ext
                   FROM {quiz_attempts} qa
                  WHERE qa.quiz = ?
                    AND qa.state = 'finished'
-                   AND (qa.sumgrades IS NULL OR qa.sumgrades = '')";
+                   AND qa.sumgrades IS NULL";
 
             return $DB->count_records_sql($sql, array($quizid));
         } else {
@@ -505,15 +503,12 @@ function count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) 
     global $CFG, $DB;
 
     $context = context_course::instance($course->id);
-    $isteacheredit = has_capability('moodle/course:update', $context);
-    $marker = has_capability('moodle/grade:viewall', $context);
+    //$isteacheredit = has_capability('moodle/course:update', $context);
+    //$marker = has_capability('moodle/grade:viewall', $context);
 
-    //$currentgroup = groups_get_course_group($course, true);;
-    $currentgroup = groups_get_activity_group($mod, true); //print_r($currentgroup);die;
+    $currentgroup = groups_get_activity_group($mod, true);
     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-
-
-    $totungraded = 0;
+    //$totungraded = 0;
 
 /// Array of functions to call for grading purposes for modules.
     $mod_grades_array = array(
@@ -611,17 +606,7 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
         'forum' => '/mod/forum/submissions.g8.html'
     );
 
-/// Collect modules data
-/// Search through all the modules, pulling out grade data
-    //get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
-    $modnames = get_module_types_names();
-    $modnamesplural = get_module_types_names(true);
-    $modinfo = get_fast_modinfo($course->id);
-    $mods = $modinfo->get_cms();
-    $modnamesused = $modinfo->get_used_module_names();
-
-    //$sections = get_all_sections($course->id); // Sort everything the same as the course
-    $sections = get_fast_modinfo($course->id)->get_section_info_all();
+    $sections = $DB->get_records('course_sections', array('course'=>$course->id), 'section ASC', 'section, sequence');
 
     $upto = min($currentweek, $course_numsections);
 
@@ -635,6 +620,10 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
         }
     }
 
+    if(!$students = get_enrolled_users($context, 'mod/assignment:submit', 0, 'u.*', 'u.id')) {
+        return 0;
+    }
+
     foreach ($selected_section as $section_num) {
         $i = $section_num;
         if (isset($sections[$i])) {   // should always be true
@@ -642,21 +631,20 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
             if ($section->sequence) {
                 $sectionmods = explode(",", $section->sequence);
                 foreach ($sectionmods as $sectionmod) {
-                    if (empty($mods[$sectionmod])) {
+                    $mod = get_coursemodule_from_id('',$sectionmod, $course->id);
+
+                    if (!isset($mod_grades_array[$mod->modname])) {
                         continue;
                     }
-
-                    $mod = $mods[$sectionmod];
 
                     if ($module) {
                         if ($module <> $mod->modname) {
                             continue;
                         }
                     }
-
-                    $currentgroup = groups_get_activity_group($mod, true);
-                    $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-
+                    /////////Changed in order to performance issue
+                    //$currentgroup = groups_get_activity_group($mod, true);
+                    //$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 
                     /// Don't count it if you can't see it.
                     $mcontext = context_module::instance($mod->id);
@@ -667,18 +655,14 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                     $libfile = "$CFG->dirroot/mod/$mod->modname/lib.php";
                     if (file_exists($libfile)) {
                         require_once($libfile);
-                        //$gradefunction = $mod->modname . "_grades";
                         $gradefunction = $mod->modname . "_get_user_grades";
 
-                        if (function_exists($gradefunction) &&
-//                            (($mod->modname != 'forum') || ($instance->assessed == 2)) && // Only include forums that are assessed only by teachers.
-                                isset($mod_grades_array[$mod->modname])) {
+                        if (function_exists($gradefunction)) {
                             /// Use the object function for fnassignments.
-                            if (($mod->modname == 'forum') &&
-                                    (($instance->assessed <= 0) || !has_capability('mod/forum:rate', $mcontext))) {
+                            if (($mod->modname == 'forum') && (($instance->assessed <= 0) || !has_capability('mod/forum:rate', $mcontext))) {
                                 $modgrades = false;
                             } else {
-                                $modgrades = new Object();
+                                $modgrades = new stdClass();
                                 if (!($modgrades->grades = $gradefunction($instance))) {
                                     $modgrades->grades = array();
                                 }
@@ -686,15 +670,15 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                                 $sql = "SELECT asub.id,
                                                asub.userid,
                                                ag.grade
-                                          FROM {$CFG->prefix}assign_submission AS asub
-                                     LEFT JOIN {$CFG->prefix}assign_grades AS ag
+                                          FROM {assign_submission} asub
+                                     LEFT JOIN {assign_grades} ag
                                             ON asub.userid = ag.userid
                                            AND asub.assignment = ag.assignment
                                            AND asub.attemptnumber = ag.attemptnumber
-                                         WHERE asub.assignment = {$instance->id}
+                                         WHERE asub.assignment = ?
                                            AND asub.status = 'submitted'";
 
-                                if($gradedSunmissions = $DB->get_records_sql($sql)){
+                                if($gradedSunmissions = $DB->get_records_sql($sql, array($instance->id))){
                                     foreach ($gradedSunmissions as $gradedSunmission) {
                                         if(! $gradedSunmission->grade){
                                             if(isset($modgrades->grades[$gradedSunmission->userid])){
@@ -728,13 +712,12 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                 }
             }
         }
-    } // a new Moodle nesting record? ;-)
+    }
 
     return $totungraded;
 }
 
 function fn_count_notloggedin($course, $days) {
-
     $truants = fn_get_notloggedin($course, $days);
     return count($truants);
 }
@@ -769,14 +752,10 @@ function fn_get_notloggedin($course, $days) {
 }
 
 function fn_get_failing($course, $percent) {
-    global $CFG, $DB;
-
-    //grab context
+      //grab context
     $context = context_course::instance($course->id);
 
-
     $student_ids = array();
-
     // grab  current group
     $currentgroup = groups_get_course_group($course, true);;
     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
@@ -815,24 +794,13 @@ function fn_count_failing($course, $percent) {
     return count(fn_get_failing($course, $percent));
 }
 
-function fn_get_notsubmittedany($course, $since = 0, $count = false, $sections, $mod_array, $students) {
-
-    global $CFG, $DB;
+function fn_get_notsubmittedany($course, $since = 0, $count = false, $sections, $students) {
 
     // grab context
     $context = context_course::instance($course->id);
-    // grab modules
-    if (!isset($mod_array)) {
-        get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
-    } else {
-        $mods = $mod_array[0];
-        $modnames = $mod_array[1];
-        $modnamesplural = $mod_array[2];
-        $modnamesused = $mod_array[3];
-    }
 
     // get current group
-    $currentgroup = groups_get_course_group($course, true);;
+    $currentgroup = groups_get_course_group($course, true);
 
     // grab modgradesarry
     $mod_grades_array = fn_get_active_mods();
@@ -841,17 +809,13 @@ function fn_get_notsubmittedany($course, $since = 0, $count = false, $sections, 
         $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
     }
 
-    //for ($i = 0; $i <= $course->numsections; $i++) {
     for ($i = 0; $i < sizeof($sections); $i++) {
         if (isset($sections[$i])) {   // should always be true
             $section = $sections[$i];
             if ($section->sequence) {
                 $sectionmods = explode(",", $section->sequence);
                 foreach ($sectionmods as $sectionmod) {
-                    if (empty($mods[$sectionmod])) {
-                        continue;
-                    }
-                    $mod = $mods[$sectionmod];
+                    $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
                     if (isset($mod_grades_array[$mod->modname])) {
                         require_once('locallib.php');
                         // build mod method
