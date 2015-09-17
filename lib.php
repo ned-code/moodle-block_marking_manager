@@ -578,27 +578,33 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
 
   //FIND CURRENT WEEK
     $courseformatoptions = course_get_format($course)->get_format_options();
+    $courseformat = course_get_format($course)->get_format();
     if( isset($courseformatoptions['numsections'])){
         $course_numsections = $courseformatoptions['numsections'];
     } else {
         $course_numsections = 10; //Default section number
     }
 
+    if ($courseformat == 'weeks') {
+        $timenow = time();
+        $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
+        $weekdate += 7200;                 // Add two hours to avoid possible DST problems
 
-    $timenow = time();
-    $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
-    $weekdate += 7200;                 // Add two hours to avoid possible DST problems
+        $weekofseconds = 604800;
+        $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
 
-    $weekofseconds = 604800;
-    $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
+        //  Calculate the current week based on today's date and the starting date of the course.
+        $currentweek = ($timenow > $course->startdate) ? (int)((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
+        $currentweek = min($currentweek, $course_numsections);
 
-    //  Calculate the current week based on today's date and the starting date of the course.
-    $currentweek = ($timenow > $course->startdate) ? (int) ((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
-    $currentweek = min($currentweek, $course_numsections);
+        $upto = min($currentweek, $course_numsections);
+    } else {
+        $upto = $course_numsections;
+    }
 
     $totungraded = 0;
 
-/// Array of functions to call for grading purposes for modules.
+    /// Array of functions to call for grading purposes for modules.
     $mod_grades_array = array(
         'assign' => '/mod/assign/submissions.g8.html',
         'assignment' => '/mod/assignment/submissions.g8.html',
@@ -606,9 +612,7 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
         'forum' => '/mod/forum/submissions.g8.html'
     );
 
-    $sections = $DB->get_records('course_sections', array('course'=>$course->id), 'section ASC', 'section, sequence');
-
-    $upto = min($currentweek, $course_numsections);
+    $sections = $DB->get_records('course_sections', array('course' => $course->id), 'section ASC', 'section, sequence');
 
     $selected_section = array();
     for ($i = 0; $i <= $upto; $i++) {
