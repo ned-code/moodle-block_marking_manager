@@ -141,3 +141,6 @@ $string['rating'] = 'Rating';
 $string['morethan10'] = 'There are more than 10 courses with ungraded work.';
 $string['student'] = 'Student';
 $string['close'] = 'Close';
+$string['sectiontitles'] = 'Section titles';
+$string['config_sectiontitles'] = 'Section titles';
+$string['config_sectiontitles_help'] = '<p>blank=course default.</p>';

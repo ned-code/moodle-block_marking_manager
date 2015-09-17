@@ -11,6 +11,8 @@
     $group = optional_param('group', 0, PARAM_INT);
     $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
 
+    $block_settings = fn_get_block_config($courseid, 'fn_marking');
+
     set_current_group($courseid, $group);
 
     if ($courseid) {
@@ -41,21 +43,6 @@
         print_error("Only teachers can use this page!");
     }
 
-    //require_capability('mod/data:viewentry', $context);
-
-    //CSS
-    //$pageCSS = new moodle_url($CFG->wwwroot.'/blocks/assessment/css/learning_styles_profile.css');
-    //$PAGE->requires->css($pageCSS);
-
-    //JS
-    //$jqueryURL = new moodle_url($CFG->wwwroot.'/blocks/assessment/js/jquery-1.9.1.min.js');
-    //$pageJS = new moodle_url($CFG->wwwroot.'/blocks/assessment/js/learning_styles_profile.js');
-    //$validateJS = new moodle_url($CFG->wwwroot.'/blocks/assessment/js/jquery.validate.js');
-
-    //$PAGE->requires->js($jqueryURL);
-    //$PAGE->requires->js($pageJS);
-    //$PAGE->requires->js($validateJS);
-
     $PAGE->set_url('/simple_gradebook.php', array('courseid' => $courseid));
 
     if (isset($CFG->noblocks)){
@@ -70,7 +57,6 @@
 
     $PAGE->set_context($context);
 
-
         // if comes from course page
     $currentgroup = get_current_group($course->id);
 
@@ -81,31 +67,7 @@
 
     foreach ($students as $key => $value) {
         $simplegradebook[$key]['name'] = $value->firstname.' '.substr($value->lastname,0,1).'.';
-        /*
-        $sql = "SELECT gg.id,
-                       gg.finalgrade,
-                       gg.rawgrademax
-                  FROM {$CFG->prefix}grade_items AS gi
-            INNER JOIN {$CFG->prefix}grade_grades AS gg
-                    ON gi.id = gg.itemid
-                 WHERE gi.itemtype = 'course'
-                   AND gi.courseid = {$course->id}
-                   AND gg.userid = $key";
-
-        if ($courseAVG = $DB->get_record_sql($sql)){
-            if (($courseAVG->finalgrade / $courseAVG->rawgrademax)  >= 0.5){
-                $simplegradebook[$key]['courseavg'] = '<td class="green">'.round($courseAVG->finalgrade,0).'</td>';
-            }else{
-                $simplegradebook[$key]['courseavg'] = '<td class="red">'.round($courseAVG->finalgrade,0).'</td>';
-            }
-
-        }else{
-            $simplegradebook[$key]['courseavg'] = '<td class="red"></td>';
-        }
-        */
     }
-
-
 
     // Get a list of all students
     if (!$students) {
@@ -137,6 +99,8 @@
 
   //FIND CURRENT WEEK
     $courseformatoptions = course_get_format($course)->get_format_options();
+    $courseformat = course_get_format($course)->get_format();
+
     $course_numsections = $courseformatoptions['numsections'];
 
     $timenow = time();
@@ -314,7 +278,14 @@
     echo "<th>%</th>";
     foreach ($weekactivitycount as $weeknum => $weekactivity) {
         if ($weekactivity['numofweek']){
-            echo '<th colspan="'.$weekactivity['numofweek'].'">Week-'.$weeknum.'</th>';
+            if (isset($block_settings->sectiontitles) && $block_settings->sectiontitles <>'') {
+                echo '<th colspan="'.$weekactivity['numofweek'].'">'.$block_settings->sectiontitles.'-'.$weeknum.'</th>';
+            } elseif ($courseformat == 'topics') {
+                echo '<th colspan="'.$weekactivity['numofweek'].'">Topic-'.$weeknum.'</th>';
+            } else {
+                echo '<th colspan="'.$weekactivity['numofweek'].'">Week-'.$weeknum.'</th>';
+            }
+
         }
     }
     echo "</tr>";
