@@ -1,4 +1,4 @@
-MoodleFN - Marking Manager (2.7-2.9)
+Moodle - Marking Manager (2.7-2.9)
 ============================================
 
 - Name: Marking Manager
