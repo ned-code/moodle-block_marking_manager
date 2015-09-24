@@ -295,7 +295,7 @@ class mod_assign_grading_form_fn extends moodleform {
             //Moodle version check
             $version = explode('.', $CFG->version);
             $version = reset($version);
-
+            // Moodle 2.9 and greater.
             if ($version >= 2015051100) {
                 $status = new assign_submission_status($assignment->get_instance()->allowsubmissionsfromdate,
                     $assignment->get_instance()->alwaysshowdescription,

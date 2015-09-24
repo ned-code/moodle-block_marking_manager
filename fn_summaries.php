@@ -110,7 +110,7 @@ $PAGE->set_title($title);
 $PAGE->set_heading($heading);
 echo $OUTPUT->header();
 
-echo '<div class="fn-menuwrapper"><a class="btn" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.get_string('close', 'block_fn_marking').'</a></div>';
+echo '<div class="menuwrapper"><a class="btn" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.get_string('close', 'block_fn_marking').'</a></div>';
 echo "<div id='marking-interface'>";
 echo "<h4 class='head-title'>$title</h4>\n";
 
