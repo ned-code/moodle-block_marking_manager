@@ -542,7 +542,7 @@ $participants_select->label = 'Participants';
 $participants_form = '<div class="groupselector">'.$OUTPUT->render($participants_select).'</div>';
 
 
-echo '<div class="menuwrapper">';
+echo '<div class="fn-menuwrapper">';
 echo $activity_type_form . "&nbsp;&nbsp;";
 
 $group_url = new moodle_url(
