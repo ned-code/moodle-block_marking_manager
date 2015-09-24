@@ -114,7 +114,7 @@ class block_fn_marking extends block_list {
         $this->content->text = '';
         $this->content->footer = '';
 
-        if($this->page->course->id == SITEID) {
+        if (($this->page->course->id == SITEID) || ($this->instance->pagetypepattern == 'my-index') ) {
             $PAGE->requires->jquery();
             $PAGE->requires->js('/blocks/fn_marking/js/collapse.js');
             $this->get_frontpage_content();
@@ -136,7 +136,9 @@ class block_fn_marking extends block_list {
         return array(
             'all' => false,
             'site' => true,
-            'course-*' => true);
+            'course-*' => true,
+            'my' => true
+        );
     }
 
     /**
@@ -257,6 +259,7 @@ class block_fn_marking extends block_list {
 
         require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
+        require_once($CFG->dirroot . '/course/lib.php');
 
         $modnames = get_module_types_names();
         $modnamesplural = get_module_types_names(true);

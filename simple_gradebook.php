@@ -262,7 +262,7 @@
     $viewform = '<div class="groupselector">'.$OUTPUT->render($select).'</div>';
 
 
-    echo '<div class="fn-menuwrapper">';
+    echo '<div class="menuwrapper">';
     groups_print_course_menu($course,$CFG->wwwroot.'/blocks/fn_marking/simple_gradebook.php?id='.$course->id.'&unsubmitted='.$unsubmitted);
     echo $viewform;
     echo '</div>';

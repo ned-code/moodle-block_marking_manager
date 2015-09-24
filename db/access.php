@@ -24,7 +24,15 @@
 ///////////////////////////////////////////////////////////////////////////
 
 $capabilities = array(
+    'block/fn_marking:myaddinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'user' => CAP_ALLOW
+        ),
 
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    ),
 
     'block/fn_marking:addinstance' => array(
         'captype' => 'write',
