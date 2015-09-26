@@ -57,7 +57,7 @@ $include_orphaned = get_config('block_fn_marking','include_orphaned');
 
 set_current_group($courseid, $group);
 
-//KEEP SEPARATE CONFIG
+// KEEP SEPARATE CONFIG.
 $keepseparate = 1;//Default value
 if ($block_config = fn_get_block_config ($courseid)) {
     if (isset($block_config->keepseparate)) {
@@ -211,6 +211,11 @@ if (($view == 'less') || ($view == 'more')) {
         $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
     }
 
+    if (!$keepseparate) {
+        if (isset($showopts['saved'])) {
+            unset($showopts['saved']);
+        }
+    }
     $urlshow = new moodle_url('fn_gradebook.php', array('courseid' => $courseid, 'dir' => $dir, 'sort' => $sort, 'view' => $view));
     $showform = $OUTPUT->single_select($urlshow, 'show', $showopts, $selected = $show, '', $formid = 'fnshow');
 }

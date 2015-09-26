@@ -64,7 +64,6 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addElement('select', 'config_keepseparate',
                             get_string('keepseparate', 'block_fn_marking'), $yesno);
         $mform->setDefault('config_keepseparate', 1);
-        //$mform->addHelpButton('config_keepseparate', 'config_keepseparate', 'block_fn_marking');
 
         // control the visibility of the grade link activities
         $mform->addElement('select', 'config_showgradeslink',
