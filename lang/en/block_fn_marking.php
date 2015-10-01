@@ -144,4 +144,4 @@ $string['close'] = 'Close';
 $string['sectiontitles'] = 'Section titles';
 $string['config_sectiontitles'] = 'Section titles';
 $string['config_sectiontitles_help'] = '<p>blank=course default.</p>';
-$string['block_fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
+$string['fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
