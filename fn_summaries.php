@@ -52,19 +52,13 @@ $isteacheredit = has_capability('moodle/course:update', $context);
 $context = context_course::instance($course->id);
 $viewallgroups = has_capability('moodle/site:accessallgroups', $context);
 
-//$groupmode    = groups_get_course_groupmode($course);   // Groups are being used.
 $currentgroup = groups_get_course_group($course, true);
 $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 
-/// Get a list of all students
+// Get a list of all students.
 if (!$students) {
     $students = array();
 }
-
-
-// grab modules
-//get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
-//$sections = get_all_sections($course->id);
 
 $modnames = get_module_types_names(); //print_r($modnames);die;
 $modnamesplural = get_module_types_names(true); //print_r($modnamesplural);die;
@@ -85,7 +79,7 @@ switch ($show) {
 
     case 'notsubmittedany':
         $lastweek = time() - (60 * 60 * 24 * $days);
-        $students_result = fn_get_notsubmittedany($course, $lastweek, false, $sections, $mod_array, $students);
+        $students_result = fn_get_notsubmittedany($course, $lastweek, false, $sections, $students);
         // students array is indexed by studentid; paging needs it to be sequential
         $students_result = array_values($students_result);
         $name = get_string('blocktitle', 'block_fn_marking');
