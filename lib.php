@@ -3061,11 +3061,13 @@ function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='
                 $gradelink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $course->id . '&show=unmarked' . '&navlevel=top&mid=0&activity_type=' . $supported_module;
                 $moduleicon = '<img src="' . $CFG->wwwroot . '/mod/' . $supported_module . '/pix/icon.png" class="icon" alt="">';
 
-                $module_text .= '<dd id="cmid' . $supported_module . '" class="module ' . $class_for_hide . '">' . "\n";
-                $module_text .= '<div class="bullet" onclick="$(\'dd#cmid' . $supported_module . ' > div.toggle\').toggleClass(\'open\');$(\'dd#cmid' . $supported_module . ' > ul\').toggleClass(\'block_fn_marking_hide\');"></div>';
-                $module_text .= '<a href="' . $gradelink . '">' . $moduleicon . '</a>';
-                $module_text .= '<a href="' . $gradelink . '" >' . $modnamesplural[$supported_module] . '</a>' . ' <span class="fn-ungraded-num">(' . $numunmarked . ')</span>';
-                $module_text .= '</dd>';
+                if ($numunmarked) {
+                    $module_text .= '<dd id="cmid' . $supported_module . '" class="module ' . $class_for_hide . '">' . "\n";
+                    $module_text .= '<div class="bullet" onclick="$(\'dd#cmid' . $supported_module . ' > div.toggle\').toggleClass(\'open\');$(\'dd#cmid' . $supported_module . ' > ul\').toggleClass(\'block_fn_marking_hide\');"></div>';
+                    $module_text .= '<a href="' . $gradelink . '">' . $moduleicon . '</a>';
+                    $module_text .= '<a href="' . $gradelink . '" >' . $modnamesplural[$supported_module] . '</a>' . ' <span class="fn-ungraded-num">(' . $numunmarked . ')</span>';
+                    $module_text .= '</dd>';
+                }
             }
 
             $course_text = '<dt id="courseid' . $course->id . '" class="cmod">
