@@ -515,15 +515,15 @@ table.simplegradebook td.empty-week {
 #page-simple_gradebook .groupselector {
 	margin-left: 15px;
 }
-.menuwrapper {
+.fn-menuwrapper {
     text-align: right;
     margin: 0 auto 10px;
     width: 852px;
 }
-div.menuwrapper div.groupselector div.singleselect{
+div.fn-menuwrapper div.groupselector div.singleselect{
 	margin: 1px 0 !important;
 }
-div.menuwrapper div.groupselector div.singleselect .singleselect{
+div.fn-menuwrapper div.groupselector div.singleselect .singleselect{
 	margin: 0 !important;
 }
 div.tablecontainer {
