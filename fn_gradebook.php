@@ -660,7 +660,7 @@ echo '
             <div><span class="markingmanagercontainer-footer-title">Plug-in name: <span>
                 <a target="_blank" class="markingmanagercontainer-footer-link" href="https://moodle.org/plugins/view/block_fn_marking">FN Marking Manager</a> |
                 <a target="_blank" class="markingmanagercontainer-footer-link" href="http://northernlinks.ca/docs/Marking_Manager_Manual.pdf">Download manual for this plug-in</a> |
-                <a target="_blank" class="markingmanagercontainer-footer-link" href="http://moodlefn.com">Report a problem with this plugin</a></div>
+                <a target="_blank" class="markingmanagercontainer-footer-link" href="https://github.com/fernandooliveira/moodle-block_marking_manager/issues">Report a problem with this plugin</a></div>
         <td>
         </tr>
     </table>
