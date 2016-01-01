@@ -145,3 +145,4 @@ $string['sectiontitles'] = 'Section titles';
 $string['config_sectiontitles'] = 'Section titles';
 $string['config_sectiontitles_help'] = '<p>blank=course default.</p>';
 $string['fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
+$string['listcourseszeroungraded'] = 'List courses with zero ungraded activities';

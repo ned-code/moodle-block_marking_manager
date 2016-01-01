@@ -269,6 +269,8 @@ class block_fn_marking extends block_list {
         $isadmin   = is_siteadmin($USER->id);
         $text = '';
 
+        $showzeroungraded = $this->config->listcourseszeroungraded;
+
         // COURSES - ADMIN
         if ($isadmin) {
             $sqlCourse = "SELECT c.*
@@ -287,7 +289,7 @@ class block_fn_marking extends block_list {
 
             if ($courses = $DB->get_records_sql($sqlCourse, array(1, 1), 0, 10)) {
 
-                $text = fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide);
+                $text = fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide, $showzeroungraded);
 
                 if ($total_course_number > 10) {
                     $text .= "<div class='fn-admin-warning' >".get_string('morethan10', 'block_fn_marking')."</div>";

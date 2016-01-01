@@ -3040,7 +3040,7 @@ function fn_get_block_config ($courseid, $blockname='fn_marking') {
     }
 }
 
-function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='') {
+function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='', $showzeroungraded=0) {
     global $CFG, $OUTPUT;
 
     $text = '';
@@ -3070,13 +3070,14 @@ function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='
                 }
             }
 
-            $course_text = '<dt id="courseid' . $course->id . '" class="cmod">
+            if (($total_ungraded == 0) && !$showzeroungraded) {} else {
+                $course_text = '<dt id="courseid' . $course->id . '" class="cmod">
                                  <div class="toggle open" onclick="$(\'dt#courseid' . $course->id . ' > div.toggle\').toggleClass(\'open\');$(\'dt#courseid' . $course->id . ' ~ dd\').toggleClass(\'block_fn_marking_hide\');"></div>
                                  ' . $courseicon . '
-                                 <a href="' . $courselink . '">' . $course->shortname . '</a> ('.$total_ungraded.')
+                                 <a href="' . $courselink . '">' . $course->shortname . '</a> (' . $total_ungraded . ')
                             </dt>';
-
-            $text .= '<div>'.$course_text.$module_text.'</div>';
+                $text .= '<div>'.$course_text.$module_text.'</div>';
+            }
         }
     }
 

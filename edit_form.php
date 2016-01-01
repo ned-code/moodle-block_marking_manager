@@ -125,6 +125,10 @@ class block_fn_marking_edit_form extends block_edit_form {
                             get_string('showtopmessage', 'block_fn_marking'), array('0'=>'No', '1'=>'Yes'));
         $mform->setDefault('config_showtopmessage', 0);
 
+        $mform->addElement('select', 'config_listcourseszeroungraded',
+                            get_string('listcourseszeroungraded', 'block_fn_marking'), array('0'=>'No', '1'=>'Yes'));
+        $mform->setDefault('config_listcourseszeroungraded', 0);
+
         $mform->addElement('editor', 'config_topmessage', get_string('topmessage', 'block_fn_marking'));
         $mform->setType('config_topmessage', PARAM_RAW);
 
