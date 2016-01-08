@@ -269,7 +269,7 @@ class block_fn_marking extends block_list {
         $isadmin   = is_siteadmin($USER->id);
         $text = '';
 
-        $showzeroungraded = $this->config->listcourseszeroungraded;
+        $showzeroungraded = isset($this->config->listcourseszeroungraded) ? $this->config->listcourseszeroungraded : 1;
 
         // COURSES - ADMIN
         if ($isadmin) {
