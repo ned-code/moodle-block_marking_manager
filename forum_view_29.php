@@ -34,72 +34,72 @@
     $search      = optional_param('search', '', PARAM_CLEAN);// search string
 
     $params = array();
-    if ($id) {
-        $params['id'] = $id;
-    } else {
-        $params['f'] = $f;
-    }
-    if ($page) {
-        $params['page'] = $page;
-    }
-    if ($search) {
-        $params['search'] = $search;
-    }
+if ($id) {
+    $params['id'] = $id;
+} else {
+    $params['f'] = $f;
+}
+if ($page) {
+    $params['page'] = $page;
+}
+if ($search) {
+    $params['search'] = $search;
+}
     $PAGE->set_url('/mod/forum/view.php', $params);
 
 
-    if ($id) {
-        if (! $cm = get_coursemodule_from_id('forum', $id)) {
-            print_error('invalidcoursemodule');
-        }
-        if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
-            print_error('coursemisconf');
-        }
-        if (! $forum = $DB->get_record("forum", array("id" => $cm->instance))) {
-            print_error('invalidforumid', 'forum');
-        }
-        if ($forum->type == 'single') {
-            $PAGE->set_pagetype('embedded');
-        }
-        // move require_course_login here to use forced language for course
-        // fix for MDL-6926
-        require_course_login($course, true, $cm);
-        $strforums = get_string("modulenameplural", "forum");
-        $strforum = get_string("modulename", "forum");
-    } else if ($f) {
+if ($id) {
+    if (! $cm = get_coursemodule_from_id('forum', $id)) {
+        print_error('invalidcoursemodule');
+    }
+    if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
+        print_error('coursemisconf');
+    }
+    if (! $forum = $DB->get_record("forum", array("id" => $cm->instance))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if ($forum->type == 'single') {
+        $PAGE->set_pagetype('embedded');
+    }
+    // move require_course_login here to use forced language for course
+    // fix for MDL-6926
+    require_course_login($course, true, $cm);
+    $strforums = get_string("modulenameplural", "forum");
+    $strforum = get_string("modulename", "forum");
+} else if ($f) {
 
-        if (! $forum = $DB->get_record("forum", array("id" => $f))) {
-            print_error('invalidforumid', 'forum');
-        }
-        if (! $course = $DB->get_record("course", array("id" => $forum->course))) {
-            print_error('coursemisconf');
-        }
+    if (! $forum = $DB->get_record("forum", array("id" => $f))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if (! $course = $DB->get_record("course", array("id" => $forum->course))) {
+        print_error('coursemisconf');
+    }
 
-        if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
-            print_error('missingparameter');
-        }
-        // move require_course_login here to use forced language for course
-        // fix for MDL-6926
-        require_course_login($course, true, $cm);
-        $strforums = get_string("modulenameplural", "forum");
-        $strforum = get_string("modulename", "forum");
-    } else {
+    if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
         print_error('missingparameter');
     }
+    // move require_course_login here to use forced language for course
+    // fix for MDL-6926
+    require_course_login($course, true, $cm);
+    $strforums = get_string("modulenameplural", "forum");
+    $strforum = get_string("modulename", "forum");
+} else {
+    print_error('missingparameter');
+}
 
-    if (!$PAGE->button) {
-        $PAGE->set_button(forum_search_form($course, $search));
-    }
+if (!$PAGE->button) {
+    $PAGE->set_button(forum_search_form($course, $search));
+}
 
     $context = context_module::instance($cm->id);
     $PAGE->set_context($context);
 
-    if (!empty($CFG->enablerssfeeds) && !empty($CFG->forum_enablerssfeeds) && $forum->rsstype && $forum->rssarticles) {
-        require_once("$CFG->libdir/rsslib.php");
+if (!empty($CFG->enablerssfeeds) && !empty($CFG->forum_enablerssfeeds) && $forum->rsstype && $forum->rssarticles) {
+    require_once("$CFG->libdir/rsslib.php");
 
-        $rsstitle = format_string($course->shortname, true, array('context' => context_course::instance($course->id))) . ': ' . format_string($forum->name);
-        rss_add_http_header($context, 'mod_forum', $forum, $rsstitle);
-    }
+    $rsstitle = format_string($course->shortname, true, array('context' => context_course::instance($course->id))) . ': ' . format_string($forum->name);
+    rss_add_http_header($context, 'mod_forum', $forum, $rsstitle);
+}
 
 /// Print header.
 
@@ -109,13 +109,13 @@
     $PAGE->set_pagelayout('embedded');
 
 /// Some capability checks.
-    if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
-        notice(get_string("activityiscurrentlyhidden"));
-    }
+if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
+    notice(get_string("activityiscurrentlyhidden"));
+}
 
-    if (!has_capability('mod/forum:viewdiscussion', $context)) {
-        notice(get_string('noviewdiscussionspermission', 'forum'));
-    }
+if (!has_capability('mod/forum:viewdiscussion', $context)) {
+    notice(get_string('noviewdiscussionspermission', 'forum'));
+}
 
     // Mark viewed and trigger the course_module_viewed event.
     forum_view($forum, $course, $cm, $context);
@@ -123,9 +123,9 @@
     echo $OUTPUT->header();
 
     echo $OUTPUT->heading(format_string($forum->name), 2);
-    if (!empty($forum->intro) && $forum->type != 'single' && $forum->type != 'teacher') {
-        echo $OUTPUT->box(format_module_intro('forum', $forum, $cm->id), 'generalbox', 'intro');
-    }
+if (!empty($forum->intro) && $forum->type != 'single' && $forum->type != 'teacher') {
+    echo $OUTPUT->box(format_module_intro('forum', $forum, $cm->id), 'generalbox', 'intro');
+}
 
 /// find out current groups mode
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/forum/view.php?id=' . $cm->id);
@@ -137,95 +137,95 @@
 
     // If it's a simple single discussion forum, we need to print the display
     // mode control.
-    if ($forum->type == 'single') {
-        $discussion = NULL;
-        $discussions = $DB->get_records('forum_discussions', array('forum'=>$forum->id), 'timemodified ASC');
-        if (!empty($discussions)) {
-            $discussion = array_pop($discussions);
+if ($forum->type == 'single') {
+    $discussion = null;
+    $discussions = $DB->get_records('forum_discussions', array('forum' => $forum->id), 'timemodified ASC');
+    if (!empty($discussions)) {
+        $discussion = array_pop($discussions);
+    }
+    if ($discussion) {
+        if ($mode) {
+            set_user_preference("forum_displaymode", $mode);
         }
-        if ($discussion) {
-            if ($mode) {
-                set_user_preference("forum_displaymode", $mode);
-            }
-            $displaymode = get_user_preferences("forum_displaymode", $CFG->forum_displaymode);
-            forum_print_mode_form($forum->id, $displaymode, $forum->type);
+        $displaymode = get_user_preferences("forum_displaymode", $CFG->forum_displaymode);
+        forum_print_mode_form($forum->id, $displaymode, $forum->type);
+    }
+}
+
+if (!empty($forum->blockafter) && !empty($forum->blockperiod)) {
+    $a = new stdClass();
+    $a->blockafter = $forum->blockafter;
+    $a->blockperiod = get_string('secondstotime'.$forum->blockperiod);
+    echo $OUTPUT->notification(get_string('thisforumisthrottled', 'forum', $a));
+}
+
+if ($forum->type == 'qanda' && !has_capability('moodle/course:manageactivities', $context)) {
+    echo $OUTPUT->notification(get_string('qandanotify','forum'));
+}
+
+switch ($forum->type) {
+    case 'single':
+        if (!empty($discussions) && count($discussions) > 1) {
+            echo $OUTPUT->notification(get_string('warnformorepost', 'forum'));
         }
-    }
+        if (! $post = forum_get_post_full($discussion->firstpost)) {
+            print_error('cannotfindfirstpost', 'forum');
+        }
+        if ($mode) {
+            set_user_preference("forum_displaymode", $mode);
+        }
 
-    if (!empty($forum->blockafter) && !empty($forum->blockperiod)) {
-        $a = new stdClass();
-        $a->blockafter = $forum->blockafter;
-        $a->blockperiod = get_string('secondstotime'.$forum->blockperiod);
-        echo $OUTPUT->notification(get_string('thisforumisthrottled', 'forum', $a));
-    }
+        $canreply    = forum_user_can_post($forum, $discussion, $USER, $cm, $course, $context);
+        $canrate     = has_capability('mod/forum:rate', $context);
+        $displaymode = get_user_preferences("forum_displaymode", $CFG->forum_displaymode);
 
-    if ($forum->type == 'qanda' && !has_capability('moodle/course:manageactivities', $context)) {
-        echo $OUTPUT->notification(get_string('qandanotify','forum'));
-    }
+        echo '&nbsp;'; // this should fix the floating in FF
+        forum_print_discussion($course, $cm, $forum, $discussion, $post, $displaymode, $canreply, $canrate);
+        break;
 
-    switch ($forum->type) {
-        case 'single':
-            if (!empty($discussions) && count($discussions) > 1) {
-                echo $OUTPUT->notification(get_string('warnformorepost', 'forum'));
-            }
-            if (! $post = forum_get_post_full($discussion->firstpost)) {
-                print_error('cannotfindfirstpost', 'forum');
-            }
-            if ($mode) {
-                set_user_preference("forum_displaymode", $mode);
-            }
+    case 'eachuser':
+        echo '<p class="mdl-align">';
+        if (forum_user_can_post_discussion($forum, null, -1, $cm)) {
+            print_string("allowsdiscussions", "forum");
+        } else {
+            echo '&nbsp;';
+        }
+        echo '</p>';
+        if (!empty($showall)) {
+            forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
+        } else {
+            forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
+        }
+        break;
 
-            $canreply    = forum_user_can_post($forum, $discussion, $USER, $cm, $course, $context);
-            $canrate     = has_capability('mod/forum:rate', $context);
-            $displaymode = get_user_preferences("forum_displaymode", $CFG->forum_displaymode);
+    case 'teacher':
+        if (!empty($showall)) {
+            forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
+        } else {
+            forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
+        }
+        break;
 
-            echo '&nbsp;'; // this should fix the floating in FF
-            forum_print_discussion($course, $cm, $forum, $discussion, $post, $displaymode, $canreply, $canrate);
-            break;
+    case 'blog':
+        echo '<br />';
+        if (!empty($showall)) {
+            forum_print_latest_discussions($course, $forum, 0, 'plain', '', -1, -1, -1, 0, $cm);
+        } else {
+            forum_print_latest_discussions($course, $forum, -1, 'plain', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
+        }
+        break;
 
-        case 'eachuser':
-            echo '<p class="mdl-align">';
-            if (forum_user_can_post_discussion($forum, null, -1, $cm)) {
-                print_string("allowsdiscussions", "forum");
-            } else {
-                echo '&nbsp;';
-            }
-            echo '</p>';
-            if (!empty($showall)) {
-                forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
-            } else {
-                forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
-            }
-            break;
-
-        case 'teacher':
-            if (!empty($showall)) {
-                forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
-            } else {
-                forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
-            }
-            break;
-
-        case 'blog':
-            echo '<br />';
-            if (!empty($showall)) {
-                forum_print_latest_discussions($course, $forum, 0, 'plain', '', -1, -1, -1, 0, $cm);
-            } else {
-                forum_print_latest_discussions($course, $forum, -1, 'plain', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
-            }
-            break;
-
-        default:
-            echo '<br />';
-            if (!empty($showall)) {
-                forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
-            } else {
-                forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
-            }
+    default:
+        echo '<br />';
+        if (!empty($showall)) {
+            forum_print_latest_discussions($course, $forum, 0, 'header', '', -1, -1, -1, 0, $cm);
+        } else {
+            forum_print_latest_discussions($course, $forum, -1, 'header', '', -1, -1, $page, $CFG->forum_manydiscussions, $cm);
+        }
 
 
-            break;
-    }
+        break;
+}
 
     // Add the subscription toggle JS.
     $PAGE->requires->yui_module('moodle-mod_forum-subscriptiontoggle', 'Y.M.mod_forum.subscriptiontoggle.init');

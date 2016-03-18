@@ -34,71 +34,71 @@
     $search      = optional_param('search', '', PARAM_CLEAN);// search string
 
     $params = array();
-    if ($id) {
-        $params['id'] = $id;
-    } else {
-        $params['f'] = $f;
-    }
-    if ($page) {
-        $params['page'] = $page;
-    }
-    if ($search) {
-        $params['search'] = $search;
-    }
+if ($id) {
+    $params['id'] = $id;
+} else {
+    $params['f'] = $f;
+}
+if ($page) {
+    $params['page'] = $page;
+}
+if ($search) {
+    $params['search'] = $search;
+}
     $PAGE->set_url('/mod/forum/view.php', $params);
 
-    if ($id) {
-        if (! $cm = get_coursemodule_from_id('forum', $id)) {
-            print_error('invalidcoursemodule');
-        }
-        if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
-            print_error('coursemisconf');
-        }
-        if (! $forum = $DB->get_record("forum", array("id" => $cm->instance))) {
-            print_error('invalidforumid', 'forum');
-        }
-        if ($forum->type == 'single') {
-            $PAGE->set_pagetype('mod-forum-discuss');
-        }
-        // move require_course_login here to use forced language for course
-        // fix for MDL-6926
-        require_course_login($course, true, $cm);
-        $strforums = get_string("modulenameplural", "forum");
-        $strforum = get_string("modulename", "forum");
-    } else if ($f) {
+if ($id) {
+    if (! $cm = get_coursemodule_from_id('forum', $id)) {
+        print_error('invalidcoursemodule');
+    }
+    if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
+        print_error('coursemisconf');
+    }
+    if (! $forum = $DB->get_record("forum", array("id" => $cm->instance))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if ($forum->type == 'single') {
+        $PAGE->set_pagetype('mod-forum-discuss');
+    }
+    // move require_course_login here to use forced language for course
+    // fix for MDL-6926
+    require_course_login($course, true, $cm);
+    $strforums = get_string("modulenameplural", "forum");
+    $strforum = get_string("modulename", "forum");
+} else if ($f) {
 
-        if (! $forum = $DB->get_record("forum", array("id" => $f))) {
-            print_error('invalidforumid', 'forum');
-        }
-        if (! $course = $DB->get_record("course", array("id" => $forum->course))) {
-            print_error('coursemisconf');
-        }
+    if (! $forum = $DB->get_record("forum", array("id" => $f))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if (! $course = $DB->get_record("course", array("id" => $forum->course))) {
+        print_error('coursemisconf');
+    }
 
-        if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
-            print_error('missingparameter');
-        }
-        // move require_course_login here to use forced language for course
-        // fix for MDL-6926
-        require_course_login($course, true, $cm);
-        $strforums = get_string("modulenameplural", "forum");
-        $strforum = get_string("modulename", "forum");
-    } else {
+    if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
         print_error('missingparameter');
     }
+    // move require_course_login here to use forced language for course
+    // fix for MDL-6926
+    require_course_login($course, true, $cm);
+    $strforums = get_string("modulenameplural", "forum");
+    $strforum = get_string("modulename", "forum");
+} else {
+    print_error('missingparameter');
+}
 
-    if (!$PAGE->button) {
-        $PAGE->set_button(forum_search_form($course, $search));
-    }
+if (!$PAGE->button) {
+    $PAGE->set_button(forum_search_form($course, $search));
+}
 
     $context = context_module::instance($cm->id);
     $PAGE->set_context($context);
 
-    if (!empty($CFG->enablerssfeeds) && !empty($CFG->forum_enablerssfeeds) && $forum->rsstype && $forum->rssarticles) {
-        require_once("$CFG->libdir/rsslib.php");
+if (!empty($CFG->enablerssfeeds) && !empty($CFG->forum_enablerssfeeds) && $forum->rsstype && $forum->rssarticles) {
+    require_once("$CFG->libdir/rsslib.php");
 
-        $rsstitle = format_string($course->shortname, true, array('context' => context_course::instance($course->id))) . ': ' . format_string($forum->name);
-        rss_add_http_header($context, 'mod_forum', $forum, $rsstitle);
-    }
+    $rsstitle = format_string($course->shortname, true, array('context' => context_course::instance($course->id))) . ': ' . format_string($forum->name);
+    rss_add_http_header($context, 'mod_forum', $forum, $rsstitle);
+}
 
     // Mark viewed if required
     $completion = new completion_info($course);
@@ -113,18 +113,18 @@
     echo $OUTPUT->header();
 
 /// Some capability checks.
-    if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
-        notice(get_string("activityiscurrentlyhidden"));
-    }
+if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
+    notice(get_string("activityiscurrentlyhidden"));
+}
 
-    if (!has_capability('mod/forum:viewdiscussion', $context)) {
-        notice(get_string('noviewdiscussionspermission', 'forum'));
-    }
+if (!has_capability('mod/forum:viewdiscussion', $context)) {
+    notice(get_string('noviewdiscussionspermission', 'forum'));
+}
 
     echo $OUTPUT->heading(format_string($forum->name), 2);
-    if (!empty($forum->intro) && $forum->type != 'single' && $forum->type != 'teacher') {
-        echo $OUTPUT->box(format_module_intro('forum', $forum, $cm->id), 'generalbox', 'intro');
-    }
+if (!empty($forum->intro) && $forum->type != 'single' && $forum->type != 'teacher') {
+    echo $OUTPUT->box(format_module_intro('forum', $forum, $cm->id), 'generalbox', 'intro');
+}
 
 /// find out current groups mode
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/forum/view.php?id=' . $cm->id);
@@ -142,13 +142,13 @@
     $SESSION->fromdiscussion = qualified_me();   // Return here if we post or set subscription etc
 
 
-/// Print settings and things across the top
+    /// Print settings and things across the top
 
     // If it's a simple single discussion forum, we need to print the display
     // mode control.
     if ($forum->type == 'single') {
-        $discussion = NULL;
-        $discussions = $DB->get_records('forum_discussions', array('forum'=>$forum->id), 'timemodified ASC');
+        $discussion = null;
+        $discussions = $DB->get_records('forum_discussions', array('forum' => $forum->id), 'timemodified ASC');
         if (!empty($discussions)) {
             $discussion = array_pop($discussions);
         }

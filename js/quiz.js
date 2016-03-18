@@ -5,11 +5,11 @@
 $( document ).ready(function() {
     $(function(){
         $("#qall-participants-chk").change(function(){
-            var item=$(this);
+            var item = $(this);
             if(item.is(":checked")) {
-                window.location.href= item.data("target")
+                window.location.href = item.data("target")
             } else {
-                window.location.href= item.data("target-off")
+                window.location.href = item.data("target-off")
             }
         });
         $('.markingmanagercontainer-footer-link').popupWindow({

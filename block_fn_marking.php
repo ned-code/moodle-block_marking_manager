@@ -1,6 +1,6 @@
 <?php
 
-//$Id: block_fn_marking.php,v 1.4 2013/01/12 14:22:06 mchurch Exp $
+// $Id: block_fn_marking.php,v 1.4 2013/01/12 14:22:06 mchurch Exp $
 
 /**
  * Simple  class for block FN_MArking
@@ -102,7 +102,7 @@ class block_fn_marking extends block_list {
     public function get_content() {
 
         global $PAGE;
-        
+
         /// Need the bigger course stdClass.
         if ($this->content !== null) {
             return $this->content;
@@ -162,9 +162,9 @@ class block_fn_marking extends block_list {
             return $this->content;
         }
 
-        $sections = $DB->get_records('course_sections', array('course'=>$this->page->course->id), 'section ASC', 'section, sequence');
+        $sections = $DB->get_records('course_sections', array('course' => $this->page->course->id), 'section ASC', 'section, sequence');
 
-        ///Course Teacher Menu:
+        // Course Teacher Menu:
         if (($this->page->course->id != SITEID)) {
 
             if (isset($this->config->showunmarked) && $this->config->showunmarked) {
@@ -196,7 +196,7 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
 
-                $numsaved= count_unmarked_activities($this->page->course, 'saved');
+                $numsaved = count_unmarked_activities($this->page->course, 'saved');
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' . $this->page->course->id . '&show=saved' .
                         '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_fn_marking').'</a>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/saved.gif"
@@ -228,16 +228,16 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->shownotloggedinuser) && $this->config->shownotloggedinuser) {
                 $numnotloggedin = fn_count_notloggedin($this->page->course, $days);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
+                $this->content->items[] = '<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
                                         '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' '.$strstudents.' </a>'.get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
             }
 
             if ($this->config->showstudentnotsubmittedassignment) {
                 $now = time();
-                $lastweek = $now - (60*60*24*$days);
-                $numnotsubmittedany = fn_get_notsubmittedany($this->page->course, $lastweek, true, $sections, NULL);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
+                $lastweek = $now - (60 * 60 * 24 * $days);
+                $numnotsubmittedany = fn_get_notsubmittedany($this->page->course, $lastweek, true, $sections, null);
+                $this->content->items[] = '<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
                                         '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' '.$strstudents.' </a>'.get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
             }
@@ -245,7 +245,7 @@ class block_fn_marking extends block_list {
             if ($this->config->showstudentmarkslessthanfiftypercent) {
 
                 $numfailing = fn_count_failing($this->page->course,$percent);
-                $this->content->items[]='<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
+                $this->content->items[] = '<span class="fn_summaries"><a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
                                         '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' '.$strstudents.'</a>'.get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
             }
@@ -312,7 +312,7 @@ class block_fn_marking extends block_list {
             if ($teacher_courses = $DB->get_records_sql($sql, array($USER->id))) {
                 $courses = array();
                 foreach ($teacher_courses as $teacher_course) {
-                    $course = $DB->get_record('course', array('id'=>$teacher_course->courseid));
+                    $course = $DB->get_record('course', array('id' => $teacher_course->courseid));
                     $courses[] = $course;
                 }
                 $text = fn_build_ungraded_tree ($courses, $supported_modules);
@@ -321,7 +321,6 @@ class block_fn_marking extends block_list {
                 $this->content->icons[] = '';
             }
         }
-
 
         return $this->content;
     }

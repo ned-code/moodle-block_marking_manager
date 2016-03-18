@@ -8,7 +8,7 @@
  * $user to look in to
  *  how previous to look for
  */
-function assignment_get_notsubmittedany($courseid, $id="0", $users = NULL, $timestart) {
+function assignment_get_notsubmittedany($courseid, $id="0", $users = null, $timestart) {
     global $CFG, $DB;
     // split out users array
     if ($users) {
@@ -31,7 +31,7 @@ function assignment_get_notsubmittedany($courseid, $id="0", $users = NULL, $time
  * $user to look in to
  *  how previous to look for
  */
-function assign_get_notsubmittedany($courseid, $id="0", $users = NULL, $timestart) {
+function assign_get_notsubmittedany($courseid, $id="0", $users = null, $timestart) {
     global $CFG, $DB;
     // split out users array
     if ($users) {
@@ -55,7 +55,7 @@ function assign_get_notsubmittedany($courseid, $id="0", $users = NULL, $timestar
  * $user to look into
  *  how previous to look for
  */
-function forum_get_notsubmittedany($courseid, $forumid="0", $users = NULL, $timestart) {
+function forum_get_notsubmittedany($courseid, $forumid="0", $users = null, $timestart) {
     global $CFG, $DB;
     // split out users array
     if ($users) {

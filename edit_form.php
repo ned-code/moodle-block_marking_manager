@@ -27,14 +27,14 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addElement('header', 'configheader',
                             get_string('blocksettings', 'block_fn_marking'));
 
-        //Config title for the block.
+        // Config title for the block.
         $mform->addElement('text', 'config_title',
                             get_string('setblocktitle', 'block_fn_marking'));
         $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_title', get_string('plugintitle', 'block_fn_marking'));
         $mform->addHelpButton('config_title', 'config_title', 'block_fn_marking');
 
-        //Section Titles
+        // Section Titles
         $mform->addElement('text', 'config_sectiontitles', get_string('sectiontitles', 'block_fn_marking'));
         $mform->setType('config_sectiontitles', PARAM_TEXT);
         $mform->addHelpButton('config_sectiontitles', 'config_sectiontitles', 'block_fn_marking');
@@ -103,7 +103,7 @@ class block_fn_marking_edit_form extends block_edit_form {
         for ($i = 1; $i <= 100; $i++) {
             $numberofdays[$i] = $i;
         }
-        //set the number of days
+        // set the number of days
         $mform->addElement('select', 'config_days',
                             get_string('setnumberofdays', 'block_fn_marking'), $numberofdays);
         $mform->setDefault('config_days', $numberofdays[7]);
@@ -114,19 +114,19 @@ class block_fn_marking_edit_form extends block_edit_form {
             $numberofpercent[$i] = $i;
         }
 
-        //set the percent of marks
+        // set the percent of marks
         $mform->addElement('select', 'config_percent',
                             get_string('setpercentmarks', 'block_fn_marking'), $numberofpercent);
         $mform->setDefault('config_percent', $numberofpercent[50]);
         $mform->addHelpButton('config_percent', 'config_percent', 'block_fn_marking');
 
-          //set the number of days
+          // set the number of days
         $mform->addElement('select', 'config_showtopmessage',
-                            get_string('showtopmessage', 'block_fn_marking'), array('0'=>'No', '1'=>'Yes'));
+                            get_string('showtopmessage', 'block_fn_marking'), array('0' => 'No', '1' => 'Yes'));
         $mform->setDefault('config_showtopmessage', 0);
 
         $mform->addElement('select', 'config_listcourseszeroungraded',
-                            get_string('listcourseszeroungraded', 'block_fn_marking'), array('0'=>'No', '1'=>'Yes'));
+                            get_string('listcourseszeroungraded', 'block_fn_marking'), array('0' => 'No', '1' => 'Yes'));
         $mform->setDefault('config_listcourseszeroungraded', 0);
 
         $mform->addElement('editor', 'config_topmessage', get_string('topmessage', 'block_fn_marking'));

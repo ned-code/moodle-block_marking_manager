@@ -25,25 +25,25 @@ class mod_assignment_grading_form_fn extends moodleform {
         $formattr['action'] = "fn_gradebook.php?id=$id&mid=$mid";
 
         $mform->setAttributes($formattr);
-        ///  start the table
+        // start the table
         $mform->addElement('html', '<table border="0" cellpadding="0" cellspacing="0"	 width="100%" class="saprate-table">');
 
-        //print the marking header in first tr
+        // print the marking header in first tr
         $mform->addElement('html', '<tr>');
         $this->add_marking_header();
         $mform->addElement('html', '</tr>');
 
-        //print the marking submission in the second tr
+        // print the marking submission in the second tr
         $mform->addElement('html', '<tr>');
         $this->add_marking_submissions();
         $mform->addElement('html', '</tr>');
 
-        //print the marking feedback in the second tr
+        // print the marking feedback in the second tr
         $mform->addElement('html', '<tr>');
         $this->add_marking_feedback();
         $mform->addElement('html', '</tr>');
 
-        ///close the table
+        // close the table
         $mform->addElement('html', '</table>');
 
         $mform->addElement('hidden', 'id', $this->_customdata->cm->id);
@@ -55,15 +55,15 @@ class mod_assignment_grading_form_fn extends moodleform {
     }
 
     /**
-     * print the marking header section     
-     * 
+     * print the marking header section
+     *
      */
     public function add_marking_header() {
         global $DB, $OUTPUT;
 
         $mform = & $this->_form;
         $mform->addElement('html', '<td width="40" valign="top" align="center" rowspan="2" class="marking-head marking_rightBRD">' . "\n");
-        
+
         $mform->addElement('html', $OUTPUT->user_picture($this->_customdata->user));
         $mform->addElement('html', '</td>');
 
@@ -84,11 +84,11 @@ class mod_assignment_grading_form_fn extends moodleform {
     }
 
     /**
-     * add the marking submission section     
-     * 
+     * add the marking submission section
+     *
      */
     public function add_marking_submissions() {
-        global $CFG, $mid, $OUTPUT, $DB;       
+        global $CFG, $mid, $OUTPUT, $DB;
         $mform = & $this->_form;
         $mform->addElement('html', '<td class="marking-headB">');
         if ($this->_customdata->submission->timemodified) {
@@ -107,7 +107,7 @@ class mod_assignment_grading_form_fn extends moodleform {
                 if ($submission->timemodified <= 0) {
                     $mform->addElement('static', 'notsubmittedyet', '', print_string('notsubmittedyet', 'assignment'));
                 } else if ($submission->timemarked <= 0) {
-                    //saved section
+                    // saved section
                     $mform->addElement('html', '<tr><td valign="top" align="left">');
                     if (($subcount > 1) && ($currcount == $subcount)) {
                         $mform->addElement('hidden', 'sub_id', $submission->id);
@@ -120,13 +120,13 @@ class mod_assignment_grading_form_fn extends moodleform {
                     $this->add_submission_content();
                     $mform->addElement('html', '</td></tr>');
                 } else {
-                    //marked section
+                    // marked section
                     $mform->addElement('html', '<tr>');
                     $mform->addElement('html', '<td>');
                     if (($subcount > 1) && ($currcount == $subcount)) {
                         $mform->addElement('hidden', 'sub_id', $submission->id);
                     }
-                    //print student response files                    
+                    // print student response files
                     $this->add_submission_content();
                     $mform->addElement('html', '</td></tr>');
                 }
@@ -140,8 +140,8 @@ class mod_assignment_grading_form_fn extends moodleform {
     }
 
     /**
-     * print the marking submission section     
-     * 
+     * print the marking submission section
+     *
      */
     public function add_marking_feedback() {
         global $CFG, $DB, $OUTPUT, $USER;
@@ -168,13 +168,13 @@ class mod_assignment_grading_form_fn extends moodleform {
             $style = '';
         }
         $mform->addElement('html', '<table cellpadding="0" cellspacing="0" width="97%" border="0" class="grade-filter"><tr><td>');
-        //add grade section
+        // add grade section
         $this->add_grades_section(); // still some worked required
         $mform->addElement('html', '</td><td align="right" valign="middle">');
         $mform->addElement('html', '</td></tr></table>');
         $mform->addElement('html', '<table width="96%" cellpadding="0" cellspacing="0" border="0" class="teacher-comments"><tr>');
-        $mform->addElement('html', '<td valign="top" width="30%" align="left" style="font-size:15px; font-weight:bold; color:#fff; padding-bottom:0;">');        
-        
+        $mform->addElement('html', '<td valign="top" width="30%" align="left" style="font-size:15px; font-weight:bold; color:#fff; padding-bottom:0;">');
+
         $mform->addElement('html', '<strong>Teacher\'s Comment:</strong>');
         $mform->addElement('html', '</td><td align="right" width="66%" style="font-size:11px; font-weight:bold; color:#fff; padding-bottom:0;">');
         $timemarked = empty($this->_customdata->submission->timemarked) ? userdate(time()) : userdate($this->_customdata->submission->timemarked);
@@ -186,19 +186,18 @@ class mod_assignment_grading_form_fn extends moodleform {
 
         // add response file section
         if ($this->_customdata->gradingdisabled) {
-            //do nothing
+            // do nothing
         } else {
-            //add responce file section
+            // add responce file section
             $mform->addElement('html', '<table cellpadding="0" cellspacing="0" width="97%" border="0" class=""><tr><td>');
-            $this->add_response_file_section(); // still some worked required//       
+            $this->add_response_file_section(); // still some worked required//
             $mform->addElement('html', '</td></tr></table>');
 
-            //add mail notification section
+            // add mail notification section
             $mform->addElement('html', '<table cellpadding="0" cellspacing="0" width="97%" border="0" class=""><tr><td>');
-            $this->add_mail_notification_section(); // still some worked required//       
+            $this->add_mail_notification_section(); // still some worked required//
             $mform->addElement('html', '</td></tr></table>');
         }
-
 
         $mform->addElement('hidden', 'sesskey', sesskey());
         $mform->setType('sesskey', PARAM_ALPHANUM);
@@ -206,7 +205,7 @@ class mod_assignment_grading_form_fn extends moodleform {
         $mform->addElement('hidden', 'offset', '1');
         $mform->setType('offset', PARAM_INT);
         $mform->addElement('html', '<div align="right" style="font:25%; padding-right:10px;">');
-        //submit button without cancel button
+        // submit button without cancel button
         $this->add_action_buttons(false, $svalue);
         // $this->add_action_buttons();
         $mform->addElement('html', '</font></div>');
@@ -248,7 +247,7 @@ class mod_assignment_grading_form_fn extends moodleform {
             // use simple direct grading
             $grademenu['-1'] = get_string('nograde');
             $mform->addElement('select', 'xgrade', get_string('grade') . ':', $grademenu, $attributes);
-            $mform->setDefault('xgrade', $this->_customdata->submission->grade); //@fixme some bug when element called 'grade' makes it break
+            $mform->setDefault('xgrade', $this->_customdata->submission->grade); // @fixme some bug when element called 'grade' makes it break
             $mform->setType('xgrade', PARAM_INT);
         }
 
@@ -287,15 +286,15 @@ class mod_assignment_grading_form_fn extends moodleform {
     function add_editor_section() {
         global $OUTPUT;
         $mform = & $this->_form;
-        //$mform->addElement('header', 'Feed Back', get_string('feedback', 'grades'));      
+        // $mform->addElement('header', 'Feed Back', get_string('feedback', 'grades'));
 
         if ($this->_customdata->gradingdisabled) {
             $mform->addElement('static', 'disabledfeedback', $this->_customdata->grading_info->items[0]->grades[$this->_customdata->userid]->str_feedback);
         } else {
-            // visible elements            
+            // visible elements
             $mform->addElement('editor', 'submissioncomment_editor', '', array('id' => 'submissioncomment_' . $this->_customdata->submission->id . '_editor'), $this->get_editor_options());
-            //$mform->addElement('textarea', 'submissioncomment_editor','','wrap="virtual" rows="20" cols="50"');
-            $mform->setType('submissioncomment_editor', PARAM_RAW); // to be cleaned before display            
+            // $mform->addElement('textarea', 'submissioncomment_editor','','wrap="virtual" rows="20" cols="50"');
+            $mform->setType('submissioncomment_editor', PARAM_RAW); // to be cleaned before display
             $mform->setDefault('submissioncomment_editor', $this->_customdata->submission->submissioncomment);
         }
     }
@@ -307,7 +306,7 @@ class mod_assignment_grading_form_fn extends moodleform {
     function add_response_file_section() {
         global $OUTPUT;
         $mform = & $this->_form;
-        // visible elements            
+        // visible elements
         switch ($this->_customdata->assignment->assignmenttype) {
             case 'upload' :
             case 'uploadsingle' :
@@ -343,7 +342,7 @@ class mod_assignment_grading_form_fn extends moodleform {
         $editoroptions['component'] = 'mod_assignment';
         $editoroptions['filearea'] = 'feedback';
         $editoroptions['noclean'] = false;
-        $editoroptions['maxfiles'] = 0; //TODO: no files for now, we need to first implement assignment_feedback area, integration with gradebook, files support in quickgrading, etc. (skodak)
+        $editoroptions['maxfiles'] = 0; // TODO: no files for now, we need to first implement assignment_feedback area, integration with gradebook, files support in quickgrading, etc. (skodak)
         $editoroptions['maxbytes'] = $this->_customdata->maxbytes;
         $editoroptions['context'] = $this->_customdata->context;
         return $editoroptions;
@@ -385,7 +384,7 @@ class mod_assignment_grading_form_fn extends moodleform {
         if (!empty($this->_customdata->submission->id)) {
             $itemid = $this->_customdata->submission->id;
         } else {
-            $itemid = null; //TODO: this is wrong, itemid MUST be known when saving files!! (skodak)
+            $itemid = null; // TODO: this is wrong, itemid MUST be known when saving files!! (skodak)
         }
 
         if ($data) {

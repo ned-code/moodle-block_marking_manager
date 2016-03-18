@@ -33,11 +33,11 @@ $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
 $timenow = optional_param('timenow', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-//  Paging options:
+// Paging options:
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 20, PARAM_INT);
 
-//  Filtering Options
+// Filtering Options
 $menushow = optional_param('menushow', 'unmarked', PARAM_ALPHA);
 $sort = optional_param('sort', 'date', PARAM_ALPHANUM);
 $show = optional_param('show', 'unmarked', PARAM_ALPHA);
@@ -58,7 +58,7 @@ $include_orphaned = get_config('block_fn_marking','include_orphaned');
 set_current_group($courseid, $group);
 
 // KEEP SEPARATE CONFIG.
-$keepseparate = 1;//Default value
+$keepseparate = 1;// Default value
 if ($block_config = fn_get_block_config ($courseid)) {
     if (isset($block_config->keepseparate)) {
         $keepseparate = $block_config->keepseparate;
@@ -72,7 +72,7 @@ $PAGE->set_url('/fn_gradebook.php', array(
     'show' => $show,
     'dir' => $dir));
 
-$pageparams = array('courseid'=>$courseid,
+$pageparams = array('courseid' => $courseid,
                     'userid' => $userid,
                     'mid' => $mid,
                     'dir' => $dir,
@@ -95,7 +95,7 @@ if (!$course = $DB->get_record("course", array("id" => $courseid))) {
 
 require_login($course);
 
-//grab course context
+// grab course context
 $context = context_course::instance($course->id);
 
 $cobject = new stdClass();
@@ -115,7 +115,7 @@ $mod_grades_array = array(
     'forum' => 'forum.submissions.fn.php',
 );
 
-//Filter modules
+// Filter modules
 if ($activity_type) {
     foreach ($mod_grades_array as $key => $value) {
         if ($activity_type <> $key) {
@@ -176,8 +176,8 @@ $urlview = new moodle_url(
         'unsubmitted' => $unsubmitted,
         'activity_type' => $activity_type,
         'participants' => $participants,
-        //'view' => $view,
-        'group'=>$group
+        // 'view' => $view,
+        'group' => $group
     )
 );
 $select = new single_select($urlview, 'view', $viewopts, $selected = $view, '');
@@ -196,7 +196,7 @@ if (($view == 'less') || ($view == 'more')) {
         } else if ($module_name == 'assignment') {
             $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
         } else if ($module_name == 'assign') {
-            $assign = $DB->get_record('assign', array('id'=>$cm_module->instance));
+            $assign = $DB->get_record('assign', array('id' => $cm_module->instance));
             if ($assign->submissiondrafts) {
                 $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
             } else {
@@ -234,13 +234,13 @@ if ($mid) {
     $modcontext = context_module::instance($course_module->id);
     $groupmode = groups_get_activity_groupmode($course_module);
     $currentgroup = groups_get_activity_group($course_module, true);
-    //$users = get_enrolled_users($modcontext, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+    // $users = get_enrolled_users($modcontext, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 } else {
     // if comes from course page
     $currentgroup = groups_get_course_group($course, true);
 }
 
-//get current group members
+// get current group members
 $group_members = groups_get_members_by_role($group, $courseid);
 
 // Get a list of all students
@@ -261,19 +261,19 @@ $totungraded = 0;
 /// Collect modules data
 $modnames = get_module_types_names();
 $modnamesplural = get_module_types_names(true);
-//$modinfo = get_fast_modinfo($course->id);
-//$mods = $modinfo->get_cms();
-//$modnamesused = $modinfo->get_used_module_names();
+// $modinfo = get_fast_modinfo($course->id);
+// $mods = $modinfo->get_cms();
+// $modnamesused = $modinfo->get_used_module_names();
 
-//$mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
+// $mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
 
-//$cobject->mods = &$mods;
-//$cobject->modnames = &$modnames;
-//$cobject->modnamesplural = &$modnamesplural;
-//$cobject->modnamesused = &$modnamesused;
-//$cobject->sections = &$sections;
+// $cobject->mods = &$mods;
+// $cobject->modnames = &$modnames;
+// $cobject->modnamesplural = &$modnamesplural;
+// $cobject->modnamesused = &$modnamesused;
+// $cobject->sections = &$sections;
 
-//FIND CURRENT WEEK
+// FIND CURRENT WEEK
 $courseformatoptions = course_get_format($course)->get_format_options();
 $courseformat = course_get_format($course)->get_format();
 $course_numsections = $courseformatoptions['numsections'];
@@ -286,7 +286,7 @@ if ($courseformat == 'weeks') {
     $weekofseconds = 604800;
     $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
 
-    //  Calculate the current week based on today's date and the starting date of the course.
+    // Calculate the current week based on today's date and the starting date of the course.
     $currentweek = ($timenow > $course->startdate) ? (int)((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
     $currentweek = min($currentweek, $course_numsections);
 
@@ -305,12 +305,12 @@ $selected_section = array();
 for ($i = 0; $i <= $upto; $i++) {
     $selected_section[] = $i;
 }
-if ($include_orphaned && (sizeof($sections) > ($course_numsections+1))) {
-    for ($i = ($course_numsections+1); $i < sizeof($sections); $i++) {
+if ($include_orphaned && (sizeof($sections) > ($course_numsections + 1))) {
+    for ($i = ($course_numsections + 1); $i < sizeof($sections); $i++) {
         $selected_section[] = $i;
     }
 }
-//print_object($selected_section);
+// print_object($selected_section);
 foreach ($selected_section as $section_num) {
     $i = $section_num;
     if (isset($sections[$i])) {   // should always be true
@@ -320,20 +320,20 @@ foreach ($selected_section as $section_num) {
             foreach ($sectionmods as $sectionmod) {
                 $mod = get_coursemodule_from_id('',$sectionmod, $course->id);
                 $currentgroup = groups_get_activity_group($mod, true);
-                //Filter if individual user selected
+                // Filter if individual user selected
 
                 if ($participants && $group) {
                     $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                     if (isset($group_members[5]->users[$participants])) {
                         $students = array();
-                        $students[$participants] = $DB->get_record('user', array('id'=>$participants));
+                        $students[$participants] = $DB->get_record('user', array('id' => $participants));
                     } else {
                         $participants = 0;
                         $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                     }
-                } elseif ($participants && !$group) {
+                } else if ($participants && !$group) {
                     $students = array();
-                    $students[$participants] = $DB->get_record('user', array('id'=>$participants));
+                    $students[$participants] = $DB->get_record('user', array('id' => $participants));
                     $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                 } else {
                     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
@@ -430,13 +430,13 @@ foreach ($selected_section as $section_num) {
                                 $name = $instance->name;
                             }
                             $mod_url = new moodle_url('/blocks/fn_marking/fn_gradebook.php', array(
-                                'courseid'=> $course->id,
-                                'show'=> $show,
-                                'sort'=> $sort,
-                                'view'=> $view,
-                                'mid'=> $mod->id,
-                                'activity_type'=>$activity_type,
-                                'group'=>$group,
+                                'courseid' => $course->id,
+                                'show' => $show,
+                                'sort' => $sort,
+                                'view' => $view,
+                                'mid' => $mod->id,
+                                'activity_type' => $activity_type,
+                                'group' => $group,
                                 'participants' => $participants
                             ));
 
@@ -466,7 +466,7 @@ $button = '';
 /// Check to see if groups are being used in this assignment
 if (!empty($cm)) {
     if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used
-        //$currentgroup = groups_get_activity_group($cm, true);
+        // $currentgroup = groups_get_activity_group($cm, true);
         $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/fn_marking/' . "fn_gradebook.php?courseid=$courseid&mid=$mid&show=$show&sort=$sort&dir=$dir&mode=single&view=$view", true);
     } else {
         $currentgroup = false;
@@ -488,7 +488,7 @@ $PAGE->set_heading($course->fullname . ': ' . $strgrades);
 
 echo $OUTPUT->header();
 
-//ACTIVITY TYPES
+// ACTIVITY TYPES
 $activity_type_opts = array(
     '0' => 'All types',
     'assign' => 'Assignments',
@@ -504,10 +504,10 @@ $activity_type_url = new moodle_url(
         'sort' => $sort,
         'show' => $show,
         'unsubmitted' => $unsubmitted,
-        //'activity_type' => $activity_type,
+        // 'activity_type' => $activity_type,
         'participants' => $participants,
         'view' => $view,
-        'group'=>$group
+        'group' => $group
     )
 );
 $activity_type_select = new single_select($activity_type_url, 'activity_type', $activity_type_opts, $activity_type, '');
@@ -515,7 +515,7 @@ $activity_type_select->formid = 'fn_activity_type';
 $activity_type_select->label = 'Activity Type';
 $activity_type_form = '<div class="groupselector">'.$OUTPUT->render($activity_type_select).'</div>';
 
-//PARTICIPANTS
+// PARTICIPANTS
 $participants_opts = array('0' => 'All participants');
 if ($group_members) {
     foreach ($group_members[5]->users as $group_member) {
@@ -536,9 +536,9 @@ $participants_url = new moodle_url(
         'show' => $show,
         'unsubmitted' => $unsubmitted,
         'activity_type' => $activity_type,
-        //'participants' => $participants,
+        // 'participants' => $participants,
         'view' => $view,
-        'group'=>$group
+        'group' => $group
     )
 );
 $participants_select = new single_select($participants_url, 'participants', $participants_opts, $participants, '');
@@ -577,7 +577,7 @@ $topmessage     = get_config('block_fn_marking', 'topmessage');
 
 $block_config = new stdClass();
 
-if ($block_instance = $DB->get_record('block_instances', array('blockname'=>'fn_marking','parentcontextid'=>$context->id))){
+if ($block_instance = $DB->get_record('block_instances', array('blockname' => 'fn_marking','parentcontextid' => $context->id))){
     if (!empty($block_instance->configdata)) {
         $block_config = unserialize(base64_decode($block_instance->configdata));
     }
@@ -587,10 +587,10 @@ if(isset($block_config->showtopmessage) && isset($block_config->topmessage['text
     if ($block_config->showtopmessage && $block_config->topmessage['text']){
         echo '<div id="marking-topmessage">'.$block_config->topmessage['text'].'</div>';
 
-    } elseif($showtopmessage && $topmessage) {
+    } else if($showtopmessage && $topmessage) {
         echo '<div id="marking-topmessage"><?php echo $topmessage; ?></div>';
     }
-} elseif ($showtopmessage && $topmessage){
+} else if ($showtopmessage && $topmessage){
     echo '<div id="marking-topmessage">'.$topmessage.'</div>';
 }
 echo '
@@ -605,36 +605,36 @@ echo '
                         </th>
                     </tr>';
 
-                    if (!empty($showform)) {
-                        echo '<tr><th valign="top" align="LEFT" nowrap="nowrap" class="header bottomline" colspan="2">';
-                        echo $showform.'</th></tr>';
-                    }
+if (!empty($showform)) {
+    echo '<tr><th valign="top" align="LEFT" nowrap="nowrap" class="header bottomline" colspan="2">';
+    echo $showform.'</th></tr>';
+}
 
                     echo '</thead><tbody>';
 
-                    foreach ($columnhtml as $index => $column) {
-                        if (strstr($column, 'mid='.$mid.'&')) {
-                            $extra = ' class="highlight"';
-                        } else {
-                            $extra = ' class="normal"';
-                        }
+foreach ($columnhtml as $index => $column) {
+    if (strstr($column, 'mid='.$mid.'&')) {
+        $extra = ' class="highlight"';
+    } else {
+        $extra = ' class="normal"';
+    }
 
-                        if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! @isset($_POST['nosaveandnext'])) && (! @isset($_POST['nosaveandprevious']))) {
-                            if($show <> 'marked'){
-                                $columnungraded[$index] -= 1;
-                                $totungraded -= 1;
-                            }
-                        }
+    if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! @isset($_POST['nosaveandnext'])) && (! @isset($_POST['nosaveandprevious']))) {
+        if($show <> 'marked'){
+            $columnungraded[$index] -= 1;
+            $totungraded -= 1;
+        }
+    }
 
-                        if (($columnungraded[$index] < 0.1) && ($view == 'less')){
-                            continue;
-                        } else {
-                            echo "<tr $extra>" .
-                                '<td style="color: red">' . $columnungraded[$index] . '</td>' .
-                                "<td>$column</td>" .
-                                '</tr>';
-                        }
-                    };
+    if (($columnungraded[$index] < 0.1) && ($view == 'less')){
+        continue;
+    } else {
+        echo "<tr $extra>" .
+            '<td style="color: red">' . $columnungraded[$index] . '</td>' .
+            "<td>$column</td>" .
+            '</tr>';
+    }
+};
 
                     echo '<tr class="marking-total">
                         <td style="font-weight: bold;">'.$totungraded.'</td>
@@ -645,13 +645,13 @@ echo '
             </td>
             <td align="left" valign="top" class="right-sec">';
 
-                if (!empty($selectedfunction)) {
-                    $iid = $selectedmod->id;
-                    include $selectedfunction;
-                }
-                else {
-                    echo '<div class="no-assign">No selected assignment</div>';
-                }
+if (!empty($selectedfunction)) {
+    $iid = $selectedmod->id;
+    include $selectedfunction;
+}
+else {
+    echo '<div class="no-assign">No selected assignment</div>';
+}
                 echo '
             </td>
         </tr>
