@@ -1,6 +1,6 @@
 <?php
 
-//$Id: block_fn_admin.php,v 1.4 2009/08/19 20:58:16 mchurch Exp $
+// $Id: block_fn_admin.php,v 1.4 2009/08/19 20:58:16 mchurch Exp $
 $string['showsaved'] = 'Show draft activities';
 $string['keepseparate'] = 'Keep draft assignments separate';
 $string['setnumberofdays'] = 'Set number of days';
@@ -14,7 +14,7 @@ $string['showstudentmarkslessthanfiftypercent'] = 'Show no of student marks less
 $string['blocksettings'] = 'Configuring a FN Marking block';
 $string['pluginname'] = 'FN Marking Manager';
 $string['plugintitle'] = 'Marking Manager';
-$string['headertitle']='FN Marking Manager';
+$string['headertitle'] = 'FN Marking Manager';
 $string['blocktitle'] = 'FN-Marking Manager';
 $string['cfgdisplaytitle'] = 'Display title';
 $string['displaytitle'] = 'Activities Submitted';
@@ -42,7 +42,7 @@ $string['title:markslessthanxpercent'] = 'The Following Students Have Not Submit
 $string['title:saved'] = 'The Following Students Have Draft Activities';
 $string['notsubmittedany'] = ' have not submitted<br>any activities for ';
 $string['overallfailinggrade'] = ' have an overall grade<br>less than ';
-//$string['unmarked'] = '$a Unmarked Activities';
+// $string['unmarked'] = '$a Unmarked Activities';
 
 
 $string['gradingstudentprogress'] = 'Showing {$a->index} of {$a->count}';

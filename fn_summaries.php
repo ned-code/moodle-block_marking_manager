@@ -10,7 +10,7 @@ global $CFG, $DB, $OUTPUT, $PAGE, $FULLME;
 
 $id = required_param('id', PARAM_INT);      // course id
 $show = optional_param('show', 'notloggedin', PARAM_ALPHA);
-$days = required_param('days', PARAM_INT); //days to look back
+$days = required_param('days', PARAM_INT); // days to look back
 $percent = optional_param('percent', 0, PARAM_INT);
 
 $datestring = new stdClass();
@@ -25,7 +25,7 @@ $datestring->mins = get_string('mins');
 $datestring->sec = get_string('sec');
 $datestring->secs = get_string('secs');
 
-//  Paging options:
+// Paging options:
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 20, PARAM_INT);
 $PAGE->set_url('/blocks/fn_marking/fn_summaries.php', array('id' => $id, 'show' => $show, 'navlevel' => 'top'));
@@ -36,7 +36,7 @@ if (!$course = $DB->get_record("course", array("id" => $id))) {
 
 require_login($course);
 
-//grab context
+// grab context
 $context = context_course::instance($course->id);
 $cobject = new Object();
 $cobject->course = $course;
@@ -60,13 +60,13 @@ if (!$students) {
     $students = array();
 }
 
-$modnames = get_module_types_names(); //print_r($modnames);die;
-$modnamesplural = get_module_types_names(true); //print_r($modnamesplural);die;
-$modinfo = get_fast_modinfo($course->id); //print_r($modinfo);die;
-$mods = $modinfo->get_cms(); //print_r($mods);die;
-$modnamesused = $modinfo->get_used_module_names(); //print_r($modnamesused);die;
+$modnames = get_module_types_names(); // print_r($modnames);die;
+$modnamesplural = get_module_types_names(true); // print_r($modnamesplural);die;
+$modinfo = get_fast_modinfo($course->id); // print_r($modinfo);die;
+$mods = $modinfo->get_cms(); // print_r($mods);die;
+$modnamesused = $modinfo->get_used_module_names(); // print_r($modnamesused);die;
 
-$sections = get_fast_modinfo($course->id)->get_section_info_all();    
+$sections = get_fast_modinfo($course->id)->get_section_info_all();
 $mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
 
 // grab list of students
@@ -137,7 +137,7 @@ if ($show == 'failing') {
 for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $totalcount); $i++) {
     // grab student
     $student = $students_result[$i];
-    //foreach($students as $student) {
+    // foreach($students as $student) {
     if ($show == 'failing') {
         $grade_obj = grade_get_course_grade($student->id, $course->id);
         // convert grade to int

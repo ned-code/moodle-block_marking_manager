@@ -3,10 +3,10 @@ global $DB, $OUTPUT, $FULLME;
 
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
-//require_once($CFG->dirroot . '/blocks/fn_marking/quiz_report/default.php');
+// require_once($CFG->dirroot . '/blocks/fn_marking/quiz_report/default.php');
 
 /// Get the quizm
-if (! $quiz = $DB->get_record("quiz", array("id"=>$iid))) {
+if (! $quiz = $DB->get_record("quiz", array("id" => $iid))) {
     print_error("Course module is incorrect");
 }
 
@@ -23,7 +23,7 @@ $student_ids = implode(',', array_keys($students));
 
 
 
-//  Paging options:
+// Paging options:
 $qsort      = optional_param('qsort', 'firstname', PARAM_ALPHANUM);
 $qdir       = optional_param('qdir', 'ASC', PARAM_ALPHA);
 
@@ -44,7 +44,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
 
     $quiz_slots = $DB->get_records('quiz_slots', array('quizid' => $quiz->id), 'slot ASC');
 
-// use paging
+    // use paging
     $sql_quiz_attempts_count = "SELECT COUNT(1) FROM {user} u LEFT JOIN {quiz_attempts} quiza ON quiza.userid = u.id AND quiza.quiz = ? WHERE u.id IN ($student_ids) AND quiza.preview = 0 AND quiza.id IS NOT NULL $filter";
 
     $totalcount = $DB->count_records_sql($sql_quiz_attempts_count, array($quiz->id));
@@ -59,7 +59,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'name' => get_string('student', 'block_fn_marking'),
         'sumgrades' => 'Grades<br>/' . round($quiz->grade),
     );
-//Build Headers
+    // Build Headers
     foreach ($quiz_slots as $quiz_slot) {
         $columns [] = 'qsgrade' . $quiz_slot->slot;
         $headers['qsgrade' . $quiz_slot->slot] = 'Q.' . $quiz_slot->slot . '<br>/' . round($quiz_slot->maxmark * ($quiz->grade / $quiz->sumgrades));
@@ -159,18 +159,18 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         $cell_rowcount = ++$counter;
         $cell_array = array();
 
-        //USER PICTURE
+        // USER PICTURE
         $user = $DB->get_record('user', array('id' => $tableRow->userid));
         $cell_array[] = new html_table_cell($OUTPUT->user_picture($user, array('size' => 35, 'class' => 'welcome_userpicture')));
 
-        //NAME
+        // NAME
         $cell_name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' . $tableRow->userid . '&amp;course=' . $quiz->course . '">' . $tableRow->firstname . ' ' . $tableRow->lastname . '</a><br>
                       <a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' . $tableRow->attempt . '" class="reviewlink">Review attempt</a></td>';
         $cell_array[] = new html_table_cell($cell_name);
 
 
 
-        //SUMGRADES
+        // SUMGRADES
         if ($tableRow->sumgrades) {
             $attempt_grade = round($tableRow->sumgrades * ($quiz->grade / $quiz->sumgrades), 2);
             $cell_sumgardes = '<a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' . $tableRow->attempt . '" title="Review attempt">' . $attempt_grade . '</a>';
@@ -214,7 +214,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             $quiz->sumgrades;
             $quiz->grade;
             $question_step_grade = round(($question_step->fraction * $question_step->maxmark) * ($quiz->grade / $quiz->sumgrades), 2);
-            //print_object($question_step);
+            // print_object($question_step);
 
             if ($question_step->state == 'gradedwrong') {
                 $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
@@ -223,21 +223,21 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                                     <span class="incorrect">' . $question_step_grade . '</span>
                                 </span>
                              </a>';
-            } elseif (($question_step->state == 'gradedright') || ($question_step->state == 'mangrright')) {
+            } else if (($question_step->state == 'gradedright') || ($question_step->state == 'mangrright')) {
                 $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
                                 <span class="que">
                                     <img src="' . $OUTPUT->pix_url('i/grade_correct', 'core') . '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
                                     <span class="correct">' . $question_step_grade . '</span>
                                 </span>
                              </a>';
-            } elseif ($question_step->state == 'needsgrading') {
+            } else if ($question_step->state == 'needsgrading') {
                 $cell = new html_table_cell('<a target="_blank" href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
                                     <span class="que">
                                         <img src="' . $OUTPUT->pix_url('i/edit', 'core') . '" title="Edit" alt="Editt" class="icon fn-icon">
                                     </span></a>');
-                $cell->attributes = array('class'=> 'fn-highlighted');
+                $cell->attributes = array('class' => 'fn-highlighted');
                 $cell_array[] = $cell;
-            } elseif ($question_step->state == 'mangrpartial') {
+            } else if ($question_step->state == 'mangrpartial') {
                 $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
                                     <span class="que">
                                         <img src="' . $OUTPUT->pix_url('i/grade_partiallycorrect', 'core') . '" title="Partially correct" alt="Partially correct" class="icon fn-icon">
@@ -300,7 +300,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     echo $OUTPUT->render($pagingbar);
     echo html_writer::table($table);
 
-} elseif ($show == 'unsubmitted') {
+} else if ($show == 'unsubmitted') {
 
     $sql_quiz_attempts = "SELECT CONCAT(u.id, '#', COALESCE(quiza.attempt, 0)) AS uniqueid,
 							(CASE WHEN (quiza.state = 'finished' AND NOT EXISTS (
@@ -345,7 +345,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         }
     }
 
-    if(count($students)>0){
+    if(count($students) > 0){
 
         $image = "<a href=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\"> <img border=0 valign=absmiddle src=\"".$OUTPUT->pix_url('icon', 'quiz')."\" " .
             "height=16 width=16 ALT=\"$cm->modname\"></a>";
@@ -361,15 +361,15 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
             echo "\n<tr>";
             echo "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
-            $user = $DB->get_record('user',array('id'=>$student->id));
-            echo $OUTPUT->user_picture($user, array('courseid'=>$course->id, 'size'=>20));
+            $user = $DB->get_record('user',array('id' => $student->id));
+            echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'size' => 20));
             echo "</td>";
             echo "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
             echo "</tr></table>\n";
 
         }
     }
-    else if(count($students)==0){
+    else if(count($students) == 0){
         echo '<center><p>The are currently no <b>users</b>  to display.</p></center>';
     }
 }

@@ -43,7 +43,7 @@ $settings->add(
         get_string('showtopmessage', 'block_fn_marking'),
         '',
         0,
-        array('0'=>'No', '1'=>'Yes')
+        array('0' => 'No', '1' => 'Yes')
     )
 );
 $settings->add(
@@ -60,6 +60,6 @@ $settings->add(
         get_string('include_orphaned', 'block_fn_marking'),
         '',
         0,
-        array('0'=>'No', '1'=>'Yes')
+        array('0' => 'No', '1' => 'Yes')
     )
 );

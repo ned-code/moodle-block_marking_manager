@@ -26,17 +26,15 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $rownum = $params['rownum'];
         $last = $params['last'];
-        $useridlist = $params['useridlist']; //echo $rownum; print_r($useridlist);
+        $useridlist = $params['useridlist']; // echo $rownum; print_r($useridlist);
         $userid = $useridlist[$rownum];
 
         $attemptnumber = $params['attemptnumber'];
         $maxattemptnumber = isset($params['maxattemptnumber']) ? $params['maxattemptnumber'] : $params['attemptnumber'];
 
-
         $user = $DB->get_record('user', array('id' => $userid));
 
-
-        $submission = get_user_submission($assignment, $userid, false); //print_r($submission);
+        $submission = get_user_submission($assignment, $userid, false); // print_r($submission);
         $submissiongroup = null;
         $submissiongroupmemberswhohavenotsubmitted = array();
         $teamsubmission = null;
@@ -52,17 +50,14 @@ class mod_assign_grading_form_fn extends moodleform {
             if(isset($submissiongroup->name)){
                 $groupname = ' ('.$submissiongroup->name.')';
             }else{
-                $groupname = ' (Default group)'; //
+                $groupname = ' (Default group)';
             }
-
 
         }else{
             $groupname = '';
         }
 
-
-
-        ///  start the table
+        // start the table
         $mform->addElement('html', '<div style="text-align:center; font-size:11px; margin-bottom:3px;">');
 
         $strprevious = get_string('previous');
@@ -73,8 +68,8 @@ class mod_assign_grading_form_fn extends moodleform {
         }else{
             $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="'.$strprevious.'" name="nosaveandprevious" disabled="disabled"> ');
         }
-        $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
-        //$mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
+        $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking', array('index' => $rownum + 1, 'count' => count($useridlist))));
+        // $mform->addElement('static', 'progress', '', get_string('gradingstudentprogress', 'block_fn_marking', array('index'=>$rownum+1, 'count'=>count($useridlist))));
 
         if (!$last) {
             $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="'.$strnext.'" name="nosaveandnext"> ');
@@ -87,7 +82,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '<table border="0" cellpadding="0" cellspacing="0" border="1" width="100%" class="saprate-table">');
 
-        //print the marking header in first tr
+        // print the marking header in first tr
         $mform->addElement('html', '<tr>');
 
         $this->add_marking_header($user,
@@ -104,14 +99,12 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '</tr>');
 
-        //GRADING
+        // GRADING
         $mform->addElement('html', '<tr>');
         $mform->addElement('html', '<td class="yellowcell" colspan="2">');
 
-
         $grade = $assignment->get_user_grade($userid, false, $attemptnumber);
         $flags = $assignment->get_user_flags($userid, false);
-
 
         // add advanced grading
         $gradingdisabled = $assignment->grading_disabled($userid);
@@ -123,24 +116,22 @@ class mod_assign_grading_form_fn extends moodleform {
             $assignment->get_instance()->id,
             $userid);
 
-        //Fix grade string for select form
+        // Fix grade string for select form
         if ($gradinginfo->items[0]->grades[$userid]->str_grade == "-"){
             $stu_grade = '-1';
         }else{
             $stu_grade = $gradinginfo->items[0]->grades[$userid]->str_grade;
         }
 
-        ############
-        $mform->addElement('html', '<table class="teacherfeedback" border="0" cellpadding="0" cellspacing="0" width="100%">');
+                $mform->addElement('html', '<table class="teacherfeedback" border="0" cellpadding="0" cellspacing="0" width="100%">');
         $mform->addElement('html', '<tr>');
         $mform->addElement('html', '<td width="50%" align="left">');
         $mform->addElement('html', '<b>Teacher\'s Feedback </b> <br /> <span class="teacher_feedback_info">'.$USER->firstname.' '.$USER->lastname.' <br /> '.userdate(time()));
         $mform->addElement('html', '</span>');
         $mform->addElement('html', '</td>');
 
-
         if ($gradinginstance) {
-            //RUBRIC
+            // RUBRIC
             $mform->addElement('html', '</tr>');
             $mform->addElement('html', '<tr>');
             $mform->addElement('html', '<td>');
@@ -166,7 +157,7 @@ class mod_assign_grading_form_fn extends moodleform {
                 $grademenu = make_grades_menu($assignment->get_instance()->grade);
                 $grademenu['-1'] = 'Select';
                 $gradingelement = $mform->addElement('select', 'grade', get_string('grade', 'block_fn_marking'), $grademenu, $attributes);
-                $mform->setDefault('grade', $stu_grade); //@fixme some bug when element called 'grade' makes it break
+                $mform->setDefault('grade', $stu_grade); // @fixme some bug when element called 'grade' makes it break
                 $mform->setType('grade', PARAM_INT);
 
                 if ($gradingdisabled) {
@@ -196,29 +187,26 @@ class mod_assign_grading_form_fn extends moodleform {
             if ($maxattempts == ASSIGN_UNLIMITED_ATTEMPTS) {
                 $maxattempts = get_string('unlimitedattempts', 'assign');
             }
-            //$mform->addelement('static', 'maxattemptslabel', get_string('maxattempts', 'assign'), $maxattempts);
-            //$mform->addelement('static', 'attemptnumberlabel', get_string('attemptnumber', 'assign'), $attemptnumber + 1);
+            // $mform->addelement('static', 'maxattemptslabel', get_string('maxattempts', 'assign'), $maxattempts);
+            // $mform->addelement('static', 'attemptnumberlabel', get_string('attemptnumber', 'assign'), $attemptnumber + 1);
 
             $ismanual = $assignment->get_instance()->attemptreopenmethod == ASSIGN_ATTEMPT_REOPEN_METHOD_MANUAL;
             $issubmission = !empty($submission);
             $isunlimited = $assignment->get_instance()->maxattempts == ASSIGN_UNLIMITED_ATTEMPTS;
-            $islessthanmaxattempts = $issubmission && ($submission->attemptnumber < ($assignment->get_instance()->maxattempts-1));
+            $islessthanmaxattempts = $issubmission && ($submission->attemptnumber < ($assignment->get_instance()->maxattempts - 1));
 
             if ($ismanual && (!$issubmission || $isunlimited || $islessthanmaxattempts)) {
-                //$mform->addElement('selectyesno', 'addattempt', get_string('addattempt', 'assign'));
-                //$mform->setDefault('addattempt', 0);
+                // $mform->addElement('selectyesno', 'addattempt', get_string('addattempt', 'assign'));
+                // $mform->setDefault('addattempt', 0);
                 $mform->addElement('checkbox', 'addattempt', 'Allow student to resubmit');
             }
         }
 
-        //$mform->addElement('html', 'Submission comments (3)');
+        // $mform->addElement('html', 'Submission comments (3)');
         $mform->addElement('html', '</table>');
 
-        ############
-
-
         // Let feedback plugins add elements to the grading form.
-        //fn_add_plugin_grade_elements($grade, $mform, $data, $userid, $assignment);
+        // fn_add_plugin_grade_elements($grade, $mform, $data, $userid, $assignment);
 
         $feedbackplugins = fn_load_plugins('assignfeedback', $assignment);
 
@@ -230,11 +218,10 @@ class mod_assign_grading_form_fn extends moodleform {
                 }
 
                 if ($plugin->get_form_elements_for_user($grade, $mform, $data, $userid)) {
-                    //print_r($data);die;
+                    // print_r($data);die;
                 }
             }
         }
-
 
         // hidden params
         $mform->addElement('hidden', 'id', $assignment->get_course_module()->id);
@@ -267,13 +254,8 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<tr>');
         $mform->addElement('html', '<td valign="top" width="50%" align="left">');
 
-
-
-
-
-
         if (($assignment->can_view_submission($userid)) || ($params['readonly'])) {
-            //$gradelocked = ($grade && $grade->locked) || $assignment->grading_disabled($userid);
+            // $gradelocked = ($grade && $grade->locked) || $assignment->grading_disabled($userid);
 
             $gradelocked = ($flags && $flags->locked) || $assignment->grading_disabled($userid);
             $extensionduedate = null;
@@ -292,7 +274,7 @@ class mod_assign_grading_form_fn extends moodleform {
             }
             $viewfullnames = has_capability('moodle/site:viewfullnames', $assignment->get_course_context());
 
-            //Moodle version check
+            // Moodle version check
             $version = explode('.', $CFG->version);
             $version = reset($version);
             // Moodle 2.9 and greater.
@@ -306,7 +288,7 @@ class mod_assign_grading_form_fn extends moodleform {
                     $notsubmitted,
                     $assignment->is_any_submission_plugin_enabled(),
                     $gradelocked,
-                    fn_is_graded($userid, $assignment),//$assignment->is_graded($userid),
+                    fn_is_graded($userid, $assignment),// $assignment->is_graded($userid),
                     $assignment->get_instance()->duedate,
                     $assignment->get_instance()->cutoffdate,
                     $assignment->get_submission_plugins(),
@@ -336,7 +318,7 @@ class mod_assign_grading_form_fn extends moodleform {
                     $notsubmitted,
                     $assignment->is_any_submission_plugin_enabled(),
                     $gradelocked,
-                    fn_is_graded($userid, $assignment),//$assignment->is_graded($userid),
+                    fn_is_graded($userid, $assignment),// $assignment->is_graded($userid),
                     $assignment->get_instance()->duedate,
                     $assignment->get_instance()->cutoffdate,
                     $assignment->get_submission_plugins(),
@@ -357,13 +339,12 @@ class mod_assign_grading_form_fn extends moodleform {
                     $assignment->get_grading_status($userid));
             }
 
-
         }
 
         // Show graders whether this submission is editable by students.
         if ($status->view == assign_submission_status::GRADER_VIEW) {
-            //$row = new html_table_row();
-            //$cell1 = new html_table_cell(get_string('editingstatus', 'assign'));
+            // $row = new html_table_row();
+            // $cell1 = new html_table_cell(get_string('editingstatus', 'assign'));
             if ($status->canedit) {
                 $editingstatus = get_string('submissioneditable', 'assign');
 
@@ -373,10 +354,6 @@ class mod_assign_grading_form_fn extends moodleform {
             }
 
         }
-
-
-
-
 
         // Last modified.
         $tsubmission = $status->teamsubmission ? $status->teamsubmission : $status->submission;
@@ -403,9 +380,8 @@ class mod_assign_grading_form_fn extends moodleform {
                     $plugin->has_user_summary() &&
                     $pluginshowsummary) {
 
-
                     $pluginname = $plugin->get_name();
-                    //$mform->addElement('html', $pluginname.'<br />');
+                    // $mform->addElement('html', $pluginname.'<br />');
 
                     $submissionplugin = new assign_submission_plugin_submission($plugin,
                         $tsubmission,
@@ -415,45 +391,36 @@ class mod_assign_grading_form_fn extends moodleform {
                         $status->returnparams);
 
                     if ($plugin->get_name() == 'Online text'){
-                        $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission'=>$submission->id));//print_r($onlinetext);
+                        $onlinetext = $DB->get_record('assignsubmission_onlinetext', array('submission' => $submission->id));// print_r($onlinetext);
 
                         $mform->addElement('hidden', 'submissionid', $submission->id);
                         $mform->setType('submissionid', PARAM_INT);
 
-
-                        $options = array('cols'=>'82'
-                            //'subdirs'=>0,
-                            //'maxbytes'=>0,
-                            //'maxfiles'=>0,
-                            //'changeformat'=>0,
-                            //'context'=>null,
-                            //'noclean'=>0,
-                            //'trusttext'=>0
+                        $options = array('cols' => '82'
+                            // 'subdirs'=>0,
+                            // 'maxbytes'=>0,
+                            // 'maxfiles'=>0,
+                            // 'changeformat'=>0,
+                            // 'context'=>null,
+                            // 'noclean'=>0,
+                            // 'trusttext'=>0
                         );
 
                         $mform->addElement('editor', 'onlinetext');
                         $mform->setType('onlinetext', PARAM_RAW);
-                        $mform->setDefault('onlinetext', array('text'=>$onlinetext->onlinetext,'format'=>FORMAT_HTML));
+                        $mform->setDefault('onlinetext', array('text' => $onlinetext->onlinetext,'format' => FORMAT_HTML));
 
                     } else {
                         if ((! isset($params['savegrade'])) && ((! $params['readonly']) || ($plugin->get_name() != 'Submission comments'))){
                             $mform->addElement('html', '<div class="fn_plugin_wrapper">'.$pluginname.'<br />');
-                            //$o = $plugin->view($submissionplugin->submission);
+                            // $o = $plugin->view($submissionplugin->submission);
                             $o = $assignment->get_renderer()->render($submissionplugin);
                             $mform->addElement('html', $o.'</div>');
                         }
                     }
 
-
-
-
-
-
-
-
-
-                    //$//row->cells = array($cell1, $cell2);
-                    //$t->data[] = $row;
+                    // $//row->cells = array($cell1, $cell2);
+                    // $t->data[] = $row;
                 }
             }
 
@@ -461,7 +428,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '</td>');
         $mform->addElement('html', '</tr>');
-        ///close the table
+        // close the table
         $mform->addElement('html', '</table>');
 
         $mform->addElement('hidden', 'courseid', $params['courseid']);
@@ -500,13 +467,9 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('hidden', 'attemptnumber', $params['attemptnumber']);
         $mform->setType('attemptnumber', PARAM_INT);
 
-
-
-
         if ($data) {
             $this->set_data($data);
         }
-
 
     }
 
@@ -517,21 +480,18 @@ class mod_assign_grading_form_fn extends moodleform {
     public function add_marking_header($user, $name, $blindmarking, $uniqueidforuser, $courseid, $viewfullnames, $rownum , $last, $groupname, $cm, $params) {
         global $CFG, $DB, $OUTPUT;
 
-
         $mform = & $this->_form;
         $mform->addElement('html', '<td width="40" valign="top" align="center" class="markingmanager-head marking_rightBRD">' . "\n");
-
 
         $o = '';
         if ($blindmarking) {
             $o .= get_string('hiddenuser', 'assign') . $uniqueidforuser;
         } else {
             $o .= $OUTPUT->user_picture($user);
-            //$o .= $OUTPUT->spacer(array('width'=>30));
-            //$o .= $OUTPUT->action_link(new moodle_url('/user/view.php', array('id' => $user->id, 'course'=>$courseid)), fullname($user, $viewfullnames));
+            // $o .= $OUTPUT->spacer(array('width'=>30));
+            // $o .= $OUTPUT->action_link(new moodle_url('/user/view.php', array('id' => $user->id, 'course'=>$courseid)), fullname($user, $viewfullnames));
         }
         $mform->addElement('html', $o);
-
 
         $mform->addElement('html', '</td>');
 
@@ -546,7 +506,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '<td width="35%" align="right" class="rightSide">');
 
-        $buttonarray=array();
+        $buttonarray = array();
         if (isset( $params['readonly'])){
             if (! $params['readonly']){
                 $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
@@ -560,7 +520,6 @@ class mod_assign_grading_form_fn extends moodleform {
             $mform->disabledIf('navar', 'grade', 'eq', -1);
         }
         $mform->addElement('html', '&nbsp;</td>');
-
 
         $mform->addElement('html', '</tr>');
         $mform->addElement('html', '</table>');

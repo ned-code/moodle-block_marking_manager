@@ -111,7 +111,7 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
                    AND s.status='submitted'
                   AND g.grade is null";
 
-        if($unmarkedstus =  $DB->get_records_sql($sqlunmarked)) {
+        if($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
             $students = explode(',', $studentlist);
 
             foreach ($unmarkedstus as $unmarkedstu) {
@@ -137,7 +137,6 @@ function assign_count_ungraded($assign, $graded, $students, $show='unmarked', $e
                    AND g.grade is not null
                    AND g.grade <> -1
                    AND g.timemodified > s.timemodified))";
-
 
         return $DB->count_records_sql($sql);
 
@@ -248,7 +247,6 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
                  WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)";
 
-
         if($data = $DB->get_records_sql($sql)){
             $arr = array();
             foreach ($data as $value) {
@@ -268,7 +266,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid and  s.attemptnumber = g.attemptnumber)
                  WHERE s.assignment=$assign AND (s.userid in ($studentlist)) AND s.status='submitted' AND (g.grade is null  OR g.grade = -1)";
 
-        if($unmarkedstus =  $DB->get_records_sql($sqlunmarked)){
+        if($unmarkedstus = $DB->get_records_sql($sqlunmarked)){
 
             foreach ($unmarkedstus as $unmarkedstu)
             {
@@ -276,10 +274,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
             }
         }
 
-
         $studentlist = implode(',', $students);
-
-
 
         $sql = "SELECT Max(s.id) AS id,
                        s.userid
@@ -292,8 +287,6 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                    AND g.grade <> -1
               GROUP BY s.userid";
 
-
-
         if($data = $DB->get_records_sql($sql)){
 
             if ($sort){
@@ -305,7 +298,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                     $arrids[] = $value->id;
                 }
 
-                //CHECK DRAFT is_Graded
+                // CHECK DRAFT is_Graded
                 $sqlDraft = "SELECT s.id,
                                     s.timemodified AS submissiontime,
                                     g.timemodified AS gradetime
@@ -316,7 +309,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                                 AND s.userid IN ($studentlist)
                                 AND s.status = 'draft'";
 
-                if($draftGrades =  $DB->get_records_sql($sqlDraft)){
+                if($draftGrades = $DB->get_records_sql($sqlDraft)){
                     foreach ($draftGrades as $draftGrade){
                         if(($draftGrade == null) || ($draftGrade->submissiontime >= $draftGrade->gradetime)){
                             $drafted[] = $draftGrade->id;
@@ -361,7 +354,6 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                         break;
                 }
 
-
                 if($datas = $DB->get_records_sql($sqls)){
                     $arr = array();
                     foreach ($datas as $value) {
@@ -374,9 +366,6 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                 }
             } //SORT
 
-
-
-
             $arr = array();
             foreach ($data as $value) {
                 $arr[] = $value->userid;
@@ -387,21 +376,18 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
             return false;
         }
 
-
-
     } else if ($show == 'unsubmitted') {
         $sql = "SELECT DISTINCT s.userid
                   FROM {assign_submission} s
                  WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
-        $subbed = $DB->get_records_sql($sql); //print_r($subbed);print_r($students);
+        $subbed = $DB->get_records_sql($sql); // print_r($subbed);print_r($students);
 
-        $unsubmitted= array_diff(array_keys($students), array_keys($subbed)); //print_r($gradedarray);die;
+        $unsubmitted = array_diff(array_keys($students), array_keys($subbed)); // print_r($gradedarray);die;
         return $unsubmitted = array_values($unsubmitted);
-
 
     } else if ($show == 'saved') {
 
-        //CHECK DRAFT is_Graded
+        // CHECK DRAFT is_Graded
         $sqlDraft = "SELECT s.userid,
                             s.timemodified AS submissiontime,
                             g.timemodified AS gradetime
@@ -416,7 +402,7 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
 
         $studentlist = explode(',', $studentlist);
 
-        if($draftGrades =  $DB->get_records_sql($sqlDraft)){
+        if($draftGrades = $DB->get_records_sql($sqlDraft)){
             foreach ($draftGrades as $draftGrade){
                 $studentlist = array_diff($studentlist, array($draftGrade->userid));
             }
@@ -427,9 +413,6 @@ function assign_students_ungraded($assign, $graded, $students, $show='unmarked',
         $sql = "SELECT DISTINCT s.userid
                   FROM {assign_submission} s
                  WHERE assignment=$assign AND (userid in ($studentlist)) AND status='draft'";
-
-
-
 
         if($data = $DB->get_records_sql($sql)){
             $arr = array();
@@ -467,7 +450,7 @@ function assign_oldest_ungraded($assign) {
 function forum_count_ungraded($forumid, $graded, $students, $show='unmarked') {
     global $CFG, $DB;
 
-    //Get students from forum_posts
+    // Get students from forum_posts
     $fusers = $DB->get_records_sql("SELECT DISTINCT u.id
                                FROM {forum_discussions} d
                                INNER JOIN {forum_posts} p ON p.discussion = d.id
@@ -503,20 +486,19 @@ function count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) 
     global $CFG, $DB;
 
     $context = context_course::instance($course->id);
-    //$isteacheredit = has_capability('moodle/course:update', $context);
-    //$marker = has_capability('moodle/grade:viewall', $context);
+    // $isteacheredit = has_capability('moodle/course:update', $context);
+    // $marker = has_capability('moodle/grade:viewall', $context);
 
     $currentgroup = groups_get_activity_group($mod, true);
     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-    //$totungraded = 0;
+    // $totungraded = 0;
 
-/// Array of functions to call for grading purposes for modules.
+    /// Array of functions to call for grading purposes for modules.
     $mod_grades_array = array(
         'assign' => '/mod/assign/submissions.g8.html',
         'assignment' => '/mod/assignment/submissions.g8.html',
         'forum' => '/mod/forum/submissions.g8.html'
     );
-
 
     ////////////////////////////////
     /// Don't count it if you can't see it.
@@ -528,10 +510,10 @@ function count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) 
     $libfile = "$CFG->dirroot/mod/$mod->modname/lib.php";
     if (file_exists($libfile)) {
         require_once($libfile);
-        //$gradefunction = $mod->modname . "_grades";
+        // $gradefunction = $mod->modname . "_grades";
         $gradefunction = $mod->modname . "_get_user_grades";
         if (function_exists($gradefunction) &&
-    //                            (($mod->modname != 'forum') || ($instance->assessed == 2)) && // Only include forums that are assessed only by teachers.
+        // (($mod->modname != 'forum') || ($instance->assessed == 2)) && // Only include forums that are assessed only by teachers.
                 isset($mod_grades_array[$mod->modname])) {
             /// Use the object function for fnassignments.
             if (($mod->modname == 'forum') &&
@@ -562,7 +544,6 @@ function count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) 
         }
     }
 
-
 }
 
 function count_unmarked_activities(&$course, $info='unmarked', $module='') {
@@ -576,13 +557,13 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
 
     $include_orphaned = get_config('block_fn_marking','include_orphaned');
 
-  //FIND CURRENT WEEK
+    // FIND CURRENT WEEK
     $courseformatoptions = course_get_format($course)->get_format_options();
     $courseformat = course_get_format($course)->get_format();
     if( isset($courseformatoptions['numsections'])){
         $course_numsections = $courseformatoptions['numsections'];
     } else {
-        $course_numsections = 10; //Default section number
+        $course_numsections = 10; // Default section number
     }
 
     if ($courseformat == 'weeks') {
@@ -593,7 +574,7 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
         $weekofseconds = 604800;
         $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
 
-        //  Calculate the current week based on today's date and the starting date of the course.
+        // Calculate the current week based on today's date and the starting date of the course.
         $currentweek = ($timenow > $course->startdate) ? (int)((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
         $currentweek = min($currentweek, $course_numsections);
 
@@ -618,8 +599,8 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
     for ($i = 0; $i <= $upto; $i++) {
         $selected_section[] = $i;
     }
-    if ($include_orphaned && (sizeof($sections) > ($course_numsections+1))) {
-        for ($i = ($course_numsections+1); $i < sizeof($sections); $i++) {
+    if ($include_orphaned && (sizeof($sections) > ($course_numsections + 1))) {
+        for ($i = ($course_numsections + 1); $i < sizeof($sections); $i++) {
             $selected_section[] = $i;
         }
     }
@@ -646,9 +627,9 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                             continue;
                         }
                     }
-                    /////////Changed in order to performance issue
-                    //$currentgroup = groups_get_activity_group($mod, true);
-                    //$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    // Changed in order to performance issue
+                    // $currentgroup = groups_get_activity_group($mod, true);
+                    // $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
 
                     /// Don't count it if you can't see it.
                     $mcontext = context_module::instance($mod->id);
@@ -670,8 +651,7 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                                 if (!($modgrades->grades = $gradefunction($instance))) {
                                     $modgrades->grades = array();
                                 }
-                                //////////////////////////////////
-                                $sql = "SELECT asub.id,
+                                                                $sql = "SELECT asub.id,
                                                asub.userid,
                                                ag.grade
                                           FROM {assign_submission} asub
@@ -691,7 +671,6 @@ function count_unmarked_activities(&$course, $info='unmarked', $module='') {
                                         }
                                     }
                                 }
-                                //////////////////////////////////
                             }
                             if ($modgrades) {
                                 /// Store the number of ungraded entries for this group.
@@ -732,7 +711,7 @@ function fn_get_notloggedin($course, $days) {
     // grab context
     $context = context_course::instance($course->id);
 
-    //grab current group
+    // grab current group
     $currentgroup = groups_get_course_group($course, true);;
     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
     // calculate a the before
@@ -756,7 +735,7 @@ function fn_get_notloggedin($course, $days) {
 }
 
 function fn_get_failing($course, $percent) {
-      //grab context
+      // grab context
     $context = context_course::instance($course->id);
 
     $student_ids = array();
@@ -776,8 +755,7 @@ function fn_get_failing($course, $percent) {
     $all_grades = grade_get_course_grades($course->id, $student_ids);
     $grades = $all_grades->grades;
 
-    //
-    $failing = array();
+        $failing = array();
 
     // create array of all failing students
     // keyed on studentid
@@ -894,7 +872,7 @@ function fn_get_active_mods($which = 'grades') {
 function fn_is_graded($userid, $assign) {
     $grade = $assign->get_user_grade($userid, false);
     if ($grade) {
-        return ($grade->grade !== NULL && $grade->grade >= 0);
+        return ($grade->grade !== null && $grade->grade >= 0);
     }
     return false;
 }
@@ -962,12 +940,12 @@ function fn_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign) {
             }
         }
     }
-    $grade->grader= $USER->id;
+    $grade->grader = $USER->id;
 
     $adminconfig = $assign->get_admin_config();
     $gradebookplugin = $adminconfig->feedback_plugin_for_gradebook;
 
-    //$submissionplugins = $assign->load_plugins('assignsubmission');
+    // $submissionplugins = $assign->load_plugins('assignsubmission');
     $feedbackplugins = fn_load_plugins('assignfeedback', $assign);
 
     // Call save in plugins.
@@ -990,7 +968,6 @@ function fn_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign) {
     if (!isset($formdata->sendstudentnotifications) || $formdata->sendstudentnotifications) {
         $assign->notify_grade_modified($grade, true);
     }
-
 
 }
 
@@ -1018,7 +995,7 @@ function fn_load_plugins($subtype, $assign) {
             if ($plugin instanceof assign_plugin) {
                 $idx = $plugin->get_sort_order();
                 while (array_key_exists($idx, $result)) {
-                    $idx +=1;
+                    $idx += 1;
                 }
                 $result[$idx] = $plugin;
             }
@@ -1048,7 +1025,7 @@ function fn_process_outcomes($userid, $formdata, $assign) {
                                     $userid);
 
     if (!empty($gradinginfo->outcomes)) {
-        foreach($gradinginfo->outcomes as $index=>$oldoutcome) {
+        foreach($gradinginfo->outcomes as $index => $oldoutcome) {
             $name = 'outcome_'.$index;
             if (isset($formdata->{$name}[$userid]) and $oldoutcome->grades[$userid]->grade != $formdata->{$name}[$userid]) {
                 $data[$index] = $formdata->{$name}[$userid];
@@ -1079,7 +1056,6 @@ function fn_process_save_grade(&$mform, $assign, $context, $course, $pageparams)
     $group = optional_param('group', 0, PARAM_INT);
     $participants = optional_param('participants', 0, PARAM_INT);
 
-
     if ($useridlist) {
         $useridlist = explode(',', $useridlist);
     } else {
@@ -1090,7 +1066,6 @@ function fn_process_save_grade(&$mform, $assign, $context, $course, $pageparams)
     if ($rownum == count($useridlist) - 1) {
         $last = true;
     }
-
 
     $data = new stdClass();
 
@@ -1104,10 +1079,9 @@ function fn_process_save_grade(&$mform, $assign, $context, $course, $pageparams)
     $pageparams['group']  = $group;
     $pageparams['participants']  = $participants;
 
-
     $formparams = array($assign, $data, $pageparams);
 
-    $mform = new mod_assign_grading_form_fn(null, $formparams, 'post', '', array('class'=>'gradeform'));
+    $mform = new mod_assign_grading_form_fn(null, $formparams, 'post', '', array('class' => 'gradeform'));
 
     if ($formdata = $mform->get_data()) {
         $submission = null;
@@ -1208,7 +1182,6 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         }
     }
 
-
     $rownum = $pageparams['rownum'] + $offset;
     $useridlistid = optional_param('useridlistid', time(), PARAM_INT);
     $userid = optional_param('userid', 0, PARAM_INT);
@@ -1237,11 +1210,10 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         } else {
             $useridlist = get_grading_userid_list($assign);
         }
-        //
-        $useridlist = $arruser;
+                $useridlist = $arruser;
         $last = false;
 
-        //BIG ROW NUMBER FIXER
+        // BIG ROW NUMBER FIXER
         $numofuser = count($useridlist);
         if ($numofuser > 0){
             if ($rownum > $numofuser - 1) {
@@ -1256,12 +1228,11 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         if (!$userid) {
             $o = "There is no record";
             return $o;
-            //throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
+            // throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
         }
     }
 
     $user = $DB->get_record('user', array('id' => $userid));
-
 
     $submission = $assign->get_user_submission($userid, false, $showattemptnumber);
     $submissiongroup = null;
@@ -1283,24 +1254,24 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
     $flags = $assign->get_user_flags($userid, false);
 
     // Get all the submissions (for the history view).
-    //list($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber) =  fn_get_submission_history($submission, $grade, $user, $showattemptnumber, $assign);
+    // list($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber) =  fn_get_submission_history($submission, $grade, $user, $showattemptnumber, $assign);
 
     if ($grade) {
         $data = new stdClass();
-        if ($grade->grade !== NULL && $grade->grade >= 0) {
+        if ($grade->grade !== null && $grade->grade >= 0) {
             $data->grade = format_float($grade->grade, 2);
         }
     } else {
         $data = new stdClass();
-        //$data->grade = '-1';
+        // $data->grade = '-1';
     }
-    //print_r($data);
+    // print_r($data);
     // Warning if required.
     $allsubmissions = fn_get_all_submissions($userid, $assign);
 
     if ($attemptnumber != -1) {
-        $params = array('attemptnumber'=>$attemptnumber + 1,
-                        'totalattempts'=>count($allsubmissions));
+        $params = array('attemptnumber' => $attemptnumber + 1,
+                        'totalattempts' => count($allsubmissions));
         $message = get_string('editingpreviousfeedbackwarning', 'assign', $params);
         $o .= $assign->get_renderer()->notification($message);
     }
@@ -1318,14 +1289,13 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
         $pageparams['group'] = $group;
         $pageparams['participants'] = $participants;
 
-
         $formparams = array($assign, $data, $pageparams);
 
         $mform = new mod_assign_grading_form_fn(null,
                                                $formparams,
                                                'post',
                                                '',
-                                               array('class'=>'gradeform'));
+                                               array('class' => 'gradeform'));
     }
     $o .= $assign->get_renderer()->render(new assign_form('gradingform', $mform));
     $version = explode('.', $CFG->version);
@@ -1359,7 +1329,6 @@ function fn_view_single_grade_page($mform, $offset=0, $assign, $context, $cm, $c
 
     \mod_assign\event\grading_form_viewed::create_from_user($assign, $user)->trigger();
 
-
     return $o;
 }
 
@@ -1373,13 +1342,13 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
 
     // Need submit permission to submit an assignment.
         $readonly = false;
-        if(! has_capability('mod/assign:grade', $ctx)){
-            if(has_capability('block/fn_marking:viewreadonly',$ctx)){
-                $readonly = true;
-            }else{
-                require_capability('mod/assign:grade', $ctx);
-            }
+    if(! has_capability('mod/assign:grade', $ctx)){
+        if(has_capability('block/fn_marking:viewreadonly',$ctx)){
+            $readonly = true;
+        }else{
+            require_capability('mod/assign:grade', $ctx);
         }
+    }
 
     $rownum = optional_param('rownum', 0, PARAM_INT) + $offset;
     $arruser = count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['sort']);
@@ -1393,22 +1362,22 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
     }
     $useridlist = $arruser;
     $last = false;
-    $userid = (isset($useridlist[$rownum])) ? $useridlist[$rownum] : NULL;
+    $userid = (isset($useridlist[$rownum])) ? $useridlist[$rownum] : null;
     if ($rownum == count($useridlist) - 1) {
         $last = true;
     }
     if (!$userid) {
         return 'There is no user.';
-        //throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
+        // throw new coding_exception('Row is out of bounds for the current grading table: ' . $rownum);
     }
 
-    if ($pageparams['show']=='unsubmitted'){
+    if ($pageparams['show'] == 'unsubmitted'){
 
         $unsubmitted = array();
 
         foreach ($useridlist as $key => $userid) {
 
-            //$user = $DB->get_record('user', array('id' => $userid));
+            // $user = $DB->get_record('user', array('id' => $userid));
 
             if($submission = $assign->get_user_submission($userid, false)){
                 if ($submission->status == 'draft'){
@@ -1419,7 +1388,7 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
             }
         }
 
-        if(count($unsubmitted)>0){
+        if(count($unsubmitted) > 0){
 
             $image = "<A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\"> <IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$cm->modname/pix/icon.gif\" " .
                     "HEIGHT=16 WIDTH=16 ALT=\"$cm->modname\"></A>";
@@ -1427,24 +1396,23 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
             $o .= '<div class="unsubmitted_header">' . $image .
                                         " Assignment: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" . $assign->get_instance()->name . '</a></div>';
 
-
             $o .= '<p class="unsubmitted_msg">The following students have not submitted this assignment:</p>';
 
             foreach ($unsubmitted as $userid) {
-            /// Check that this user hasn't submitted before.
+                /// Check that this user hasn't submitted before.
 
                 $o .= "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
                 $o .= "\n<tr>";
                 $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
-                $user = $DB->get_record('user',array('id'=>$userid));
-                $o .= $OUTPUT->user_picture($user, array('courseid'=>$course->id, 'size'=>20));
+                $user = $DB->get_record('user',array('id' => $userid));
+                $o .= $OUTPUT->user_picture($user, array('courseid' => $course->id, 'size' => 20));
                 $o .= "</td>";
                 $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
                 $o .= "</tr></table>\n";
 
             }
         }
-        else if(count($unsubmitted)==0){
+        else if(count($unsubmitted) == 0){
                  $o .= '<center><p>The are currently no <b>users</b>  to display.</p></center>';
         }
 
@@ -1482,11 +1450,8 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
             // Get the current grade.
             $grade = $assign->get_user_grade($userid, false, $showattemptnumber);
 
-
-
             // Get all the submissions (for the history view).
-            list($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber) =
-                fn_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign);
+            list($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber) = fn_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign);
 
             if ($grade) {
                 $data = new stdClass();
@@ -1497,7 +1462,6 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
                 $data = new stdClass();
                 $data->grade = '';
             }
-
 
             // Now show the grading form.
             if ($attemptnumber != $maxattemptnumber) {
@@ -1516,16 +1480,13 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
                                                                               $assign
                                                                               );
 
+            /*
+            $allsubmissions = fn_get_all_submissions($userid, $assign);
 
 
-
-    /*
-    $allsubmissions = fn_get_all_submissions($userid, $assign);
-
-
-    if (count($allsubmissions) > 1) {
-        $allgrades = fn_get_all_grades($userid, $assign);
-        $history = new assign_attempt_history($allsubmissions,
+            if (count($allsubmissions) > 1) {
+            $allgrades = fn_get_all_grades($userid, $assign);
+            $history = new assign_attempt_history($allsubmissions,
                                               $allgrades,
                                               $assign->get_submission_plugins(),
                                               $assign->get_feedback_plugins(),
@@ -1534,25 +1495,17 @@ function fn_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign
                                               $assign->get_return_params(),
                                               true);
 
-        $o .= $assign->get_renderer()->render($history);
-    }
-    */
-
-
-
-
-
-
-
+            $o .= $assign->get_renderer()->render($history);
+            }
+            */
 
             $msg = get_string('viewgradingformforstudent',
                               'assign',
-                              array('id'=>$user->id, 'fullname'=>fullname($user)));
+                              array('id' => $user->id, 'fullname' => fullname($user)));
             fn_add_to_log_legacy($assign, 'view grading form', $msg);
 
         }
     }
-
 
     return $o;
 }
@@ -1576,7 +1529,7 @@ function fn_get_submission_history($submission, $grade, $user, $showattemptnumbe
             $maxattemptnumber = 0;
         }
     }
-    for ($i=1; $i<=$maxattemptnumber; $i++) {
+    for ($i = 1; $i <= $maxattemptnumber; $i++) {
         // Retrieve any submissions / grades we haven't already retrieved.
         if (!array_key_exists($i, $allsubmissions)) {
             $allsubmissions[$i] = $assign->get_user_submission($user->id, false, $i);
@@ -1586,7 +1539,7 @@ function fn_get_submission_history($submission, $grade, $user, $showattemptnumbe
             if ($allgrades[$i]) {
                 $allgrades[$i]->gradefordisplay = $assign->display_grade($allgrades[$i]->grade, false);
                 if (!array_key_exists($allgrades[$i]->grader, $graders)) {
-                    $graders[$allgrades[$i]->grader] = $DB->get_record('user', array('id'=>$allgrades[$i]->grader));
+                    $graders[$allgrades[$i]->grader] = $DB->get_record('user', array('id' => $allgrades[$i]->grader));
                 }
                 $allgrades[$i]->grader = $graders[$allgrades[$i]->grader];
             }
@@ -1602,8 +1555,8 @@ function fn_get_submission_history_view($submission, $grade, $user, $showattempt
     $attemptnumber = ($submission) ? $submission->attemptnumber : 1;
     $allsubmissions = array();
     $allgrades = array();
-    //$allsubmissions = array($attemptnumber => $submission);
-    //$allgrades = array($attemptnumber => $grade);
+    // $allsubmissions = array($attemptnumber => $submission);
+    // $allgrades = array($attemptnumber => $grade);
     $graders = array();
     if (is_null($showattemptnumber)) {
         // If attemptnumber was not set, then we already have the most recent submission.
@@ -1617,7 +1570,7 @@ function fn_get_submission_history_view($submission, $grade, $user, $showattempt
             $maxattemptnumber = 0;
         }
     }
-    for ($i=0; $i<=$maxattemptnumber; $i++) {
+    for ($i = 0; $i <= $maxattemptnumber; $i++) {
         // Retrieve any submissions / grades we haven't already retrieved.
         if (!array_key_exists($i, $allsubmissions)) {
             $allsubmissions[$i] = $assign->get_user_submission($user->id, false, $i);
@@ -1627,13 +1580,12 @@ function fn_get_submission_history_view($submission, $grade, $user, $showattempt
             if ($allgrades[$i]) {
                 $allgrades[$i]->gradefordisplay = $assign->display_grade($allgrades[$i]->grade, false);
                 if (!array_key_exists($allgrades[$i]->grader, $graders)) {
-                    $graders[$allgrades[$i]->grader] = $DB->get_record('user', array('id'=>$allgrades[$i]->grader));
+                    $graders[$allgrades[$i]->grader] = $DB->get_record('user', array('id' => $allgrades[$i]->grader));
                 }
                 $allgrades[$i]->grader = $graders[$allgrades[$i]->grader];
             }
         }
     }
-
 
     return array($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber);
 }
@@ -1660,7 +1612,7 @@ function fn_add_resubmission($userid, $assign) {
     $DB->set_field('assign_submission', 'status', ASSIGN_SUBMISSION_STATUS_RESUBMISSION, array('id' => $submission->id));
 
     fn_add_to_log_legacy($assign,'add resubmission', get_string('addresubmissionforstudent', 'assign',
-                                                     array('id'=>$user->id, 'fullname'=>fullname($user))));
+                                                     array('id' => $user->id, 'fullname' => fullname($user))));
 }
 
 function fn_remove_resubmission($userid, $assign) {
@@ -1682,10 +1634,10 @@ function fn_remove_resubmission($userid, $assign) {
 
     // Set the submission's status to resubmission.
     fn_add_to_log_legacy($assign,'remove resubmission', get_string('removeresubmissionforstudent', 'assign',
-                                                        array('id'=>$user->id, 'fullname'=>fullname($user))));
+                                                        array('id' => $user->id, 'fullname' => fullname($user))));
 }
 
-function get_grading_userid_list($assign){
+function get_grading_userid_list($assign) {
     global $CFG;
 
     require_once($CFG->dirroot.'/mod/assign/gradingtable.php');
@@ -1705,15 +1657,12 @@ function get_user_submission($assign, $userid, $create, $attemptnumber = null) {
         $userid = $USER->id;
     }
 
-
     // If the userid is not null then use userid.
-    $params = array('assignment'=>$assign->get_instance()->id, 'userid'=>$userid, 'groupid'=>0);
+    $params = array('assignment' => $assign->get_instance()->id, 'userid' => $userid, 'groupid' => 0);
     if (!is_null($attemptnumber)) {
         $params['attemptnumber'] = $attemptnumber;
     }
     $submission = $DB->get_records('assign_submission', $params, 'attemptnumber DESC', '*', 0, 1);
-
-
 
     if ($submission) {
         return reset($submission);
@@ -1748,7 +1697,7 @@ function get_user_grade($assign, $userid) {
     }
 
     // if the userid is not null then use userid
-    $grade = $DB->get_record('assign_grades', array('assignment'=>$assign->get_instance()->id, 'userid'=>$userid));
+    $grade = $DB->get_record('assign_grades', array('assignment' => $assign->get_instance()->id, 'userid' => $userid));
 
     if ($grade) {
         return $grade;
@@ -1759,7 +1708,7 @@ function get_user_grade($assign, $userid) {
 function is_graded($assign, $userid) {
     $grade = get_user_grade($assign, $userid);
     if ($grade) {
-        return ($grade->grade !== NULL && $grade->grade >= 0);
+        return ($grade->grade !== null && $grade->grade >= 0);
     }
     return false;
 }
@@ -1767,7 +1716,7 @@ function is_graded($assign, $userid) {
 function fn_render_assign_submission_history(assign_submission_history $history, $assign_renderer) {
     global $OUTPUT, $DB;
     $historyout = '';
-    for ($i=$history->maxattemptnumber; $i>0; $i--) {
+    for ($i = $history->maxattemptnumber; $i > 0; $i--) {
         /*
         if ($i == $history->attemptnumber) {
             // Do not show the currently-selected submission in the submission history.
@@ -1798,7 +1747,7 @@ function fn_render_assign_submission_history(assign_submission_history $history,
         }
 
         $t = new html_table();
-        $cell = new html_table_cell(get_string('attemptnumber', 'assign', $i).' '.$editbtn);//Submission # and button row
+        $cell = new html_table_cell(get_string('attemptnumber', 'assign', $i).' '.$editbtn);// Submission # and button row
         $cell->attributes['class'] = 'historytitle';
         $cell->colspan = 2;
         $t->data[] = new html_table_row(array($cell));
@@ -1846,8 +1795,8 @@ function fn_render_assign_submission_history(assign_submission_history $history,
 
             // Graded by.
             $cell1 = new html_table_cell(get_string('gradedby', 'assign'));
-            $cell2 = new html_table_cell($OUTPUT->user_picture(is_object($grade->grader) ? $grade->grader : $DB->get_record('user', array('id'=>$grade->grader))) .
-                                             $OUTPUT->spacer(array('width'=>30)) . fullname($grade->grader));
+            $cell2 = new html_table_cell($OUTPUT->user_picture(is_object($grade->grader) ? $grade->grader : $DB->get_record('user', array('id' => $grade->grader))) .
+                                             $OUTPUT->spacer(array('width' => 30)) . fullname($grade->grader));
             $t->data[] = new html_table_row(array($cell1, $cell2));
 
             // Feedback from plugins.
@@ -1899,24 +1848,21 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
                                                $assign->get_uniqueid_for_user($user->id),
                                                get_extra_user_fields($assign->get_context()));
 
-        //$modulename =  $assign->get_course_module()->modname;
-        $gradeitem = $DB->get_record('grade_items', array('itemtype'=>'mod', 'itemmodule'=>'assign', 'iteminstance'=>$assign->get_instance()->id));
-
-
-
+        // $modulename =  $assign->get_course_module()->modname;
+        $gradeitem = $DB->get_record('grade_items', array('itemtype' => 'mod', 'itemmodule' => 'assign', 'iteminstance' => $assign->get_instance()->id));
 
         $maxattemptnumber = isset($pageparams['maxattemptnumber']) ? $pageparams['maxattemptnumber'] : sizeof($history->allsubmissions);
 
         $resubstatus = '';
 
-        //$maxattemptnumber = isset($params['maxattemptnumber']) ? $params['maxattemptnumber'] : $params['attemptnumber'];
+        // $maxattemptnumber = isset($params['maxattemptnumber']) ? $params['maxattemptnumber'] : $params['attemptnumber'];
         $resubtype = $assign->get_instance()->attemptreopenmethod;
         if ($resubtype != ASSIGN_ATTEMPT_REOPEN_METHOD_NONE) {
             if (fn_reached_resubmission_limit($maxattemptnumber, $assign)) {
                 $resubstatus = get_string('atmaxresubmission', 'assign');
             } else if ($resubtype == ASSIGN_ATTEMPT_REOPEN_METHOD_MANUAL) {
 
-                if ($history->allsubmissions[(sizeof($history->allsubmissions)-1)]->status == 'reopened'){
+                if ($history->allsubmissions[(sizeof($history->allsubmissions) - 1)]->status == 'reopened'){
                     $resubstatus = 'Allow resubmit: <input name="checkbox" type="checkbox" id="checkbox" value="1" checked="checked" disabled="disabled" />';
                 }else{
                     $resubstatus = 'Allow resubmit: <input name="checkbox" type="checkbox" id="checkbox" value="1"  disabled="disabled" />';
@@ -1925,14 +1871,11 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             } else if ($resubtype == ASSIGN_ATTEMPT_REOPEN_METHOD_UNTILPASS) {
                 $gradepass = $gradeitem->gradepass;
                 if ($gradeitem->gradepass > 0) {
-                    //$resubstatus = get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1));
+                    // $resubstatus = get_string('resubmissiononfailedgrade', 'assign', round($gradepass,1));
                     $resubstatus = get_string('attemptreopenmethod_untilpass', 'assign');
                 }
             }
         }
-
-
-
 
         if ($assign->get_instance()->teamsubmission) {
 
@@ -1943,17 +1886,9 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
                 $groupname = ' (Default group)';
             }
 
-
         }else{
             $groupname = '';
         }
-
-
-
-
-
-
-
 
         $header = '<table class="headertable"><tr>';
 
@@ -1962,16 +1897,15 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             $header .= '<br />Assignment ' .$assign->get_instance()->name.'</td>';
         } else {
             $header .= '<td width="35px">'.$OUTPUT->user_picture($summary->user).'</td>';
-            //$header .= $OUTPUT->spacer(array('width'=>30));
-            $urlparams = array('id' => $summary->user->id, 'course'=>$summary->courseid);
+            // $header .= $OUTPUT->spacer(array('width'=>30));
+            $urlparams = array('id' => $summary->user->id, 'course' => $summary->courseid);
             $url = new moodle_url('/user/view.php', $urlparams);
 
-            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank', 'class'=>'userlink')). $groupname. '</div>';
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target' => '_blank', 'class' => 'userlink')). $groupname. '</div>';
             $header .= '<div style="margin-top:5px; color:white;">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
             $header .= '<td align="right" style="color:white;">'.$resubstatus.'</td>';
         }
         $header .= '</tr></table>';
-
 
     }
 
@@ -1982,14 +1916,12 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
     $cell->colspan = 3;
     $t->data[] = new html_table_row(array($cell));
 
-
-
     $submitted_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/text.gif" valign="absmiddle"> ';
     $marked_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $saved_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
     $marked_icon_incomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
     // print_r($history);die;
-    for ($i=$history->maxsubmissionnum; $i>=0; $i--) {
+    for ($i = $history->maxsubmissionnum; $i >= 0; $i--) {
         /*
         if ($i == $history->attemptnumber) {
             // Do not show the currently-selected submission in the submission history.
@@ -2007,13 +1939,11 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
         $submission = $history->allsubmissions[$i];
         $grade = $history->allgrades[$i];
 
-
         if (($i == $history->maxsubmissionnum) && (isset($grade->grade))){
             $lastsubmission_class = (($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? 'bg_green' : 'bg_orange';
         }else{
             $lastsubmission_class = '';
         }
-
 
         $editbtn = ''; /*
         if ($history->grading) {
@@ -2026,7 +1956,7 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             $editurl = new moodle_url('/mod/assign/view.php', $params);
             $editbtn = $OUTPUT->single_button($editurl, get_string('editfeedback', 'mod_assign'), 'get');
         }
-       */
+        */
         if ($grade) {
 
             $cell1 = new html_table_cell($grade->gradefordisplay);
@@ -2034,7 +1964,6 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             if ($i == $history->maxsubmissionnum){
                 $cell1->attributes['class'] = $lastsubmission_class;
             }
-
 
             if ($submission->status == 'draft'){
                 $cell2 = new html_table_cell($saved_icon . 'Draft');
@@ -2057,8 +1986,6 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
 
             $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
 
-
-
             $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
             $cell2 = new html_table_cell(userdate($grade->timemodified));
             if ($i == $history->maxsubmissionnum){
@@ -2067,10 +1994,7 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
             }
             $t->data[] = new html_table_row(array($cell1, $cell2));
 
-
-
         }
-
 
     }
 
@@ -2079,7 +2003,7 @@ function fn_render_assign_submission_history_summary(assign_submission_history $
     $o = '';
     if ($historyout) {
         $o .= $assign_renderer->box_start('generalbox submissionhistory_summary');
-        //$o .= $assign_renderer->heading(get_string('submissionhistory', 'assign'), 3);
+        // $o .= $assign_renderer->heading(get_string('submissionhistory', 'assign'), 3);
 
         $o .= $historyout;
 
@@ -2093,7 +2017,6 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
     global $OUTPUT, $DB, $CFG, $pageparams;
     $o = '';
 
-
     if ($user) {
         $viewfullnames = has_capability('moodle/site:viewfullnames', $assign->get_course_context());
         $summary = new assign_user_summary($user,
@@ -2101,15 +2024,10 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
                                                $viewfullnames,
                                                $assign->is_blind_marking(),
                                                $assign->get_uniqueid_for_user($user->id),
-                                               NULL);
+                                               null);
 
-        //$modulename =  $assign->get_course_module()->modname;
-        $gradeitem = $DB->get_record('grade_items', array('itemtype'=>'mod', 'itemmodule'=>'assign', 'iteminstance'=>$assign->get_instance()->id));
-
-
-
-
-
+        // $modulename =  $assign->get_course_module()->modname;
+        $gradeitem = $DB->get_record('grade_items', array('itemtype' => 'mod', 'itemmodule' => 'assign', 'iteminstance' => $assign->get_instance()->id));
 
         if ($assign->get_instance()->teamsubmission) {
 
@@ -2120,17 +2038,9 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
                 $groupname = ' (Default group)';
             }
 
-
         }else{
             $groupname = '';
         }
-
-
-
-
-
-
-
 
         $header = '<table class="headertable"><tr>';
 
@@ -2139,29 +2049,21 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
             $header .= '<br />Assignment ' .$assign->get_instance()->name.'</td>';
         } else {
             $header .= '<td width="35px">'.$OUTPUT->user_picture($summary->user).'</td>';
-            //$header .= $OUTPUT->spacer(array('width'=>30));
-            $urlparams = array('id' => $summary->user->id, 'course'=>$summary->courseid);
+            // $header .= $OUTPUT->spacer(array('width'=>30));
+            $urlparams = array('id' => $summary->user->id, 'course' => $summary->courseid);
             $url = new moodle_url('/user/view.php', $urlparams);
 
-            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target'=>'_blank', 'class'=>'userlink')). $groupname. '</div>';
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($summary->user, $summary->viewfullnames), null, array('target' => '_blank', 'class' => 'userlink')). $groupname. '</div>';
             $header .= '<div style="margin-top:5px; color:white;">Assignment: <a target="_blank" class="marking_header_link" title="Assignment" href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$assign->get_course_module()->id.'">' .$assign->get_instance()->name.'</a></div></td>';
         }
         $header .= '</tr></table>';
 
-
     }
 
+     // echo $header;die;
 
-     //echo $header;die;
-
-
-
-
-
-
-
-    //$o .= $OUTPUT->container_start('submissionstatustable');
-    //$o .= $OUTPUT->heading(get_string('submissionstatusheading', 'assign'), 3);
+    // $o .= $OUTPUT->container_start('submissionstatustable');
+    // $o .= $OUTPUT->heading(get_string('submissionstatusheading', 'assign'), 3);
     $time = time();
     /*
     if ($status->allowsubmissionsfromdate &&
@@ -2175,7 +2077,7 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
         $o .= $OUTPUT->box_end();
     }
     */
-    //$o .= $OUTPUT->box_start('boxaligncenter submissionsummarytable');
+    // $o .= $OUTPUT->box_start('boxaligncenter submissionsummarytable');
 
     $t = new html_table();
     $t->attributes['class'] = 'generaltable historytable';
@@ -2183,8 +2085,6 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
     $cell->attributes['class'] = 'historyheader';
     $cell->colspan = 3;
     $t->data[] = new html_table_row(array($cell));
-
-
 
     $submitted_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/text.gif" valign="absmiddle"> ';
     $marked_icon = '<img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
@@ -2393,57 +2293,49 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
     }
     */
 
-
-
         $grade->gradefordisplay = $assign->display_grade($grade->grade, false);
 
         $submission = $assign->get_user_submission($user->id, false);
 
-        if ($grade) {
+    if ($grade) {
 
-            $cell1 = new html_table_cell($grade->gradefordisplay);
-            $cell1->rowspan = 2;
+        $cell1 = new html_table_cell($grade->gradefordisplay);
+        $cell1->rowspan = 2;
 
+        if ($submission->status == 'draft'){
+            $cell2 = new html_table_cell($saved_icon . 'Draft');
+        }else{
+            $cell2 = new html_table_cell($submitted_icon . get_string('submitted', 'assign'));
+        }
 
-
-            if ($submission->status == 'draft'){
-                $cell2 = new html_table_cell($saved_icon . 'Draft');
-            }else{
-                $cell2 = new html_table_cell($submitted_icon . get_string('submitted', 'assign'));
-            }
-
-            $cell3 = new html_table_cell(userdate($submission->timemodified));
-            $lastsubmission_class = '';
-            if (true){
-                $cell3->text = '<div style="float:left;">'.$cell3->text.'
+        $cell3 = new html_table_cell(userdate($submission->timemodified));
+        $lastsubmission_class = '';
+        if (true){
+            $cell3->text = '<div style="float:left;">'.$cell3->text.'
                                 </div>
                                 <div style="float:right;">
                                 <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.$pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.$pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].'&expand=1&userid='.$user->id.'">
                                 <img width="16" height="16" border="0" alt="Assignment" src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
-                $cell2->attributes['class'] = $lastsubmission_class;
-                $cell3->attributes['class'] = $lastsubmission_class;
-            }
-
-            $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
-
-
-
-            $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
-            $cell2 = new html_table_cell(userdate($grade->timemodified));
-            if (true){
-                $cell1->attributes['class'] = $lastsubmission_class;
-                $cell2->attributes['class'] = $lastsubmission_class;
-            }
-            $t->data[] = new html_table_row(array($cell1, $cell2));
-
-
-
+            $cell2->attributes['class'] = $lastsubmission_class;
+            $cell3->attributes['class'] = $lastsubmission_class;
         }
 
+        $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
+
+        $cell1 = new html_table_cell(((($gradeitem->gradepass > 0) && ($grade->grade >= $gradeitem->gradepass)) ? $marked_icon : $marked_icon_incomplete) . 'Marked');
+        $cell2 = new html_table_cell(userdate($grade->timemodified));
+        if (true){
+            $cell1->attributes['class'] = $lastsubmission_class;
+            $cell2->attributes['class'] = $lastsubmission_class;
+        }
+        $t->data[] = new html_table_row(array($cell1, $cell2));
+
+    }
+
     $historyout = html_writer::table($t);
-    //$o .= $OUTPUT->box_end();
+    // $o .= $OUTPUT->box_end();
     /*
     // Links.
     if ($status->view == assign_submission_status::STUDENT_VIEW) {
@@ -2472,11 +2364,10 @@ function fn_render_assign_submission_status(assign_submission_status $status, $a
     $o .= $OUTPUT->container_end();
     */
 
-
     $o = '';
     if ($historyout) {
         $o .= $assign_renderer->box_start('generalbox submissionhistory_summary');
-        //$o .= $assign_renderer->heading(get_string('submissionhistory', 'assign'), 3);
+        // $o .= $assign_renderer->heading(get_string('submissionhistory', 'assign'), 3);
 
         $o .= $historyout;
 
@@ -2504,10 +2395,10 @@ function fn_get_all_submissions($userid, $assign) {
         }
 
         // Params to get the group submissions.
-        $params = array('assignment'=>$assign->get_instance()->id, 'groupid'=>$groupid, 'userid'=>0);
+        $params = array('assignment' => $assign->get_instance()->id, 'groupid' => $groupid, 'userid' => 0);
     } else {
         // Params to get the user submissions.
-        $params = array('assignment'=>$assign->get_instance()->id, 'userid'=>$userid);
+        $params = array('assignment' => $assign->get_instance()->id, 'userid' => $userid);
     }
 
     // Return the submissions ordered by attempt.
@@ -2524,7 +2415,7 @@ function fn_get_all_grades($userid, $assign) {
         $userid = $USER->id;
     }
 
-    $params = array('assignment'=>$assign->get_instance()->id, 'userid'=>$userid);
+    $params = array('assignment' => $assign->get_instance()->id, 'userid' => $userid);
 
     $grades = $DB->get_records('assign_grades', $params, 'attemptnumber ASC');
 
@@ -2552,7 +2443,7 @@ function fn_get_all_grades($userid, $assign) {
             $grade->grader = $gradercache[$grade->grader];
         } else {
             // Not in cache - need to load the grader record.
-            $grade->grader = $DB->get_record('user', array('id'=>$grade->grader));
+            $grade->grader = $DB->get_record('user', array('id' => $grade->grader));
             $gradercache[$grade->grader->id] = $grade->grader;
         }
 
@@ -2599,9 +2490,9 @@ function fn_process_add_attempt($userid, $assign) {
 
     // Create the new submission record for the group/user.
     if ($assign->get_instance()->teamsubmission) {
-        $submission = $assign->get_group_submission($userid, 0, true, $submission->attemptnumber+1);
+        $submission = $assign->get_group_submission($userid, 0, true, $submission->attemptnumber + 1);
     } else {
-        $submission = $assign->get_user_submission($userid, true, $submission->attemptnumber+1);
+        $submission = $assign->get_user_submission($userid, true, $submission->attemptnumber + 1);
     }
 
     // Set the status of the new attempt to reopened.
@@ -2620,7 +2511,7 @@ function fn_update_submission(stdClass $submission, $userid, $updatetime, $teams
     if ($updatetime) {
         $submission->timemodified = time();
     }
-    $result= $DB->update_record('assign_submission', $submission);
+    $result = $DB->update_record('assign_submission', $submission);
     if ($result) {
         fn_gradebook_item_update($submission,null,$assign);
     }
@@ -2711,8 +2602,8 @@ function render_assign_attempt_history(assign_attempt_history $history) {
             $submissionsummary = get_string('nosubmission', 'assign');
         }
 
-        $attemptsummaryparams = array('attemptnumber'=>$submission->attemptnumber+1,
-                                      'submissionsummary'=>$submissionsummary);
+        $attemptsummaryparams = array('attemptnumber' => $submission->attemptnumber + 1,
+                                      'submissionsummary' => $submissionsummary);
         $o .= $this->heading(get_string('attemptheading', 'assign', $attemptsummaryparams), 4);
 
         $t = new html_table();
@@ -2746,20 +2637,20 @@ function render_assign_attempt_history(assign_attempt_history $history) {
         if ($grade) {
             // Heading 'feedback'.
             $title = get_string('feedback', 'assign', $i);
-            $title .= $this->output->spacer(array('width'=>10));
+            $title .= $this->output->spacer(array('width' => 10));
             if ($history->cangrade) {
                 // Edit previous feedback.
                 $returnparams = http_build_query($history->returnparams);
                 $urlparams = array('id' => $history->coursemoduleid,
-                               'userid'=>$grade->userid,
-                               'attemptnumber'=>$grade->attemptnumber,
-                               'action'=>'grade',
-                               'rownum'=>0,
-                               'returnaction'=>$history->returnaction,
-                               'returnparams'=>$returnparams);
+                               'userid' => $grade->userid,
+                               'attemptnumber' => $grade->attemptnumber,
+                               'action' => 'grade',
+                               'rownum' => 0,
+                               'returnaction' => $history->returnaction,
+                               'returnparams' => $returnparams);
                 $url = new moodle_url('/mod/assign/view.php', $urlparams);
                 $icon = new pix_icon('gradefeedback',
-                                        get_string('editattemptfeedback', 'assign', $grade->attemptnumber+1),
+                                        get_string('editattemptfeedback', 'assign', $grade->attemptnumber + 1),
                                         'mod_assign');
                 $title .= $this->output->action_icon($url, $icon);
             }
@@ -2781,7 +2672,7 @@ function render_assign_attempt_history(assign_attempt_history $history) {
             // Graded by.
             $cell1 = new html_table_cell($gradedbystr);
             $cell2 = new html_table_cell($this->output->user_picture($grade->grader) .
-                                         $this->output->spacer(array('width'=>30)) . fullname($grade->grader));
+                                         $this->output->spacer(array('width' => 30)) . fullname($grade->grader));
             $t->data[] = new html_table_row(array($cell1, $cell2));
 
             // Feedback from plugins.
@@ -2889,7 +2780,7 @@ function _assignment_status($mod, $userid) {
 
         switch ($assignment->assignmenttype) {
             case "upload":
-                if($assignment->var4){ //if var4 enable then assignment can be saved
+                if($assignment->var4){ // if var4 enable then assignment can be saved
                     if(!empty($submission->timemodified)
                             && (empty($submission->data2))
                             && (empty($submission->timemarked))){
@@ -2897,13 +2788,13 @@ function _assignment_status($mod, $userid) {
 
                     }
                     else if(!empty($submission->timemodified)
-                            && ($submission->data2='submitted')
+                            && ($submission->data2 = 'submitted')
                             && empty($submission->timemarked)){
                         return 'submitted';
                     }
                     else if(!empty($submission->timemodified)
-                            && ($submission->data2='submitted')
-                            && ($submission->grade==-1)){
+                            && ($submission->data2 = 'submitted')
+                            && ($submission->grade == -1)){
                         return 'submitted';
 
                     }
@@ -2933,7 +2824,7 @@ function _assignment_status($mod, $userid) {
             return false; // Doesn't exist
         }
 
-        if (!$submission = $DB->get_records('assign_submission', array('assignment'=>$assignment->id, 'userid'=>$userid), 'attemptnumber DESC', '*', 0, 1)) {
+        if (!$submission = $DB->get_records('assign_submission', array('assignment' => $assignment->id, 'userid' => $userid), 'attemptnumber DESC', '*', 0, 1)) {
             return false;
         }else{
             $submission = reset($submission);
@@ -2945,10 +2836,10 @@ function _assignment_status($mod, $userid) {
             $attemptnumber = $submission->attemptnumber - 1;
         }
 
-        if ($submissionisgraded = $DB->get_records('assign_grades', array('assignment'=>$assignment->id, 'userid'=>$userid, 'attemptnumber' => $attemptnumber), 'attemptnumber DESC', '*', 0, 1)) {
+        if ($submissionisgraded = $DB->get_records('assign_grades', array('assignment' => $assignment->id, 'userid' => $userid, 'attemptnumber' => $attemptnumber), 'attemptnumber DESC', '*', 0, 1)) {
             $submissionisgraded = reset($submissionisgraded);
             if ($submissionisgraded->grade > -1){
-              if ($submission->timemodified > $submissionisgraded->timemodified) {
+                if ($submission->timemodified > $submissionisgraded->timemodified) {
                     $graded = false;
                 }else{
                     $graded = true;
@@ -2959,7 +2850,6 @@ function _assignment_status($mod, $userid) {
         }else {
             $graded = false;
         }
-
 
         if ($submission->status == 'draft') {
             if($graded){
@@ -3014,7 +2904,7 @@ function fn_add_to_log_legacy($assign, $action = '', $info = '', $url='', $retur
     if ($return) {
         // We only need to call debugging when returning a value. This is because the call to
         // call_user_func_array('add_to_log', $args) will trigger a debugging message of it's own.
-        //debugging('The mod_assign add_to_log() function is now deprecated.', DEBUG_DEVELOPER);
+        // debugging('The mod_assign add_to_log() function is now deprecated.', DEBUG_DEVELOPER);
         return $args;
     }
     call_user_func_array('_fn_add_to_log_legacy', $args);
@@ -3070,7 +2960,8 @@ function fn_build_ungraded_tree ($courses, $supported_modules, $class_for_hide='
                 }
             }
 
-            if (($total_ungraded == 0) && !$showzeroungraded) {} else {
+            if (($total_ungraded == 0) && !$showzeroungraded) {
+            } else {
                 $course_text = '<dt id="courseid' . $course->id . '" class="cmod">
                                  <div class="toggle open" onclick="$(\'dt#courseid' . $course->id . ' > div.toggle\').toggleClass(\'open\');$(\'dt#courseid' . $course->id . ' ~ dd\').toggleClass(\'block_fn_marking_hide\');"></div>
                                  ' . $courseicon . '

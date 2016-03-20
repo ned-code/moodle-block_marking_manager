@@ -1,7 +1,7 @@
 <?PHP
 require_once($CFG->dirroot.'/rating/lib.php');
 
-if (! $forum = $DB->get_record("forum", array("id"=>$iid))) {
+if (! $forum = $DB->get_record("forum", array("id" => $iid))) {
     print_error("Forum ID was incorrect or no longer exists");
 }
 
@@ -12,7 +12,7 @@ $isteacheredit  = has_capability('moodle/course:update', $context);
 if ($cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
     $buttontext = "";
 } else {
-    $cm->id = NULL;
+    $cm->id = null;
     $buttontext = "";
 }
 
@@ -45,7 +45,7 @@ echo '<br />';
 */
 $student_id_list = implode(',', array_keys($students));
 
-//Get students from forum_posts
+// Get students from forum_posts
 $st_posts = $DB->get_records_sql("SELECT DISTINCT u.*, (
                                     SELECT COUNT(r.rating) AS rawgrade
                                                                  FROM mdl_user us
@@ -102,7 +102,7 @@ if(($show == 'unmarked') || ($show == 'marked')){
 
         $forumtypes = forum_get_forum_types();
 
-        $permission=CAP_ALLOW;
+        $permission = CAP_ALLOW;
         $rolenamestring = null;
 
         $rolenames = get_role_names_with_caps_in_context($modcontext, array('moodle/rating:rate', 'mod/'.$cm->modname.':rate'));
@@ -149,9 +149,9 @@ if(($show == 'unmarked') || ($show == 'marked')){
 
         echo '<div style="overflow: hidden; margin: 10px 0px 0px;">';
         echo '<div style="float: left;">'.get_string('student_have_posted', 'block_fn_marking').'</div>';
-        if(($show =='marked') && $st_posts){
+        if(($show == 'marked') && $st_posts){
             echo '<div style="float: right;" ><button id="showForum">Click to see all  rated discussion.</button></div>';
-        } elseif(($show =='unmarked') && $st_posts){
+        } else if(($show == 'unmarked') && $st_posts){
             echo '<div style="float: right;"><button id="showForum">Open Forum</button></div>';
         }
         echo '</div>';
@@ -187,13 +187,14 @@ if(($show == 'unmarked') || ($show == 'marked')){
                               AND r.ratingarea = :ratingarea
                               AND i.userid = :userid";
 
-            $grade = $DB->get_record_sql($sql_rating, array('contextid'=>$modcontext->id, 'component'=>'mod_forum', 'ratingarea'=>'post', 'userid'=>$st_post->id));
+            $grade = $DB->get_record_sql($sql_rating, array('contextid' => $modcontext->id, 'component' => 'mod_forum', 'ratingarea' => 'post', 'userid' => $st_post->id));
 
             $rating_str = ($st_post->numofrating == 0) ? '-' : round($grade->rawgrade, 0).'/'.$forum->scale;
 
-            $cell_class='';
-            if ($rating_str == '-')
+            $cell_class = '';
+            if ($rating_str == '-') {
                 $cell_class = ' fn-highlighted';
+            }
 
             echo $OUTPUT->user_picture($st_post)."</td>";
 
