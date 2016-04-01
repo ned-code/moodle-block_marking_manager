@@ -6,10 +6,10 @@
             $(this).click(function(){
 
                 $.fn.popupWindow.defaultSettings = {
-                    centerBrowser:0, // center window over browser window? {1 (YES) or 0 (NO)}. overrides top and left
-                    centerScreen:0, // center window over entire screen? {1 (YES) or 0 (NO)}. overrides top and left
-                    height:500, // sets the height in pixels of the window.
-                    left:0, // left position when the window appears.
+                    centerBrowser:0, // Center window over browser window? {1 (YES) or 0 (NO)}. overrides top and left.
+                    centerScreen:0, // Center window over entire screen? {1 (YES) or 0 (NO)}. overrides top and left.
+                    height:500, // Sets the height in pixels of the window.
+                    left:0, // Left position when the window appears.
                     location:0, // determines whether the address bar is displayed {1 (YES) or 0 (NO)}.
                     menubar:0, // determines whether the menu bar is displayed {1 (YES) or 0 (NO)}.
                     resizable:0, // whether the window can be resized {1 (YES) or 0 (NO)}. Can also be overloaded using resizable.
@@ -32,7 +32,7 @@
 
                 if(settings.centerBrowser){
 
-                    if ($.browser.msie) {// hacked together for IE browsers
+                    if ($.browser.msie) {// Hacked together for IE browsers.
                         centeredY = (window.screenTop - 120) + ((((document.documentElement.clientHeight + 120) / 2) - (settings.height / 2)));
                         centeredX = window.screenLeft + ((((document.body.offsetWidth + 20) / 2) - (settings.width / 2)));
                     }else{

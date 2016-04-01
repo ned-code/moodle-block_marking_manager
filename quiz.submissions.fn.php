@@ -1,16 +1,34 @@
 <?php
-global $DB, $OUTPUT, $FULLME;
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * @package    block_ned_marking
+ * @copyright  Michael Gardener <mgardener@cissq.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
-// require_once($CFG->dirroot . '/blocks/fn_marking/quiz_report/default.php');
 
-/// Get the quizm
+// Get the quizm.
 if (! $quiz = $DB->get_record("quiz", array("id" => $iid))) {
     print_error("Course module is incorrect");
 }
 
-/// Get the course module entry
+// Get the course module entry.
 if (! $cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id)) {
     print_error("Course Module ID was incorrect");
 }
@@ -19,11 +37,9 @@ $ctx = context_module::instance($cm->id);
 
 $currentgroup = groups_get_activity_group($cm, true);
 $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-$student_ids = implode(',', array_keys($students));
+$studentids = implode(',', array_keys($students));
 
-
-
-// Paging options:
+// Paging options.
 $qsort      = optional_param('qsort', 'firstname', PARAM_ALPHANUM);
 $qdir       = optional_param('qdir', 'ASC', PARAM_ALPHA);
 
@@ -42,12 +58,19 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         }
     }
 
-    $quiz_slots = $DB->get_records('quiz_slots', array('quizid' => $quiz->id), 'slot ASC');
+    $quizslots = $DB->get_records('quiz_slots', array('quizid' => $quiz->id), 'slot ASC');
 
-    // use paging
-    $sql_quiz_attempts_count = "SELECT COUNT(1) FROM {user} u LEFT JOIN {quiz_attempts} quiza ON quiza.userid = u.id AND quiza.quiz = ? WHERE u.id IN ($student_ids) AND quiza.preview = 0 AND quiza.id IS NOT NULL $filter";
+    // Use paging.
+    $sqlquizattemptscount = "SELECT COUNT(1)
+                               FROM {user} u
+                          LEFT JOIN {quiz_attempts} quiza
+                                 ON quiza.userid = u.id
+                                AND quiza.quiz = ?
+                              WHERE u.id IN ($studentids)
+                                AND quiza.preview = 0
+                                AND quiza.id IS NOT NULL $filter";
 
-    $totalcount = $DB->count_records_sql($sql_quiz_attempts_count, array($quiz->id));
+    $totalcount = $DB->count_records_sql($sqlquizattemptscount, array($quiz->id));
 
     $columns = array(
         'userpicture',
@@ -56,20 +79,21 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     );
     $headers = array(
         'userpicture' => '',
-        'name' => get_string('student', 'block_fn_marking'),
+        'name' => get_string('student', 'block_ned_marking'),
         'sumgrades' => 'Grades<br>/' . round($quiz->grade),
     );
-    // Build Headers
-    foreach ($quiz_slots as $quiz_slot) {
-        $columns [] = 'qsgrade' . $quiz_slot->slot;
-        $headers['qsgrade' . $quiz_slot->slot] = 'Q.' . $quiz_slot->slot . '<br>/' . round($quiz_slot->maxmark * ($quiz->grade / $quiz->sumgrades));
+    // Build Headers.
+    foreach ($quizslots as $quizslot) {
+        $columns [] = 'qsgrade' . $quizslot->slot;
+        $headers['qsgrade' . $quizslot->slot] = 'Q.' . $quizslot->slot . '<br>/' .
+            round($quizslot->maxmark * ($quiz->grade / $quiz->sumgrades));
     }
 
     if ($qsort) {
-        $sort_sql = " ORDER BY $qsort $qdir";
+        $sortsql = " ORDER BY $qsort $qdir";
     }
 
-    $sql_quiz_attempts = "SELECT CONCAT(u.id, '#', COALESCE(quiza.attempt, 0)) AS uniqueid,
+    $sqlquizattempts = "SELECT CONCAT(u.id, '#', COALESCE(quiza.attempt, 0)) AS uniqueid,
 							(CASE WHEN (quiza.state = 'finished' AND NOT EXISTS (
 							SELECT 1 FROM {quiz_attempts} qa2
 							WHERE qa2.quiz = quiza.quiz AND
@@ -102,7 +126,8 @@ if (($show == 'marked') || ($show == 'unmarked')) {
 							FROM
 							{user} u
 							LEFT JOIN {quiz_attempts} quiza ON
-							quiza.userid = u.id AND quiza.quiz = ? WHERE u.id IN ($student_ids) AND quiza.preview = 0 AND quiza.id IS NOT NULL $filter $sort_sql";
+							quiza.userid = u.id AND quiza.quiz = ? WHERE u.id IN ($studentids)
+							AND quiza.preview = 0 AND quiza.id IS NOT NULL $filter $sortsql";
 
 
     foreach ($columns as $column) {
@@ -127,7 +152,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         if (($column == 'userpicture') || ($column == 'edit')) {
             $$column = $headers[$column];
         } else {
-            $qsorting_params = array(
+            $qsortingparams = array(
                 'view' => $view,
                 'show' => $show,
                 'mid' => $mid,
@@ -137,8 +162,8 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                 'qdir' => $columndir
             );
 
-            $sortingURL = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $qsorting_params);
-            $$column = "<a href=\"" . $sortingURL->out() . "\">" . $headers[$column] . "</a>$columnicon";
+            $sortingurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $qsortingparams);
+            $$column = "<a href=\"" . $sortingurl->out() . "\">" . $headers[$column] . "</a>$columnicon";
         }
     }
 
@@ -150,41 +175,45 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     $table->wrap = array('', 'nowrap', '');
 
 
-    $tableRows = $DB->get_records_sql($sql_quiz_attempts, array($quiz->id), $page * $perpage, $perpage);
+    $tablerows = $DB->get_records_sql($sqlquizattempts, array($quiz->id), $page * $perpage, $perpage);
 
     $counter = ($page * $perpage);
 
-    foreach ($tableRows as $tableRow) {
+    foreach ($tablerows as $tablerow) {
         $row = new html_table_row();
-        $cell_rowcount = ++$counter;
-        $cell_array = array();
+        $cellrowcount = ++$counter;
+        $cellarray = array();
 
-        // USER PICTURE
-        $user = $DB->get_record('user', array('id' => $tableRow->userid));
-        $cell_array[] = new html_table_cell($OUTPUT->user_picture($user, array('size' => 35, 'class' => 'welcome_userpicture')));
+        // USER PICTURE.
+        $user = $DB->get_record('user', array('id' => $tablerow->userid));
+        $cellarray[] = new html_table_cell($OUTPUT->user_picture($user, array('size' => 35, 'class' => 'welcome_userpicture')));
 
-        // NAME
-        $cell_name = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' . $tableRow->userid . '&amp;course=' . $quiz->course . '">' . $tableRow->firstname . ' ' . $tableRow->lastname . '</a><br>
-                      <a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' . $tableRow->attempt . '" class="reviewlink">Review attempt</a></td>';
-        $cell_array[] = new html_table_cell($cell_name);
+        // NAME.
+        $cellname = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' . $tablerow->userid . '&amp;course=' .
+            $quiz->course . '">' . $tablerow->firstname . ' ' . $tablerow->lastname . '</a><br>
+                      <a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' .
+            $tablerow->attempt . '" class="reviewlink">Review attempt</a></td>';
+        $cellarray[] = new html_table_cell($cellname);
 
 
 
-        // SUMGRADES
-        if ($tableRow->sumgrades) {
-            $attempt_grade = round($tableRow->sumgrades * ($quiz->grade / $quiz->sumgrades), 2);
-            $cell_sumgardes = '<a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' . $tableRow->attempt . '" title="Review attempt">' . $attempt_grade . '</a>';
+        // SUMGRADES.
+        if ($tablerow->sumgrades) {
+            $attemptgrade = round($tablerow->sumgrades * ($quiz->grade / $quiz->sumgrades), 2);
+            $cellsumgardes = '<a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' .
+                $tablerow->attempt . '" title="Review attempt">' . $attemptgrade . '</a>';
         } else {
-            $cell_sumgardes = '<a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' . $tableRow->attempt . '" title="Review attempt">Not yet graded</a>';
+            $cellsumgardes = '<a href="' . $CFG->wwwroot . '/mod/quiz/review.php?attempt=' .
+                $tablerow->attempt . '" title="Review attempt">Not yet graded</a>';
         }
-        $cell_array[] = $cell_sumgardes;
+        $cellarray[] = $cellsumgardes;
 
-        foreach ($quiz_slots as $quiz_slot) {
+        foreach ($quizslots as $quizslot) {
             $table->wrap[] = 'nowrap';
             $table->align[] = 'center';
-            $columns [] = 'qsgrade' . $quiz_slot->slot;
+            $columns [] = 'qsgrade' . $quizslot->slot;
 
-            $sql_usages = "SELECT qasd.id,
+            $sqlusages = "SELECT qasd.id,
                                   quiza.sumgrades,
                                   qu.preferredbehaviour,
                                   qa.slot,
@@ -209,48 +238,57 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                               AND quiza.id = ?
                          ORDER BY qas.id DESC";
 
-            $question_step = $DB->get_records_sql($sql_usages, array($quiz_slot->slot, $tableRow->attempt));
-            $question_step = reset($question_step);
+            $questionstep = $DB->get_records_sql($sqlusages, array($quizslot->slot, $tablerow->attempt));
+            $questionstep = reset($questionstep);
             $quiz->sumgrades;
             $quiz->grade;
-            $question_step_grade = round(($question_step->fraction * $question_step->maxmark) * ($quiz->grade / $quiz->sumgrades), 2);
-            // print_object($question_step);
+            $questionstepgrade = round(($questionstep->fraction * $questionstep->maxmark) * ($quiz->grade / $quiz->sumgrades), 2);
 
-            if ($question_step->state == 'gradedwrong') {
-                $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
+            if ($questionstep->state == 'gradedwrong') {
+                $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
+                    $tablerow->attempt . '&amp;slot=' .
+                    $quizslot->slot . '" title="Review response">
                                 <span class="que">
-                                    <img src="' . $OUTPUT->pix_url('i/grade_incorrect', 'core') . '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
-                                    <span class="incorrect">' . $question_step_grade . '</span>
+                                    <img src="' . $OUTPUT->pix_url('i/grade_incorrect', 'core') .
+                                    '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
+                                    <span class="incorrect">' . $questionstepgrade . '</span>
                                 </span>
                              </a>';
-            } else if (($question_step->state == 'gradedright') || ($question_step->state == 'mangrright')) {
-                $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
+            } else if (($questionstep->state == 'gradedright') || ($questionstep->state == 'mangrright')) {
+                $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
+                    $tablerow->attempt . '&amp;slot=' .
+                    $quizslot->slot . '" title="Review response">
                                 <span class="que">
-                                    <img src="' . $OUTPUT->pix_url('i/grade_correct', 'core') . '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
-                                    <span class="correct">' . $question_step_grade . '</span>
+                                    <img src="' . $OUTPUT->pix_url('i/grade_correct', 'core') .
+                                    '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
+                                    <span class="correct">' . $questionstepgrade . '</span>
                                 </span>
                              </a>';
-            } else if ($question_step->state == 'needsgrading') {
-                $cell = new html_table_cell('<a target="_blank" href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
+            } else if ($questionstep->state == 'needsgrading') {
+                $cell = new html_table_cell('<a target="_blank" href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
+                    $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
                                     <span class="que">
-                                        <img src="' . $OUTPUT->pix_url('i/edit', 'core') . '" title="Edit" alt="Editt" class="icon fn-icon">
+                                        <img src="' . $OUTPUT->pix_url('i/edit', 'core') .
+                                        '" title="Edit" alt="Editt" class="icon fn-icon">
                                     </span></a>');
                 $cell->attributes = array('class' => 'fn-highlighted');
-                $cell_array[] = $cell;
-            } else if ($question_step->state == 'mangrpartial') {
-                $cell_array[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' . $tableRow->attempt . '&amp;slot=' . $quiz_slot->slot . '" title="Review response">
+                $cellarray[] = $cell;
+            } else if ($questionstep->state == 'mangrpartial') {
+                $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
+                    $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
                                     <span class="que">
-                                        <img src="' . $OUTPUT->pix_url('i/grade_partiallycorrect', 'core') . '" title="Partially correct" alt="Partially correct" class="icon fn-icon">
-                                        <span class="partiallycorrect">' . $question_step_grade . '</span>
+                                        <img src="' . $OUTPUT->pix_url('i/grade_partiallycorrect', 'core') .
+                                        '" title="Partially correct" alt="Partially correct" class="icon fn-icon">
+                                        <span class="partiallycorrect">' . $questionstepgrade . '</span>
                                     </span></a>';
             }
         }
 
-        $row->cells = $cell_array;
+        $row->cells = $cellarray;
         $table->data[] = $row;
     }
 
-    $target_on_params = array(
+    $targetonparams = array(
         'courseid' => $courseid,
         'show' => $show,
         'view' => $view,
@@ -260,7 +298,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'dir' => $qdir,
         'qallparticipants' => 1
     );
-    $target_off_params = array(
+    $targetoffparams = array(
         'courseid' => $courseid,
         'show' => $show,
         'view' => $view,
@@ -270,22 +308,25 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'dir' => $qdir,
         'qallparticipants' => 0
     );
-    $target_on_url = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $target_on_params);
-    $target_off_url = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $target_off_params);
+    $targetonurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetonparams);
+    $targetoffurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetoffparams);
 
     echo '<div class="quiz-top-menu"><div class="qdefault-view">';
-    echo '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id . '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> Moodle default view</a>';
+    echo '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
+        '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> Moodle default view</a>';
     echo '</div><div class="qall-participants">';
     if ($qallparticipants) {
-        echo '<input checked="checked" id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' . $target_on_url->out() . '" data-target-off="' . $target_off_url->out() . '"> Show all participants';
+        echo '<input checked="checked" id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
+            $targetonurl->out() . '" data-target-off="' . $targetoffurl->out() . '"> Show all participants';
     } else {
-        echo '<input id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' . $target_on_url->out() . '" data-target-off="' . $target_off_url->out() . '"> Show all participants';
+        echo '<input id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
+            $targetonurl->out() . '" data-target-off="' . $targetoffurl->out() . '"> Show all participants';
     }
     echo '</div></div>';
 
     echo '<div class="fn_quiz_header"><img src="' . $OUTPUT->pix_url('icon', 'quiz') . '">' . $quiz->name . '</div>';
 
-    $qpaging_params = array(
+    $qpagingparams = array(
         'courseid' => $courseid,
         'show' => $show,
         'view' => $view,
@@ -295,14 +336,14 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'dir' => $qdir,
         'qallparticipants' => $qallparticipants
     );
-    $pagingURL = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $qpaging_params);
-    $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingURL, 'page');
+    $pagingurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $qpagingparams);
+    $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingurl, 'page');
     echo $OUTPUT->render($pagingbar);
     echo html_writer::table($table);
 
 } else if ($show == 'unsubmitted') {
 
-    $sql_quiz_attempts = "SELECT CONCAT(u.id, '#', COALESCE(quiza.attempt, 0)) AS uniqueid,
+    $sqlquizattempts = "SELECT CONCAT(u.id, '#', COALESCE(quiza.attempt, 0)) AS uniqueid,
 							(CASE WHEN (quiza.state = 'finished' AND NOT EXISTS (
 							SELECT 1 FROM {quiz_attempts} qa2
 							WHERE qa2.quiz = quiza.quiz AND
@@ -335,23 +376,27 @@ if (($show == 'marked') || ($show == 'unmarked')) {
 							FROM
 							{user} u
 							LEFT JOIN {quiz_attempts} quiza ON
-							quiza.userid = u.id AND quiza.quiz = ? WHERE u.id IN ($student_ids) AND quiza.preview = 0 AND quiza.id IS NOT NULL AND quiza.sumgrades > 0";
+							quiza.userid = u.id AND quiza.quiz = ?
+							WHERE u.id IN ($studentids) AND quiza.preview = 0
+							AND quiza.id IS NOT NULL AND quiza.sumgrades > 0";
 
-    if ($quiz_attempts = $DB->get_records_sql($sql_quiz_attempts, array($quiz->id))) {
-        foreach ($quiz_attempts as $quiz_attempt) {
-            if (isset($students[$quiz_attempt->userid])) {
-                unset($students[$quiz_attempt->userid]);
+    if ($quizattempts = $DB->get_records_sql($sqlquizattempts, array($quiz->id))) {
+        foreach ($quizattempts as $quizattempt) {
+            if (isset($students[$quizattempt->userid])) {
+                unset($students[$quizattempt->userid]);
             }
         }
     }
 
-    if(count($students) > 0){
+    if (count($students) > 0) {
 
-        $image = "<a href=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\"> <img border=0 valign=absmiddle src=\"".$OUTPUT->pix_url('icon', 'quiz')."\" " .
+        $image = "<a href=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">
+            <img border=0 valign=absmiddle src=\"".$OUTPUT->pix_url('icon', 'quiz')."\" " .
             "height=16 width=16 ALT=\"$cm->modname\"></a>";
 
         echo '<div class="unsubmitted_header">' . $image .
-            " Quiz: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" . $quiz->name . '</a></div>';
+            " Quiz: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" .
+            $quiz->name . '</a></div>';
 
 
         echo '<p class="unsubmitted_msg">The following students have not submitted this assignment:</p>';
@@ -361,15 +406,14 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
             echo "\n<tr>";
             echo "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
-            $user = $DB->get_record('user',array('id' => $student->id));
+            $user = $DB->get_record('user', array('id' => $student->id));
             echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'size' => 20));
             echo "</td>";
             echo "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
             echo "</tr></table>\n";
 
         }
-    }
-    else if(count($students) == 0){
+    } else if (count($students) == 0) {
         echo '<center><p>The are currently no <b>users</b>  to display.</p></center>';
     }
 }

@@ -6,16 +6,16 @@ function togglecollapseall(iscoursecontext) {
     if($('dl').hasClass('expanded')) {
         $('.toggle').removeClass('open');
         if (!iscoursecontext) {
-            $('dd').addClass('block_fn_marking_hide');
+            $('dd').addClass('block_ned_marking_hide');
         }
-        $('dd ul').addClass('block_fn_marking_hide');
+        $('dd ul').addClass('block_ned_marking_hide');
         $('dl').removeClass('expanded');
     } else {
         $('.toggle').addClass('open');
         if (!iscoursecontext) {
-            $('dd').removeClass('block_fn_marking_hide');
+            $('dd').removeClass('block_ned_marking_hide');
         }
-        $('dd ul').removeClass('block_fn_marking_hide');
+        $('dd ul').removeClass('block_ned_marking_hide');
         $('dl').addClass('expanded');
     }
 }

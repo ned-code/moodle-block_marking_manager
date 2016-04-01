@@ -1,7 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Displays all grades for a course
-global $CFG, $DB, $OUTPUT, $course;
+/**
+ * @package    block_ned_marking
+ * @copyright  Michael Gardener <mgardener@cissq.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once('../../config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/lib/plagiarismlib.php');
@@ -11,33 +29,29 @@ require_once($CFG->dirroot . '/mod/forum/lib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 
 $PAGE->requires->jquery();
-$PAGE->requires->js('/blocks/fn_marking/js/popup.js');
-$PAGE->requires->js('/blocks/fn_marking/js/quiz.js');
+$PAGE->requires->js('/blocks/ned_marking/js/popup.js');
+$PAGE->requires->js('/blocks/ned_marking/js/quiz.js');
 
-if (isset($CFG->noblocks)){
-    if ($CFG->noblocks){
-        $PAGE->set_pagelayout('markingmanager');
-    }else{
-        $PAGE->set_pagelayout('course');
-    }
-}else{
+if ($layout = get_config('block_ned_marking', 'pagelayout')) {
+    $PAGE->set_pagelayout($layout);
+} else {
     $PAGE->set_pagelayout('course');
 }
 
-$courseid = required_param('courseid', PARAM_INT);      // course id
-$mid = optional_param('mid', 0, PARAM_INT); // mod id to look at
+$courseid = required_param('courseid', PARAM_INT); // Course id.
+$mid = optional_param('mid', 0, PARAM_INT); // Mod id to look at.
 $cmid = 0;                                 // If no mid is specified, we'll select one in this variable.
 
-/// From mod grade files:
+// From mod grade files.
 $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
 $timenow = optional_param('timenow', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// Paging options:
+// Paging options.
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 20, PARAM_INT);
 
-// Filtering Options
+// Filtering Options.
 $menushow = optional_param('menushow', 'unmarked', PARAM_ALPHA);
 $sort = optional_param('sort', 'date', PARAM_ALPHANUM);
 $show = optional_param('show', 'unmarked', PARAM_ALPHA);
@@ -50,18 +64,18 @@ $rownum = optional_param('rownum', 0, PARAM_INT);
 
 
 $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
-$activity_type = optional_param('activity_type', '0', PARAM_RAW);
+$activitytype = optional_param('activity_type', '0', PARAM_RAW);
 $participants = optional_param('participants', '0', PARAM_INT);
 
-$include_orphaned = get_config('block_fn_marking','include_orphaned');
+$includeorphaned = get_config('block_ned_marking', 'include_orphaned');
 
-set_current_group($courseid, $group);
+$SESSION->currentgroup[$courseid] = $group;
 
 // KEEP SEPARATE CONFIG.
-$keepseparate = 1;// Default value
-if ($block_config = fn_get_block_config ($courseid)) {
-    if (isset($block_config->keepseparate)) {
-        $keepseparate = $block_config->keepseparate;
+$keepseparate = 1; // Default value.
+if ($blockconfig = block_ned_marking_get_block_config ($courseid)) {
+    if (isset($blockconfig->keepseparate)) {
+        $keepseparate = $blockconfig->keepseparate;
     }
 }
 
@@ -95,7 +109,7 @@ if (!$course = $DB->get_record("course", array("id" => $courseid))) {
 
 require_login($course);
 
-// grab course context
+// Grab course context.
 $context = context_course::instance($course->id);
 
 $cobject = new stdClass();
@@ -107,30 +121,30 @@ if (!$isteacher = has_capability('moodle/grade:viewall', $context)) {
 
 require_login($course->id);
 
-/// Array of functions to call for grading purposes for modules.
-$mod_grades_array = array(
+// Array of functions to call for grading purposes for modules.
+$modgradesarray = array(
     'assign' => 'assign.submissions.fn.php',
     'assignment' => 'assignment.submissions.fn.php',
     'quiz' => 'quiz.submissions.fn.php',
     'forum' => 'forum.submissions.fn.php',
 );
 
-// Filter modules
-if ($activity_type) {
-    foreach ($mod_grades_array as $key => $value) {
-        if ($activity_type <> $key) {
-            unset($mod_grades_array[$key]);
+// Filter modules.
+if ($activitytype) {
+    foreach ($modgradesarray as $key => $value) {
+        if ($activitytype <> $key) {
+            unset($modgradesarray[$key]);
         }
     }
 }
 
-/// Array of functions to call to display grades for modules.
-$mod_gradedisp_array = array(
+// Array of functions to call to display grades for modules.
+$modgradedisparray = array(
     'assignment' => 'grades.fn.html',
     'forum' => 'grades.fn.html'
 );
 
-$strgrades = get_string("headertitle", 'block_fn_marking');
+$strgrades = get_string("headertitle", 'block_ned_marking');
 $strgrade = get_string("grade");
 $strmax = get_string("maximumshort");
 
@@ -174,9 +188,8 @@ $urlview = new moodle_url(
         'sort' => $sort,
         'show' => $show,
         'unsubmitted' => $unsubmitted,
-        'activity_type' => $activity_type,
+        'activity_type' => $activitytype,
         'participants' => $participants,
-        // 'view' => $view,
         'group' => $group
     )
 );
@@ -188,27 +201,30 @@ $viewform = 'View:' . $OUTPUT->render($select);
 // The show options.
 if (($view == 'less') || ($view == 'more')) {
     if ($mid) {
-        $cm_module = $DB->get_record('course_modules', array('id' => $mid));
-        $module_name = $DB->get_field('modules', 'name', array('id' => $cm_module->module));
+        $cmmodule = $DB->get_record('course_modules', array('id' => $mid));
+        $modulename = $DB->get_field('modules', 'name', array('id' => $cmmodule->module));
 
-        if ($module_name == 'forum') {
+        if ($modulename == 'forum') {
             $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
-        } else if ($module_name == 'assignment') {
-            $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
-        } else if ($module_name == 'assign') {
-            $assign = $DB->get_record('assign', array('id' => $cm_module->instance));
+        } else if ($modulename == 'assignment') {
+            $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
+                'unsubmitted' => 'Not submitted');
+        } else if ($modulename == 'assign') {
+            $assign = $DB->get_record('assign', array('id' => $cmmodule->instance));
             if ($assign->submissiondrafts) {
-                $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
+                $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
+                    'unsubmitted' => 'Not submitted');
             } else {
                 $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
             }
-        } else if ($module_name == 'quiz') {
+        } else if ($modulename == 'quiz') {
             $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
         } else {
             $showopts = array();
         }
     } else {
-        $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
+        $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
+            'unsubmitted' => 'Not submitted');
     }
 
     if (!$keepseparate) {
@@ -223,27 +239,26 @@ if (($view == 'less') || ($view == 'more')) {
 
 
 if ($mid) {
-    if (!$course_module = $DB->get_record('course_modules', array('id' => $mid))) {
+    if (!$coursemodule = $DB->get_record('course_modules', array('id' => $mid))) {
         print_error('invalidcoursemodule');
     }
 
-    if (!$module = $DB->get_record('modules', array('id' => $course_module->module))) {
+    if (!$module = $DB->get_record('modules', array('id' => $coursemodule->module))) {
         print_error('invalidcoursemodule');
     }
 
-    $modcontext = context_module::instance($course_module->id);
-    $groupmode = groups_get_activity_groupmode($course_module);
-    $currentgroup = groups_get_activity_group($course_module, true);
-    // $users = get_enrolled_users($modcontext, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+    $modcontext = context_module::instance($coursemodule->id);
+    $groupmode = groups_get_activity_groupmode($coursemodule);
+    $currentgroup = groups_get_activity_group($coursemodule, true);
 } else {
-    // if comes from course page
+    // If comes from course page.
     $currentgroup = groups_get_course_group($course, true);
 }
 
-// get current group members
-$group_members = groups_get_members_by_role($group, $courseid);
+// Get current group members.
+$groupmembers = groups_get_members_by_role($group, $courseid);
 
-// Get a list of all students
+// Get a list of all students.
 if (!$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id')) {
     $students = array();
     $PAGE->set_title(get_string('course') . ': ' . $course->fullname);
@@ -258,73 +273,61 @@ $columnhtml = array();  // Accumulate column html in this array.
 $columnungraded = array(); // Accumulate column graded totals in this array.
 $totungraded = 0;
 
-/// Collect modules data
+// Collect modules data.
 $modnames = get_module_types_names();
 $modnamesplural = get_module_types_names(true);
-// $modinfo = get_fast_modinfo($course->id);
-// $mods = $modinfo->get_cms();
-// $modnamesused = $modinfo->get_used_module_names();
 
-// $mod_array = array($mods, $modnames, $modnamesplural, $modnamesused);
-
-// $cobject->mods = &$mods;
-// $cobject->modnames = &$modnames;
-// $cobject->modnamesplural = &$modnamesplural;
-// $cobject->modnamesused = &$modnamesused;
-// $cobject->sections = &$sections;
-
-// FIND CURRENT WEEK
+// FIND CURRENT WEEK.
 $courseformatoptions = course_get_format($course)->get_format_options();
 $courseformat = course_get_format($course)->get_format();
-$course_numsections = $courseformatoptions['numsections'];
+$coursenumsections = $courseformatoptions['numsections'];
 
 if ($courseformat == 'weeks') {
     $timenow = time();
-    $weekdate = $course->startdate;    // this should be 0:00 Monday of that week
-    $weekdate += 7200;                 // Add two hours to avoid possible DST problems
+    $weekdate = $course->startdate;    // This should be 0:00 Monday of that week.
+    $weekdate += 7200;                 // Add two hours to avoid possible DST problems.
 
     $weekofseconds = 604800;
-    $course_enddate = $course->startdate + ($weekofseconds * $course_numsections);
+    $courseenddate = $course->startdate + ($weekofseconds * $coursenumsections);
 
     // Calculate the current week based on today's date and the starting date of the course.
     $currentweek = ($timenow > $course->startdate) ? (int)((($timenow - $course->startdate) / $weekofseconds) + 1) : 0;
-    $currentweek = min($currentweek, $course_numsections);
+    $currentweek = min($currentweek, $coursenumsections);
 
     if ($view == "less") {
-        $upto = min($currentweek, $course_numsections);
+        $upto = min($currentweek, $coursenumsections);
     } else {
-        $upto = $course_numsections;
+        $upto = $coursenumsections;
     }
 } else {
-    $upto = $course_numsections;
+    $upto = $coursenumsections;
 }
 
 $sections = $DB->get_records('course_sections', array('course' => $course->id), 'section ASC', 'section, sequence');
 
-$selected_section = array();
+$selectedsection = array();
 for ($i = 0; $i <= $upto; $i++) {
-    $selected_section[] = $i;
+    $selectedsection[] = $i;
 }
-if ($include_orphaned && (sizeof($sections) > ($course_numsections + 1))) {
-    for ($i = ($course_numsections + 1); $i < sizeof($sections); $i++) {
-        $selected_section[] = $i;
+if ($includeorphaned && (count($sections) > ($coursenumsections + 1))) {
+    for ($i = ($coursenumsections + 1); $i < count($sections); $i++) {
+        $selectedsection[] = $i;
     }
 }
-// print_object($selected_section);
-foreach ($selected_section as $section_num) {
-    $i = $section_num;
-    if (isset($sections[$i])) {   // should always be true
+
+foreach ($selectedsection as $sectionnum) {
+    $i = $sectionnum;
+    if (isset($sections[$i])) {   // Should always be true.
         $section = $sections[$i];
         if ($section->sequence) {
             $sectionmods = explode(",", $section->sequence);
             foreach ($sectionmods as $sectionmod) {
-                $mod = get_coursemodule_from_id('',$sectionmod, $course->id);
+                $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
                 $currentgroup = groups_get_activity_group($mod, true);
-                // Filter if individual user selected
-
+                // Filter if individual user selected.
                 if ($participants && $group) {
-                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-                    if (isset($group_members[5]->users[$participants])) {
+                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    if (isset($groupmembers[5]->users[$participants])) {
                         $students = array();
                         $students[$participants] = $DB->get_record('user', array('id' => $participants));
                     } else {
@@ -334,13 +337,13 @@ foreach ($selected_section as $section_num) {
                 } else if ($participants && !$group) {
                     $students = array();
                     $students[$participants] = $DB->get_record('user', array('id' => $participants));
-                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                 } else {
                     $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-                    $participants_arr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
                 }
 
-                /// Don't count it if you can't see it.
+                // Don't count it if you can't see it.
                 $mcontext = context_module::instance($mod->id);
                 if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
                     continue;
@@ -351,23 +354,24 @@ foreach ($selected_section as $section_num) {
                 if (file_exists($libfile)) {
                     require_once($libfile);
                     $gradefunction = $mod->modname . "_get_user_grades";
-                    if ((($mod->modname != 'forum') || (($instance->assessed > 0) && has_capability('mod/forum:rate', $mcontext))) && // Only include forums that are assessed only by teachers.
-                            isset($mod_grades_array[$mod->modname])) {
+                    if ((($mod->modname != 'forum') || (($instance->assessed > 0) && has_capability('mod/forum:rate', $mcontext)))
+                        && isset($modgradesarray[$mod->modname])) {
                         $modgrades = new stdClass();
                         if (!function_exists($gradefunction) || !($modgrades->grades = $gradefunction($instance))) {
                             $modgrades->grades = array();
                         }
 
                         if (!empty($modgrades)) {
-                            /// Store the number of ungraded entries for this group.
+                            // Store the number of ungraded entries for this group.
                             if (is_array($modgrades->grades)) {
                                 $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                                 $numgraded = count($gradedarray);
                                 $numstudents = count($students);
-                                $ungradedfunction = $mod->modname . '_count_ungraded';
+                                $ungradedfunction = 'block_ned_marking_' . $mod->modname . '_count_ungraded';
                                 if (function_exists($ungradedfunction)) {
                                     $extra = false;
-                                    $ung = $ungradedfunction($instance->id, $gradedarray, $students, $show, $extra, $instance, $keepseparate);
+                                    $ung = $ungradedfunction($instance->id, $gradedarray, $students, $show,
+                                        $extra, $instance, $keepseparate);
                                 } else if ($show == 'unmarked') {
                                     $ung = $numstudents - $numgraded;
                                 } else if ($show == 'marked') {
@@ -382,9 +386,9 @@ foreach ($selected_section as $section_num) {
                                 $columnungraded[] = 0;
                             }
 
-                            /// If we haven't specifically selected a mid, look for the oldest ungraded one.
+                            // If we haven't specifically selected a mid, look for the oldest ungraded one.
                             if (($mid == 0) && !empty($ung)) {
-                                $oldestfunc = $mod->modname . '_oldest_ungraded';
+                                $oldestfunc = 'block_ned_marking_' . $mod->modname . '_oldest_ungraded';
                                 if (function_exists($oldestfunc)) {
                                     $told = $oldestfunc($mod->instance);
                                     if (empty($cold) || ($told < $cold)) {
@@ -392,7 +396,7 @@ foreach ($selected_section as $section_num) {
                                         $cmid = $mod->id;
                                         $mid = $mod->id;
                                         $selectedmod = $instance;
-                                        $selectedfunction = $mod_grades_array[$mod->modname];
+                                        $selectedfunction = $modgradesarray[$mod->modname];
                                         $cm = $mod;
                                     }
                                 } else {
@@ -400,10 +404,10 @@ foreach ($selected_section as $section_num) {
                                 }
                             }
 
-                            /// Get the function for the selected mod.
+                            // Get the function for the selected mod.
                             if ($mid == $mod->id) {
                                 $selectedmod = $instance;
-                                $selectedfunction = $mod_grades_array[$mod->modname];
+                                $selectedfunction = $modgradesarray[$mod->modname];
                                 $cm = $mod;
                             }
 
@@ -429,23 +433,23 @@ foreach ($selected_section as $section_num) {
                             } else {
                                 $name = $instance->name;
                             }
-                            $mod_url = new moodle_url('/blocks/fn_marking/fn_gradebook.php', array(
+                            $modurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php', array(
                                 'courseid' => $course->id,
                                 'show' => $show,
                                 'sort' => $sort,
                                 'view' => $view,
                                 'mid' => $mod->id,
-                                'activity_type' => $activity_type,
+                                'activity_type' => $activitytype,
                                 'group' => $group,
                                 'participants' => $participants
                             ));
 
                             if ($mod->visible) {
                                 $columnhtml[] = '<div style="font-size: 85%">' . $image . ' ' .
-                                        '<a class="assignmentlist" href="' . $mod_url->out() . '">' . $name . '</a></div>';
+                                        '<a class="assignmentlist" href="' . $modurl->out() . '">' . $name . '</a></div>';
                             } else {
                                 $columnhtml[] = '<div style="font-size: 85%">' . $image . ' ' .
-                                        '<a class="dimmed assignmentlist" href="' . $mod_url->out() . '">' . $name . '</a></div>';
+                                        '<a class="dimmed assignmentlist" href="' . $modurl->out() . '">' . $name . '</a></div>';
                             }
                         }
                     }
@@ -454,20 +458,20 @@ foreach ($selected_section as $section_num) {
         }
     }
 
-} // a new Moodle nesting record? ;-)
-/// Set mid to cmid if there wasn't a mid and there is a cmid.
+}
+// Set mid to cmid if there wasn't a mid and there is a cmid.
 if (empty($mid) && !empty($cmid)) {
     $mid = $cmid;
 }
 
-/// Setup selection options.
+// Setup selection options.
 $button = '';
 
-/// Check to see if groups are being used in this assignment
+// Check to see if groups are being used in this assignment.
 if (!empty($cm)) {
-    if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used
-        // $currentgroup = groups_get_activity_group($cm, true);
-        $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/fn_marking/' . "fn_gradebook.php?courseid=$courseid&mid=$mid&show=$show&sort=$sort&dir=$dir&mode=single&view=$view", true);
+    if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used.
+        $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/ned_marking/' .
+            "fn_gradebook.php?courseid=$courseid&mid=$mid&show=$show&sort=$sort&dir=$dir&mode=single&view=$view", true);
     } else {
         $currentgroup = false;
         $groupform = '';
@@ -476,7 +480,7 @@ if (!empty($cm)) {
     $groupform = '';
 }
 
-/// Print header
+// Print header.
 $PAGE->navbar->add($strgrades);
 $button = '<tr><td>' . $groupform . '&nbsp;&nbsp;</td>' .
         '<td style="padding-left:10em;">' . $sortform . '&nbsp;&nbsp;</td>' .
@@ -488,14 +492,14 @@ $PAGE->set_heading($course->fullname . ': ' . $strgrades);
 
 echo $OUTPUT->header();
 
-// ACTIVITY TYPES
-$activity_type_opts = array(
+// ACTIVITY TYPES.
+$activitytypeopts = array(
     '0' => 'All types',
     'assign' => 'Assignments',
     'forum' => 'Forums',
     'quiz' => 'Quizzes',
 );
-$activity_type_url = new moodle_url(
+$activitytypeurl = new moodle_url(
     'fn_gradebook.php',
     array(
         'courseid' => $courseid,
@@ -504,29 +508,28 @@ $activity_type_url = new moodle_url(
         'sort' => $sort,
         'show' => $show,
         'unsubmitted' => $unsubmitted,
-        // 'activity_type' => $activity_type,
         'participants' => $participants,
         'view' => $view,
         'group' => $group
     )
 );
-$activity_type_select = new single_select($activity_type_url, 'activity_type', $activity_type_opts, $activity_type, '');
-$activity_type_select->formid = 'fn_activity_type';
-$activity_type_select->label = 'Activity Type';
-$activity_type_form = '<div class="groupselector">'.$OUTPUT->render($activity_type_select).'</div>';
+$activitytypeselect = new single_select($activitytypeurl, 'activity_type', $activitytypeopts, $activitytype, '');
+$activitytypeselect->formid = 'fn_activity_type';
+$activitytypeselect->label = 'Activity Type';
+$activitytypeform = '<div class="groupselector">'.$OUTPUT->render($activitytypeselect).'</div>';
 
-// PARTICIPANTS
-$participants_opts = array('0' => 'All participants');
-if ($group_members) {
-    foreach ($group_members[5]->users as $group_member) {
-        $participants_opts[$group_member->id] = fullname($group_member);
+// PARTICIPANTS.
+$participantsopts = array('0' => 'All participants');
+if ($groupmembers) {
+    foreach ($groupmembers[5]->users as $groupmember) {
+        $participantsopts[$groupmember->id] = fullname($groupmember);
     }
 } else {
-    foreach ($participants_arr as $group_member) {
-        $participants_opts[$group_member->id] = fullname($group_member);
+    foreach ($participantsarr as $groupmember) {
+        $participantsopts[$groupmember->id] = fullname($groupmember);
     }
 }
-$participants_url = new moodle_url(
+$participantsurl = new moodle_url(
     'fn_gradebook.php',
     array(
         'courseid' => $courseid,
@@ -535,22 +538,21 @@ $participants_url = new moodle_url(
         'sort' => $sort,
         'show' => $show,
         'unsubmitted' => $unsubmitted,
-        'activity_type' => $activity_type,
-        // 'participants' => $participants,
+        'activity_type' => $activitytype,
         'view' => $view,
         'group' => $group
     )
 );
-$participants_select = new single_select($participants_url, 'participants', $participants_opts, $participants, '');
-$participants_select->formid = 'fn_participants';
-$participants_select->label = 'Participants';
-$participants_form = '<div class="groupselector">'.$OUTPUT->render($participants_select).'</div>';
+$participantsselect = new single_select($participantsurl, 'participants', $participantsopts, $participants, '');
+$participantsselect->formid = 'fn_participants';
+$participantsselect->label = 'Participants';
+$participantsform = '<div class="groupselector">'.$OUTPUT->render($participantsselect).'</div>';
 
 
 echo '<div class="fn-menuwrapper">';
-echo $activity_type_form . "&nbsp;&nbsp;";
+echo $activitytypeform . "&nbsp;&nbsp;";
 
-$group_url = new moodle_url(
+$groupurl = new moodle_url(
     'fn_gradebook.php',
     array(
         'courseid' => $courseid,
@@ -559,38 +561,38 @@ $group_url = new moodle_url(
         'sort' => $sort,
         'show' => $show,
         'unsubmitted' => $unsubmitted,
-        'activity_type' => $activity_type,
+        'activity_type' => $activitytype,
         'participants' => $participants,
         'view' => $view
     )
 );
-groups_print_course_menu($course, $group_url->out());
+groups_print_course_menu($course, $groupurl->out());
 echo "&nbsp;&nbsp;";
-echo $participants_form . "&nbsp;&nbsp;";
+echo $participantsform . "&nbsp;&nbsp;";
 echo $viewform . " ";
 echo '</div>';
 
 echo '<table border="0" cellpadding="5" cellspacing="0" style="margin: auto;"><tr><td>';
 
-$showtopmessage = get_config('block_fn_marking', 'showtopmessage');
-$topmessage     = get_config('block_fn_marking', 'topmessage');
+$showtopmessage = get_config('block_ned_marking', 'showtopmessage');
+$topmessage     = get_config('block_ned_marking', 'topmessage');
 
-$block_config = new stdClass();
+$blockconfig = new stdClass();
 
-if ($block_instance = $DB->get_record('block_instances', array('blockname' => 'fn_marking','parentcontextid' => $context->id))){
-    if (!empty($block_instance->configdata)) {
-        $block_config = unserialize(base64_decode($block_instance->configdata));
+if ($blockinstance = $DB->get_record('block_instances', array('blockname' => 'ned_marking', 'parentcontextid' => $context->id))) {
+    if (!empty($blockinstance->configdata)) {
+        $blockconfig = unserialize(base64_decode($blockinstance->configdata));
     }
 }
 
-if(isset($block_config->showtopmessage) && isset($block_config->topmessage['text'])){
-    if ($block_config->showtopmessage && $block_config->topmessage['text']){
-        echo '<div id="marking-topmessage">'.$block_config->topmessage['text'].'</div>';
+if (isset($blockconfig->showtopmessage) && isset($blockconfig->topmessage['text'])) {
+    if ($blockconfig->showtopmessage && $blockconfig->topmessage['text']) {
+        echo '<div id="marking-topmessage">'.$blockconfig->topmessage['text'].'</div>';
 
-    } else if($showtopmessage && $topmessage) {
+    } else if ($showtopmessage && $topmessage) {
         echo '<div id="marking-topmessage"><?php echo $topmessage; ?></div>';
     }
-} else if ($showtopmessage && $topmessage){
+} else if ($showtopmessage && $topmessage) {
     echo '<div id="marking-topmessage">'.$topmessage.'</div>';
 }
 echo '
@@ -619,14 +621,16 @@ foreach ($columnhtml as $index => $column) {
         $extra = ' class="normal"';
     }
 
-    if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade') && (! @isset($_POST['nosaveandnext'])) && (! @isset($_POST['nosaveandprevious']))) {
-        if($show <> 'marked'){
+    if ((strstr($column, 'mid='.$mid.'"')) && ($action == 'submitgrade')
+        && (! @isset($_POST['nosaveandnext']))
+        && (! @isset($_POST['nosaveandprevious']))) {
+        if ($show <> 'marked') {
             $columnungraded[$index] -= 1;
             $totungraded -= 1;
         }
     }
 
-    if (($columnungraded[$index] < 0.1) && ($view == 'less')){
+    if (($columnungraded[$index] < 0.1) && ($view == 'less')) {
         continue;
     } else {
         echo "<tr $extra>" .
@@ -647,20 +651,31 @@ foreach ($columnhtml as $index => $column) {
 
 if (!empty($selectedfunction)) {
     $iid = $selectedmod->id;
-    include $selectedfunction;
-}
-else {
+    include($selectedfunction);
+} else {
     echo '<div class="no-assign">No selected assignment</div>';
 }
-                echo '
+$pluginman = core_plugin_manager::instance();
+$pluginfo = $pluginman->get_plugin_info('block_ned_marking');
+echo '
             </td>
         </tr>
         <tr>
         <td class="markingmanagercontainer-footer" colspan="2">
-            <div><span class="markingmanagercontainer-footer-title">Plug-in name: <span>
-                <a target="_blank" class="markingmanagercontainer-footer-link" href="https://moodle.org/plugins/view/block_fn_marking">FN Marking Manager</a> |
-                <a target="_blank" class="markingmanagercontainer-footer-link" href="http://northernlinks.ca/docs/Marking_Manager_Manual.pdf">Download manual for this plug-in</a> |
-                <a target="_blank" class="markingmanagercontainer-footer-link" href="https://github.com/fernandooliveira/moodle-block_marking_manager/issues">Report a problem with this plugin</a></div>
+            <div>
+                <div class="markingmanagercontainer-footer-left">'.get_string('pluginnametext', 'block_ned_marking').':
+                    <a target="_blank" class="markingmanagercontainer-footer-link"
+                        href="https://moodle.org/plugins/view/block_ned_marking">'.
+                        get_string('pluginname', 'block_ned_marking').'</a>
+                </div>
+                <div class="markingmanagercontainer-footer-center">'.
+                    get_string('version', 'block_ned_marking').': '.$pluginfo->release.'</div>
+                <div class="markingmanagercontainer-footer-right">
+                    <a target="_blank" class="markingmanagercontainer-footer-link"
+                        href="https://github.com/fernandooliveira/moodle-block_marking_manager/issues">'
+                        .get_string('visitpluginhome', 'block_ned_marking').'</a>
+                </div>
+            </div>
         <td>
         </tr>
     </table>
