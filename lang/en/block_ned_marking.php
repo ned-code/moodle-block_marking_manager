@@ -1,6 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: block_fn_admin.php,v 1.4 2009/08/19 20:58:16 mchurch Exp $
+/**
+ * @package    block_ned_marking
+ * @copyright  Michael Gardener <mgardener@cissq.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['showsaved'] = 'Show draft activities';
 $string['keepseparate'] = 'Keep draft assignments separate';
 $string['setnumberofdays'] = 'Set number of days';
@@ -12,10 +31,10 @@ $string['shownotloggedinuser'] = 'Show not logged in user';
 $string['showstudentnotsubmittedassignment'] = 'Show no of student not submitted assignment';
 $string['showstudentmarkslessthanfiftypercent'] = 'Show no of student marks less than 50 percent';
 $string['blocksettings'] = 'Configuring a FN Marking block';
-$string['pluginname'] = 'FN Marking Manager';
+$string['pluginname'] = 'NED Marking Manager';
 $string['plugintitle'] = 'Marking Manager';
-$string['headertitle'] = 'FN Marking Manager';
-$string['blocktitle'] = 'FN-Marking Manager';
+$string['headertitle'] = 'NED Marking Manager';
+$string['blocktitle'] = 'NED Marking Manager';
 $string['cfgdisplaytitle'] = 'Display title';
 $string['displaytitle'] = 'Activities Submitted';
 $string['gradeslink'] = 'Grades';
@@ -42,8 +61,6 @@ $string['title:markslessthanxpercent'] = 'The Following Students Have Not Submit
 $string['title:saved'] = 'The Following Students Have Draft Activities';
 $string['notsubmittedany'] = ' have not submitted<br>any activities for ';
 $string['overallfailinggrade'] = ' have an overall grade<br>less than ';
-// $string['unmarked'] = '$a Unmarked Activities';
-
 
 $string['gradingstudentprogress'] = 'Showing {$a->index} of {$a->count}';
 $string['grade'] = '<b>Grade: </b>';
@@ -101,9 +118,9 @@ $string['config_days_help'] = '<p>This setting allows to set  </p>
 $string['config_percent'] = 'Set the percent of marks';
 $string['config_percent_help'] = '<p>This setting allows to set  </p>
 <p>the percent of marks and after setting the percent you will see the number of student marks below x percent.</p>';
-$string['fn_marking:addinstance'] = 'Add instance';
-$string['fn_marking:viewblock'] = 'View block';
-$string['fn_marking:viewreadonly'] = 'View readonly';
+$string['ned_marking:addinstance'] = 'Add instance';
+$string['ned_marking:viewblock'] = 'View block';
+$string['ned_marking:viewreadonly'] = 'View readonly';
 $string['simplegradebook'] = 'Progress Report';
 $string['studentlist'] = 'Student List';
 $string['moodlegradebook'] = 'Open Moodle Gradebook';
@@ -144,5 +161,17 @@ $string['close'] = 'Close';
 $string['sectiontitles'] = 'Section titles';
 $string['config_sectiontitles'] = 'Section titles';
 $string['config_sectiontitles_help'] = '<p>blank=course default.</p>';
-$string['fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
+$string['ned_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
 $string['listcourseszeroungraded'] = 'List courses with zero ungraded activities';
+$string['version'] = 'Version';
+$string['visitpluginhome'] = 'Vist plugin home page';
+$string['pluginnametext'] = 'Plug-in name';
+$string['pagelayout'] = 'Page layout';
+$string['coursecategories'] = 'Course categories';
+$string['coursecategoriesincluded'] = 'Course categories included';
+$string['selectcategories'] = 'Select categories';
+$string['successful'] = 'Successful';
+$string['allcategories'] = 'All Categories';
+$string['markinmanagerscoursecats'] = 'Marking Manager - Course Categories';
+$string['markinmanagerscoursecatsdesc'] = 'Selected the course categories that will be processed by the
+Marking Manager block on the Moodle frontpage and dashboard.';

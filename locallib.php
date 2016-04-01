@@ -1,4 +1,24 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * @package    block_ned_marking
+ * @copyright  Michael Gardener <mgardener@cissq.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 /**
  *
@@ -10,17 +30,23 @@
  */
 function assignment_get_notsubmittedany($courseid, $id="0", $users = null, $timestart) {
     global $CFG, $DB;
-    // split out users array
+    // Split out users array.
     if ($users) {
         $userids = array_keys($users);
         $userselect = ' AND u.id IN (' . implode(',', $userids) . ')';
-        $students_with_submissions = $DB->get_records_sql("SELECT DISTINCT  u.id as userid, u.firstname, u.lastname, u.email, u.picture, u.imagealt
-                                           FROM {assignment_submissions} asb
-                                                JOIN {assignment} a      ON a.id = asb.assignment
-                                                JOIN {user} u            ON u.id = asb.userid
+        $studentswithsubmissions = $DB->get_records_sql("SELECT DISTINCT u.id as userid,
+                                                                  u.firstname,
+                                                                  u.lastname,
+                                                                  u.email,
+                                                                  u.picture,
+                                                                  u.imagealt
+                                                             FROM {assignment_submissions} asb
+                                                             JOIN {assignment} a
+                                                               ON a.id = asb.assignment
+                                                            JOIN {user} u ON u.id = asb.userid
                                           WHERE asb.timemodified > $timestart AND a.id = $id
                                                 $userselect");
-        return $students_with_submissions;
+        return $studentswithsubmissions;
     }
 }
 /**
@@ -33,17 +59,17 @@ function assignment_get_notsubmittedany($courseid, $id="0", $users = null, $time
  */
 function assign_get_notsubmittedany($courseid, $id="0", $users = null, $timestart) {
     global $CFG, $DB;
-    // split out users array
+    // Split out users array.
     if ($users) {
         $userids = array_keys($users);
         $userselect = ' AND asub.userid IN (' . implode(',', $userids) . ')';
-        $students_with_submissions = $DB->get_records_sql("SELECT DISTINCT asub.userid
+        $studentswithsubmissions = $DB->get_records_sql("SELECT DISTINCT asub.userid
                                                                       FROM {assign_submission} asub
                                                                      WHERE asub.assignment = $id
                                                                            $userselect
                                                                        AND asub.timemodified > $timestart");
 
-        return $students_with_submissions;
+        return $studentswithsubmissions;
     }
 }
 
@@ -57,11 +83,11 @@ function assign_get_notsubmittedany($courseid, $id="0", $users = null, $timestar
  */
 function forum_get_notsubmittedany($courseid, $forumid="0", $users = null, $timestart) {
     global $CFG, $DB;
-    // split out users array
+    // Split out users array.
     if ($users) {
         $userids = array_keys($users);
         $userselect = ' AND u.id IN (' . implode(',', $userids) . ')';
-        $students_with_posts = $DB->get_records_sql("SELECT DISTINCT u.id as userid,
+        $studentswithposts = $DB->get_records_sql("SELECT DISTINCT u.id as userid,
                                                                      u.firstname,
                                                                      u.lastname,
                                                                      u.email,
@@ -78,7 +104,7 @@ function forum_get_notsubmittedany($courseid, $forumid="0", $users = null, $time
                                                                  AND f.id = $forumid
                                                                      $userselect");
 
-        return $students_with_posts;
+        return $studentswithposts;
     }
 }
 

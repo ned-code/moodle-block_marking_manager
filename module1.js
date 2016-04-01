@@ -13,40 +13,22 @@ M.show_forum_panel = {
 
     showforumpanel: function() {
         var Y = this.Y;
-        // var div = Y.one('#iframediv');
-         var url = M.cfg.wwwroot + "/blocks/fn_marking/forum_view.php?id=" + this.mid;
-        // create div
-        var div = Y.Node.create('</div><div/>');// Y.one('#iframediv');
+         var url = M.cfg.wwwroot + "/blocks/ned_marking/forum_view.php?id=" + this.mid;
+        var div = Y.Node.create('</div><div/>');
         div.set("id", "forumiframecontainer");
 
-        // create iframe
-        // var spinner = Y.Node.create('<img/>');
-        // spinner.set('src', this.spinnerpic);
-        // spinner.set('id', 'loaderimage');
+        // Create iframe.
         var ifrm = Y.Node.create('<iframe frameborder="0"><iframe>');
         ifrm.set("src", url);
-        // ifrm.set("width", '100%');
-        // ifrm.set("height", '600px');
-        // ifrm.set("scrolling", "auto");
         ifrm.set("name", "forumiframe");
         ifrm.set("id", "forumiframe");
         ifrm.setStyle('width', '100%');
         ifrm.setStyle('height', '430px');
         ifrm.setStyle('display', 'none');
-        // div.append(spinner);
         div.append(ifrm);
 
-        // ifrm.onload = function() {
-        // ifrm.setStyle('display', 'block');
-        // ifrm.style.display = 'block';
-        // spinner.parentNode.removeChild(spinner);
-        // spinner.removeChild();
-        // }
          Y.on('contentready', function(){
                                 ifrm.setStyle('display', 'block');
-                               // spinner.remove();
-                               // var spinimage = document.getElementById('loaderimage');
-                               // spinimage.parentNode.removeChild(spinimage);
          }, '#forumiframe');
 
             var panel;
