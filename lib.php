@@ -2736,12 +2736,22 @@ function  block_ned_marking_get_child_categories($parentid) {
 }
 
 function  block_ned_marking_category_tree_form($structures, $categoryids='', $courseids='') {
+    if ($categoryids == '0') {
+        $rootcategorychecked = 'checked="checked"';
+    } else {
+        if ($categoryids || $courseids) {
+            $rootcategorychecked = '';
+        } else {
+            $rootcategorychecked = 'checked="checked"';
+        }
+    }
+
     $categoryids = explode(',', $categoryids);
     $courseids = explode(',', $courseids);
 
     $content = '<ul id="course-category-tree" class="course-category-tree">
                <li>
-               <input id="category_0" class="_checkbox" type="checkbox" checked="checked" name="category_0" value="0">
+               <input id="category_0" class="_checkbox" type="checkbox" '.$rootcategorychecked.' name="category_0" value="0">
                <span class="ned-form-course-category">'.get_string('allcategories', 'block_ned_marking').'</span>';
     $content .= '<ul>';
     foreach ($structures as $structure) {

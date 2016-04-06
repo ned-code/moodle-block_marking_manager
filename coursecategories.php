@@ -66,7 +66,7 @@ if ($mform->is_cancelled()) {
         get_string('successful', 'block_ned_marking'));
 } else if ($fromform = $mform->get_data()) {
 
-    set_config('category', '0',  'block_ned_marking');
+    set_config('category', '',  'block_ned_marking');
     set_config('course', '',  'block_ned_marking');
 
     foreach ($_POST as $key => $value) {
