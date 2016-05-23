@@ -175,3 +175,4 @@ $string['allcategories'] = 'All Categories';
 $string['markinmanagerscoursecats'] = 'Marking Manager - Course Categories';
 $string['markinmanagerscoursecatsdesc'] = 'Selected the course categories that will be processed by the
 Marking Manager block on the Moodle frontpage and dashboard.';
+$string['progressreport'] = 'Progress Report';

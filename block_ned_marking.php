@@ -230,7 +230,7 @@ class block_ned_marking extends block_list {
             $this->content->icons[] = '';
 
             if (isset($this->config->showgradeslink) && $this->config->showgradeslink) {
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/simple_gradebook.php?id=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/progress_report.php?id=' .
                     $this->page->course->id .
                     '">' . get_string('simplegradebook', 'block_ned_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";

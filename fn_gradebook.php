@@ -665,15 +665,19 @@ echo '
             <div>
                 <div class="markingmanagercontainer-footer-left">'.get_string('pluginnametext', 'block_ned_marking').':
                     <a target="_blank" class="markingmanagercontainer-footer-link"
-                        href="https://moodle.org/plugins/view/block_ned_marking">'.
+                        href="#">'.
                         get_string('pluginname', 'block_ned_marking').'</a>
                 </div>
                 <div class="markingmanagercontainer-footer-center">'.
-                    get_string('version', 'block_ned_marking').': '.$pluginfo->release.'</div>
+                    get_string('version', 'block_ned_marking').': <span class="markingmanager-version">'.
+                    $pluginfo->versiondb.'</span></div>
                 <div class="markingmanagercontainer-footer-right">
                     <a target="_blank" class="markingmanagercontainer-footer-link"
-                        href="https://github.com/fernandooliveira/moodle-block_marking_manager/issues">'
-                        .get_string('visitpluginhome', 'block_ned_marking').'</a>
+                        href="https://github.com/fernandooliveira/moodle-block_marking_manager">'
+                        .'<img src="'.$OUTPUT->pix_url('ned_24', 'block_ned_marking') .'" /></a>
+                    <a target="_blank" class="markingmanagercontainer-footer-link"
+                        href="https://moodle.org/plugins/block_fn_marking">'
+                        .'<img src="'.$OUTPUT->pix_url('moodle_24', 'block_ned_marking') .'" /></a>
                 </div>
             </div>
         <td>

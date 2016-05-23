@@ -143,7 +143,7 @@ echo '<table  width="100%" border="0" cellpadding="0" cellspacing="0">';
 if ($show == 'notloggedin' || $show == 'notsubmittedany') {
     echo "<tr>";
     echo "<th>Student</th>";
-    echo "<th>Last access</th>";
+    echo "<th style='text-align: center;'>Last access</th>";
     echo "</tr>";
 }
 

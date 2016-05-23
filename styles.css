@@ -56,8 +56,6 @@ span.fn_summaries {
 #marking-interface {
     width: 850px;
     margin: 0 auto;
-    background: #f3f3f3;
-    border: 1px solid #a7a7a7;
 }
 #marking-interface table.markingmanagercontainer td.left-sec {
     padding: 15px;
@@ -165,7 +163,7 @@ table.not-submitted td.rightName {
     font-weight: bold;
 }
 h4.head-title {
-    padding: 10px 10px 0;
+    padding: 0px 0 20px;
     text-align: center;
     font-size: 14px;
 }
@@ -176,19 +174,29 @@ h4.head-title {
     padding: 0;
 }
 .markingmanagercontainerList table {
-    border: 1px solid #bbb;
+    margin-bottom:0;
+    border:1px solid #DDDDDD;
+    border-collapse:separate;
+    border-radius:6px;
+    -moz-border-radius:6px;
     margin-bottom: 18px;
 }
 .markingmanagercontainerList table td {
-    margin-bottom: 0;
-    border: 1px solid #BBB;
-    padding: 5px;
+    margin-bottom:0;
+    border-left:1px solid #DDDDDD;
+    border-top:1px solid #DDDDDD;
+    padding: 10px;
+}
+.markingmanagercontainerList table td:first-child {
+    border-left: none;
 }
 .markingmanagercontainerList table th {
-    border: 1px solid #BBB;
-    font-size: 14px;
-    text-align: center;
-    padding: 5px;
+    background-color: #eeeeee;
+    border-top: none;
+    border-left:1px solid #DDDDDD;
+    color: #333333;
+    font-size: 15px;
+    padding: 10px;
 }
 
 .block_ned_marking .content {
@@ -604,9 +612,12 @@ table.fn-forum-list-header {
     margin-left: 0 !important;
     width: 100% !important;
 }
-.markingmanagercontainer-footer {
-    background-color: #a7a7a7;
-    color: white;
+#page-fn_gradebook .markingmanagercontainer-footer {
+    background-color: #DFDFDF;
+    color: #494949;
+}
+#page-fn_gradebook .markingmanagercontainer-footer .markingmanager-version {
+    color: black;
 }
 #page-fn_gradebook .markingmanagercontainer-footer > div {
     font-size: 12px;
@@ -625,6 +636,10 @@ table.fn-forum-list-header {
 #page-fn_gradebook .markingmanagercontainer-footer-right {
     float: right;
     width: 33.3%;
+    text-align: right;
+}
+#page-fn_gradebook .markingmanagercontainer-footer-right .markingmanagercontainer-footer-link {
+    margin-right: 5px;
 }
 .markingmanagercontainer-footer-title {
     color: black;
