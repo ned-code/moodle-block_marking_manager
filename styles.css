@@ -613,17 +613,19 @@ table.fn-forum-list-header {
     width: 100% !important;
 }
 #page-fn_gradebook .markingmanagercontainer-footer {
-    background-color: #DFDFDF;
+    background-color: #dfdfdf;
+    border-radius: 20px;
     color: #494949;
+    overflow: hidden;
+    padding: 5px 20px;
 }
 #page-fn_gradebook .markingmanagercontainer-footer .markingmanager-version {
     color: black;
 }
 #page-fn_gradebook .markingmanagercontainer-footer > div {
     font-size: 12px;
-    margin: 5px;
     overflow: hidden;
-    text-align: center;
+    line-height: 26px;
 }
 #page-fn_gradebook .markingmanagercontainer-footer-left {
     float: left;
@@ -632,15 +634,14 @@ table.fn-forum-list-header {
 #page-fn_gradebook .markingmanagercontainer-footer-center {
     float: left;
     width: 33.3%;
+    text-align: center;
 }
 #page-fn_gradebook .markingmanagercontainer-footer-right {
     float: right;
     width: 33.3%;
     text-align: right;
 }
-#page-fn_gradebook .markingmanagercontainer-footer-right .markingmanagercontainer-footer-link {
-    margin-right: 5px;
-}
+
 .markingmanagercontainer-footer-title {
     color: black;
 }

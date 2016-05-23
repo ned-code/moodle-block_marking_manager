@@ -661,9 +661,9 @@ echo '
             </td>
         </tr>
         <tr>
-        <td class="markingmanagercontainer-footer" colspan="2">
-            <div>
-                <div class="markingmanagercontainer-footer-left">'.get_string('pluginnametext', 'block_ned_marking').':
+        <td colspan="2">
+            <div class="markingmanagercontainer-footer">
+                <div class="markingmanagercontainer-footer-left">
                     <a target="_blank" class="markingmanagercontainer-footer-link"
                         href="#">'.
                         get_string('pluginname', 'block_ned_marking').'</a>
@@ -674,10 +674,7 @@ echo '
                 <div class="markingmanagercontainer-footer-right">
                     <a target="_blank" class="markingmanagercontainer-footer-link"
                         href="https://github.com/fernandooliveira/moodle-block_marking_manager">'
-                        .'<img src="'.$OUTPUT->pix_url('ned_24', 'block_ned_marking') .'" /></a>
-                    <a target="_blank" class="markingmanagercontainer-footer-link"
-                        href="https://moodle.org/plugins/block_fn_marking">'
-                        .'<img src="'.$OUTPUT->pix_url('moodle_24', 'block_ned_marking') .'" /></a>
+                        .'<img src="'.$OUTPUT->pix_url('ned_26', 'block_ned_marking') .'" /></a>
                 </div>
             </div>
         <td>
