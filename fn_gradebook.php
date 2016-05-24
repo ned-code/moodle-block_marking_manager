@@ -79,29 +79,28 @@ if ($blockconfig = block_ned_marking_get_block_config ($courseid)) {
     }
 }
 
-$PAGE->set_url('/fn_gradebook.php', array(
-    'courseid' => $courseid,
-    'mid' => $mid,
-    'view' => $view,
-    'show' => $show,
-    'dir' => $dir));
+$PAGE->set_url(
+    new moodle_url('/blocks/ned_marking/fn_gradebook.php',
+        array('courseid' => $courseid, 'mid' => $mid, 'view' => $view, 'show' => $show,'dir' => $dir)
+    )
+);
 
 $pageparams = array('courseid' => $courseid,
-                    'userid' => $userid,
-                    'mid' => $mid,
-                    'dir' => $dir,
-                    'group' => $group,
-                    'timenow' => $timenow,
-                    'action' => $action,
-                    'expand' => $expand,
-                    'rownum' => $rownum,
-                    'page' => $page,
-                    'perpage' => $perpage,
-                    'menushow' => $menushow,
-                    'sort' => $sort,
-                    'view' => $view,
-                    'show' => $show,
-                    'dir' => $dir);
+    'userid' => $userid,
+    'mid' => $mid,
+    'dir' => $dir,
+    'group' => $group,
+    'timenow' => $timenow,
+    'action' => $action,
+    'expand' => $expand,
+    'rownum' => $rownum,
+    'page' => $page,
+    'perpage' => $perpage,
+    'menushow' => $menushow,
+    'sort' => $sort,
+    'view' => $view,
+    'show' => $show
+);
 
 if (!$course = $DB->get_record("course", array("id" => $courseid))) {
     print_error("Course ID was incorrect");
