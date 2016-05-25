@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/group/lib.php');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/blocks/ned_marking/js/popup.js');
 $PAGE->requires->js('/blocks/ned_marking/js/quiz.js');
+$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
 
 if ($layout = get_config('block_ned_marking', 'pagelayout')) {
     $PAGE->set_pagelayout($layout);
@@ -656,32 +657,15 @@ if (!empty($selectedfunction)) {
 }
 $pluginman = core_plugin_manager::instance();
 $pluginfo = $pluginman->get_plugin_info('block_ned_marking');
-echo '
-            </td>
+echo '</td>
         </tr>
         <tr>
         <td colspan="2">
-            <div class="markingmanagercontainer-footer">
-                <div class="markingmanagercontainer-footer-left">
-                    <a target="_blank" class="markingmanagercontainer-footer-link"
-                        href="#">'.
-                        get_string('pluginname', 'block_ned_marking').'</a>
-                </div>
-                <div class="markingmanagercontainer-footer-center">'.
-                    get_string('version', 'block_ned_marking').': <span class="markingmanager-version">'.
-                    $pluginfo->versiondb.'</span></div>
-                <div class="markingmanagercontainer-footer-right">
-                    <a target="_blank" class="markingmanagercontainer-footer-link"
-                        href="https://github.com/fernandooliveira/moodle-block_marking_manager">'
-                        .'<img src="'.$OUTPUT->pix_url('ned_26', 'block_ned_marking') .'" /></a>
-                </div>
-            </div>
+            '.block_ned_marking_footer().'
         <td>
         </tr>
     </table>
 </div>';
 
 echo '</td></tr></table>';
-
-
 echo $OUTPUT->footer($course);

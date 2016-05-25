@@ -64,6 +64,8 @@ if (!$isteacher) {
     print_error("Only teachers can use this page!");
 }
 
+$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
+
 $PAGE->set_url('/progress_report.php', array('courseid' => $courseid));
 
 if ($layout = get_config('block_ned_marking', 'pagelayout')) {
@@ -364,5 +366,7 @@ foreach ($simplegradebook as $studentid => $studentreport) {
 echo "</table>";
 echo "</div>";
 echo '<div style="text-align:center;"><img src="'.$CFG->wwwroot.'/blocks/ned_marking/pix/gradebook_key.png"></div>';
+
+echo block_ned_marking_footer();
 
 echo $OUTPUT->footer();

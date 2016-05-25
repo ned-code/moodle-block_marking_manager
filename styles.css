@@ -612,42 +612,6 @@ table.fn-forum-list-header {
     margin-left: 0 !important;
     width: 100% !important;
 }
-#page-fn_gradebook .markingmanagercontainer-footer {
-    background-color: #dfdfdf;
-    border-radius: 20px;
-    color: #494949;
-    overflow: hidden;
-    padding: 5px 20px;
-}
-#page-fn_gradebook .markingmanagercontainer-footer .markingmanager-version {
-    color: black;
-}
-#page-fn_gradebook .markingmanagercontainer-footer > div {
-    font-size: 12px;
-    overflow: hidden;
-    line-height: 26px;
-}
-#page-fn_gradebook .markingmanagercontainer-footer-left {
-    float: left;
-    width: 33.3%;
-}
-#page-fn_gradebook .markingmanagercontainer-footer-center {
-    float: left;
-    width: 33.3%;
-    text-align: center;
-}
-#page-fn_gradebook .markingmanagercontainer-footer-right {
-    float: right;
-    width: 33.3%;
-    text-align: right;
-}
-
-.markingmanagercontainer-footer-title {
-    color: black;
-}
-a.markingmanagercontainer-footer-link {
-    color: #0000EE;
-}
 .fn-admin-warning {
     color: red;
 }

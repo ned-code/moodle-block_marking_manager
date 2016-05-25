@@ -25,9 +25,6 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once('lib.php');
 require_once($CFG->dirroot . '/grade/querylib.php');
 
-global $CFG, $DB, $OUTPUT, $PAGE, $FULLME;
-
-
 $id = required_param('id', PARAM_INT);      // Course id.
 $show = optional_param('show', 'notloggedin', PARAM_ALPHA);
 $days = required_param('days', PARAM_INT); // Days to look back.
@@ -48,6 +45,8 @@ $datestring->secs = get_string('secs');
 // Paging options.
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 20, PARAM_INT);
+
+$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
 $PAGE->set_url('/blocks/ned_marking/fn_summaries.php', array('id' => $id, 'show' => $show, 'navlevel' => 'top'));
 
 if (!$course = $DB->get_record("course", array("id" => $id))) {
@@ -215,5 +214,6 @@ echo '</td></tr></table>';
 
 echo "</div>";
 
+echo block_ned_marking_footer();
 
 echo $OUTPUT->footer($course);

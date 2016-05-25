@@ -2898,3 +2898,33 @@ function block_ned_marking_checkbox_checked($name, $id , $class, $value) {
         )
     );
 }
+function block_ned_marking_footer(){
+    global $OUTPUT;
+
+    $output = '';
+
+    $pluginman = core_plugin_manager::instance();
+    $pluginfo = $pluginman->get_plugin_info('block_ned_marking');
+
+    $output = html_writer::div(
+        html_writer::div(
+            html_writer::link('#', get_string('pluginname', 'block_ned_marking')),
+            'markingmanagercontainer-footer-left'
+        ) .
+        html_writer::div(
+            get_string('version', 'block_ned_marking') . ': ' .
+            html_writer::span($pluginfo->versiondb, 'markingmanager-version'),
+            'markingmanagercontainer-footer-center'
+        ) .
+        html_writer::div(
+            html_writer::link(
+                'https://github.com/fernandooliveira/moodle-block_marking_manager',
+                html_writer::img($OUTPUT->pix_url('ned_26', 'block_ned_marking'), 'NED'),
+                array('target' => '_blank')
+            ),
+            'markingmanagercontainer-footer-right'
+        ),
+        'markingmanagercontainer-footer'
+    );
+    return $output;
+}
