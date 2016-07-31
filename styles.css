@@ -320,6 +320,9 @@ div.submissionhistory_summary {
 .submissionhistory_summary {
     background-color: #b0b0b0;
 }
+.submissionhistory_summary .bg_white {
+    background-color: #ffffff !important;
+}
 .submissionhistory_summary .bg_orange {
     background-color: #fde1ce !important;
 }

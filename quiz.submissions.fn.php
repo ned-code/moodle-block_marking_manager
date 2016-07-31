@@ -43,6 +43,7 @@ $studentids = implode(',', array_keys($students));
 $qsort      = optional_param('qsort', 'firstname', PARAM_ALPHANUM);
 $qdir       = optional_param('qdir', 'ASC', PARAM_ALPHA);
 
+$o = '';
 $qallparticipants = optional_param('qallparticipants', 0, PARAM_INT);
 
 if (($show == 'marked') || ($show == 'unmarked')) {
@@ -311,20 +312,20 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     $targetonurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetonparams);
     $targetoffurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetoffparams);
 
-    echo '<div class="quiz-top-menu"><div class="qdefault-view">';
-    echo '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
+    $o .= '<div class="quiz-top-menu"><div class="qdefault-view">';
+    $o .= '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
         '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> Moodle default view</a>';
-    echo '</div><div class="qall-participants">';
+    $o .= '</div><div class="qall-participants">';
     if ($qallparticipants) {
-        echo '<input checked="checked" id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
+        $o .= '<input checked="checked" id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
             $targetonurl->out() . '" data-target-off="' . $targetoffurl->out() . '"> Show all participants';
     } else {
-        echo '<input id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
+        $o .= '<input id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .
             $targetonurl->out() . '" data-target-off="' . $targetoffurl->out() . '"> Show all participants';
     }
-    echo '</div></div>';
+    $o .= '</div></div>';
 
-    echo '<div class="fn_quiz_header"><img src="' . $OUTPUT->pix_url('icon', 'quiz') . '">' . $quiz->name . '</div>';
+    $o .= '<div class="fn_quiz_header"><img src="' . $OUTPUT->pix_url('icon', 'quiz') . '">' . $quiz->name . '</div>';
 
     $qpagingparams = array(
         'courseid' => $courseid,
@@ -338,8 +339,8 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     );
     $pagingurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $qpagingparams);
     $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingurl, 'page');
-    echo $OUTPUT->render($pagingbar);
-    echo html_writer::table($table);
+    $o .= $OUTPUT->render($pagingbar);
+    $o .= html_writer::table($table);
 
 } else if ($show == 'unsubmitted') {
 
@@ -394,26 +395,26 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             <img border=0 valign=absmiddle src=\"".$OUTPUT->pix_url('icon', 'quiz')."\" " .
             "height=16 width=16 ALT=\"$cm->modname\"></a>";
 
-        echo '<div class="unsubmitted_header">' . $image .
+        $o .= '<div class="unsubmitted_header">' . $image .
             " Quiz: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" .
             $quiz->name . '</a></div>';
 
 
-        echo '<p class="unsubmitted_msg">The following students have not submitted this assignment:</p>';
+        $o .= '<p class="unsubmitted_msg">The following students have not submitted this assignment:</p>';
 
         foreach ($students as $student) {
 
-            echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
-            echo "\n<tr>";
-            echo "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
+            $o .= "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
+            $o .= "\n<tr>";
+            $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
             $user = $DB->get_record('user', array('id' => $student->id));
-            echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'size' => 20));
-            echo "</td>";
-            echo "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
-            echo "</tr></table>\n";
+            $o .= $OUTPUT->user_picture($user, array('courseid' => $course->id, 'size' => 20));
+            $o .= "</td>";
+            $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
+            $o .= "</tr></table>\n";
 
         }
     } else if (count($students) == 0) {
-        echo '<center><p>The are currently no <b>users</b>  to display.</p></center>';
+        $o .= '<center><p>The are currently no <b>users</b>  to display.</p></center>';
     }
 }

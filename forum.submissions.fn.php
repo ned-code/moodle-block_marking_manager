@@ -28,7 +28,7 @@ if (! $forum = $DB->get_record("forum", array("id" => $iid))) {
 
 $context        = context_course::instance($course->id);
 $isteacheredit  = has_capability('moodle/course:update', $context);
-
+$o = '';
 
 if ($cm = get_coursemodule_from_instance("forum", $forum->id, $course->id)) {
     $buttontext = "";
@@ -90,27 +90,27 @@ if ($show == 'unsubmitted') {
             <IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$cm->modname/pix/icon.gif\" " .
             "HEIGHT=16 WIDTH=16 ALT=\"$cm->modname\"></A>";
 
-        echo '<div class="unsubmitted_header">' . $image .
+        $o .= '<div class="unsubmitted_header">' . $image .
             " Forum: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"
             TITLE=\"$cm->modname\">" . $forum->name . '</a></div>';
 
 
-        echo '<p class="unsubmitted_msg">The following students have not yet posted to this forum:</p>';
+        $o .= '<p class="unsubmitted_msg">The following students have not yet posted to this forum:</p>';
 
         foreach ($students as $student) {
             if (!is_array($stposts) || !array_key_exists($student->id, $stposts)) {
 
-                echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
-                echo "\n<tr>";
-                echo "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
-                echo $OUTPUT->user_picture($student);
-                echo "</td>";
-                echo "<td width=\"100%\" class=\"rightName\"><strong>".fullname($student)."</strong></td>\n";
-                echo "</tr></table>\n";
+                $o .= "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
+                $o .= "\n<tr>";
+                $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
+                $o .= $OUTPUT->user_picture($student);
+                $o .= "</td>";
+                $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($student)."</strong></td>\n";
+                $o .= "</tr></table>\n";
             }
         }
     } else {
-        echo $OUTPUT->box("No Students", 'box generalbox generalboxcontent boxaligncenter', 'intro');
+        $o .= $OUTPUT->box("No Students", 'box generalbox generalboxcontent boxaligncenter', 'intro');
     }
 }
 
@@ -129,9 +129,9 @@ if (($show == 'unmarked') || ($show == 'marked')) {
         $rm = new rating_manager();
         $aggregationstring    = $rm->get_aggregation_method($forum->assessed);
 
-        echo '<div class="fn_forum_header">';
+        $o .= '<div class="fn_forum_header">';
 
-        echo '<table id="forum-header-tbl">
+        $o .= '<table id="forum-header-tbl">
                       <tr>
                         <td valign="middle" width="50%">
                               <table width="100%" border="0">
@@ -168,31 +168,31 @@ if (($show == 'unmarked') || ($show == 'marked')) {
                         </td>
                       </tr>
                     </table>';
-        echo'</div>';
+        $o .='</div>';
 
-        echo '<div style="overflow: hidden; margin: 10px 0px 0px;">';
-        echo '<div style="float: left;">'.get_string('student_have_posted', 'block_ned_marking').'</div>';
+        $o .= '<div style="overflow: hidden; margin: 10px 0px 0px;">';
+        $o .= '<div style="float: left;">'.get_string('student_have_posted', 'block_ned_marking').'</div>';
         if (($show == 'marked') && $stposts) {
-            echo '<div style="float: right;" ><button id="showForum">Click to see all  rated discussion.</button></div>';
+            $o .= '<div style="float: right;" ><button id="showForum">Click to see all  rated discussion.</button></div>';
         } else if (($show == 'unmarked') && $stposts) {
-            echo '<div style="float: right;"><button id="showForum">Open Forum</button></div>';
+            $o .= '<div style="float: right;"><button id="showForum">Open Forum</button></div>';
         }
-        echo '</div>';
+        $o .= '</div>';
 
 
-        echo '<table width="100%" border="0" cellspacing="0" valign="top" cellpadding="0"
+        $o .= '<table width="100%" border="0" cellspacing="0" valign="top" cellpadding="0"
                 id="fn-forum-grading" class="generaltable">';
-        echo "<tr>";
-        echo "<th colspan='2' class='fn-student'>".get_string('student', 'block_ned_marking')." </th>
+        $o .= "<tr>";
+        $o .= "<th colspan='2' class='fn-student'>".get_string('student', 'block_ned_marking')." </th>
               <th class='fn-posts'>".get_string('posts', 'block_ned_marking')."</th>
               <th class='fn-replies'>".get_string('replies', 'block_ned_marking')."</th>
               <th class='fn-rating'>".get_string('rating', 'block_ned_marking')."</th>";
-        echo "</tr>";
+        $o .= "</tr>";
 
         foreach ($stposts as $stpost) {
 
-            echo "\n<tr>";
-            echo "\n<td width=\"40\" valign=\"top\">";
+            $o .= "\n<tr>";
+            $o .= "\n<td width=\"40\" valign=\"top\">";
 
             $sqlposts = "SELECT COUNT(fd.id) FROM {forum_discussions} fd WHERE fd.userid = ? AND fd.forum = ?";
             $numberofposts = $DB->count_records_sql($sqlposts, array($stpost->id, $forum->id));
@@ -228,19 +228,19 @@ if (($show == 'unmarked') || ($show == 'marked')) {
                 $cellclass = ' fn-highlighted';
             }
 
-            echo $OUTPUT->user_picture($stpost)."</td>";
+            $o .= $OUTPUT->user_picture($stpost)."</td>";
 
-            echo '<td class="fn-student"><a href="' . $CFG->wwwroot . '/user/view.php?id=' .
+            $o .= '<td class="fn-student"><a href="' . $CFG->wwwroot . '/user/view.php?id=' .
                 $stpost->id . '&amp;course=' . $forum->course . '">' . fullname($stpost). '</a></td>';
-            echo '<td class="fn-posts">'.$numberofposts.'</td>';
-            echo '<td class="fn-replies">'.$numberofreplies.'</td>';
-            echo '<td class="fn-rating'.$cellclass.'">'.$ratingstr.'</td>';
-            echo "</tr>";
+            $o .= '<td class="fn-posts">'.$numberofposts.'</td>';
+            $o .= '<td class="fn-replies">'.$numberofreplies.'</td>';
+            $o .= '<td class="fn-rating'.$cellclass.'">'.$ratingstr.'</td>';
+            $o .= "</tr>";
         }
-        echo "</table>";
+        $o .= "</table>";
 
     } else {
-        echo $OUTPUT->box("No Student with post in this group or course",
+        $o .= $OUTPUT->box("No Student with post in this group or course",
             'box generalbox generalboxcontent boxaligncenter', 'intro');
     }
 }

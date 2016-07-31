@@ -131,7 +131,7 @@ if ($data = data_submitted()) {
             !empty($assignment->submission->submissioncomment) ? addslashes($assignment->submission->submissioncomment) : '')) ||
         ($data->content <> addslashes($assignment->submission->data2->content->text)) ||
         $uplfile || ($canresubmit != $assignment->submission->canresubmit)) {
-        echo "You came in right section";
+        $o .= "You came in right section";
 
         $assignment->submission->id         = $data->sub_id;
         $assignment->submission->grade      = $data->grade;
@@ -159,7 +159,7 @@ if ($data = data_submitted()) {
         }
 
         if (! $assignment->update_submission()) {
-            echo $OUTPUT->notification(get_string("failedupdatefeedback", "assignment", $assignment->submission->userid));
+            $o .= $OUTPUT->notification(get_string("failedupdatefeedback", "assignment", $assignment->submission->userid));
         }
         redirect($FULLME);
     }
@@ -175,7 +175,7 @@ if ($data = data_submitted()) {
                 "submissions.php?id={$assignment->assignment->id}", "$count users", $cm->id);
         }
 
-        echo $OUTPUT->notification('Submissions feedback updated for '.fullname($users[$assignment->submission->userid]).'.');
+        $o .= $OUTPUT->notification('Submissions feedback updated for '.fullname($users[$assignment->submission->userid]).'.');
     }
 } else {
     $manager = get_log_manager();
@@ -265,9 +265,9 @@ if (!$done) {
     if ($show == 'unmarked') {
         $totsubs = count($ugrouped);
         if ($totsubs > 0) {
-            echo '<center><p><b>Following students submissions are still  <b>unmarked</b>:</b></p></center>';
+            $o .= '<center><p><b>Following students submissions are still  <b>unmarked</b>:</b></p></center>';
             $pagingbar = new paging_bar($totsubs, $page, $perpage, $baseurl, 'page');
-            echo $OUTPUT->render($pagingbar);
+            $o .= $OUTPUT->render($pagingbar);
             for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $totsubs); $i++) {
                 $usersubs = $ugrouped[$i];
                 ksort($usersubs);
@@ -276,10 +276,10 @@ if (!$done) {
                 $assignment->user = $users[$temp->userid];
                 fn_print_submission($assignment);
             }
-            echo '<br />';
+            $o .= '<br />';
         } else if ($totsubs == 0) {
-            echo '<center><p>There are currently no <b>Unmarked</b> activities to display.</p></center>';
-            echo "<br/>";
+            $o .= '<center><p>There are currently no <b>Unmarked</b> activities to display.</p></center>';
+            $o .= "<br/>";
         }
     }
 
@@ -288,9 +288,9 @@ if (!$done) {
         if ($assignment->assignment->var4) {
             $totsubs = count($sgrouped);
             if ($totsubs > 0) {
-                echo '<center><p><strong>Following students have kept this assignment as saved:</strong></p></center>';
+                $o .= '<center><p><strong>Following students have kept this assignment as saved:</strong></p></center>';
                 $pagingbar = new paging_bar($totsubs, $page, $perpage, $baseurl, 'page');
-                echo $OUTPUT->render($pagingbar);
+                $o .= $OUTPUT->render($pagingbar);
                 for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $totsubs); $i++) {
                     $usersubs = $sgrouped[$i];
                     ksort($usersubs);
@@ -299,14 +299,14 @@ if (!$done) {
                     $assignment->user = $users[$temp->userid];
                     fn_print_submission($assignment);
                 }
-                echo '<br />';
+                $o .= '<br />';
             } else {
-                echo '<center><p>There are currently no <b>Saved</b> activities to display.</p></center>';
-                echo "<br/>";
+                $o .= '<center><p>There are currently no <b>Saved</b> activities to display.</p></center>';
+                $o .= "<br/>";
             }
         } else {
-            echo '<center><p>There are currently no <b>Saved</b> activities to display.</p></center>';
-            echo "<br/>";
+            $o .= '<center><p>There are currently no <b>Saved</b> activities to display.</p></center>';
+            $o .= "<br/>";
         }
     }
 }
@@ -316,9 +316,9 @@ if ($show == 'marked') {
     usort($mgrouped, 'marksort'.$sort);
     $totsubs = count($mgrouped);
     if ($totsubs > 0) {
-        echo '<center><p><strong>Following students submissions have been marked:</strong></p></center>';
+        $o .= '<center><p><strong>Following students submissions have been marked:</strong></p></center>';
         $pagingbar = new paging_bar($totsubs, $page, $perpage, $baseurl, 'page');
-        echo $OUTPUT->render($pagingbar);
+        $o .= $OUTPUT->render($pagingbar);
         for ($i = ($page * $perpage); ($i < ($page * $perpage) + $perpage) && ($i < $totsubs); $i++) {
             $usersubs = $mgrouped[$i];
             ksort($usersubs);
@@ -327,17 +327,17 @@ if ($show == 'marked') {
             $assignment->user = $users[$temp->userid];
             fn_print_submission($assignment, ($view != 'less'));
         }
-        echo '<br />';
+        $o .= '<br />';
     } else if ($totsubs == 0) {
-        echo '<center><p>There are currently no <strong>Marked</strong> activities to display.</p></center>';
-        echo "<br/>";
+        $o .= '<center><p>There are currently no <strong>Marked</strong> activities to display.</p></center>';
+        $o .= "<br/>";
     }
 }
 // Show all unsubmitted assignment.
 $unsubmittedusers = array();
 if ($show == 'unsubmitted') {
     if (count($unsubmitted) > 0) {
-        echo '<p class="headTxt"><strong>The following students have not submitted this assignment:</strong></p>';
+        $o .= '<p class="headTxt"><strong>The following students have not submitted this assignment:</strong></p>';
         count($unsubmitted);
         foreach ($unsubmitted as $submission) {
             // Check that this user hasn't submitted before.
@@ -345,18 +345,18 @@ if ($show == 'unsubmitted') {
                 continue;
             } else if (isset($users[$submission->userid])) {
                 $user = $users[$submission->userid];
-                echo "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
-                echo "\n<tr>";
-                echo "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
+                $o .= "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
+                $o .= "\n<tr>";
+                $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
                 $user = $DB->get_record('user', array('id' => $user->id));
-                echo $OUTPUT->user_picture($user, array('courseid' => $assignment->course->id));
-                echo "</td>";
-                echo "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
-                echo "</tr></table>\n";
+                $o .= $OUTPUT->user_picture($user, array('courseid' => $assignment->course->id));
+                $o .= "</td>";
+                $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
+                $o .= "</tr></table>\n";
             }
         }
     } else if (count($unsubmitted) == 0) {
-        echo '<center><p>The are currently no <b>users</b>  to display.</p></center>';
+        $o .= '<center><p>The are currently no <b>users</b>  to display.</p></center>';
     }
 }
 

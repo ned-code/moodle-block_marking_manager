@@ -108,7 +108,8 @@ function block_ned_marking_assign_count_ungraded($assign, $graded, $students,
                      WHERE s.assignment=$assign
                        AND (s.userid in ($studentlist))
                        AND s.status='submitted'
-                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)";
+                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                       AND s.latest = 1";
         } else {
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
@@ -117,7 +118,8 @@ function block_ned_marking_assign_count_ungraded($assign, $graded, $students,
                      WHERE s.assignment=$assign
                        AND (s.userid in ($studentlist))
                        AND s.status IN ('submitted', 'draft')
-                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)";
+                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                       AND s.latest = 1";
         }
         return $DB->count_records_sql($sql);
 
@@ -1046,11 +1048,14 @@ function block_ned_marking_process_outcomes($userid, $formdata, $assign) {
 
 }
 
-function block_ned_marking_process_save_grade(&$mform, $assign, $context, $course, $pageparams) {
+function block_ned_marking_process_save_grade(&$mform, $assign, $context, $course, $pageparams, $gradingonly = true) {
     global $CFG;
     // Include grade form.
     require_once($CFG->dirroot . '/mod/assign/gradeform.php');
 
+    if (!$gradingonly) {
+        return true;
+    }
     // Need submit permission to submit an assignment.
     require_capability('mod/assign:grade', $context);
     require_sesskey();
@@ -1195,7 +1200,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     $useridlistid = optional_param('useridlistid', time(), PARAM_INT);
     $userid = optional_param('userid', 0, PARAM_INT);
     $attemptnumber = optional_param('attemptnumber', -1, PARAM_INT);
-    $activitytype = optional_param('activity_type', 0, PARAM_TEXT);
+    $activitytype = $pageparams['activity_type'];
     $group = optional_param('group', 0, PARAM_INT);
     $participants = optional_param('participants', 0, PARAM_INT);
 
@@ -1269,6 +1274,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
         $data = new stdClass();
     }
 
+    block_ned_marking_get_all_submissions_fix($userid, $assign);
     $allsubmissions = block_ned_marking_get_all_submissions($userid, $assign);
 
     if ($attemptnumber != -1) {
@@ -1879,16 +1885,26 @@ function block_ned_marking_render_assign_submission_history_summary(assign_submi
         $CFG->wwwroot.'/blocks/ned_marking/pix/completed.gif" valign="absmiddle"> ';
     $savedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
         $CFG->wwwroot.'/blocks/ned_marking/pix/saved.gif" valign="absmiddle"> ';
-    $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    if  ($gradeitem->gradepass > 0) {
+        $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
+            $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    } else {
+        $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
+            $CFG->wwwroot.'/blocks/ned_marking/pix/graded.gif" valign="absmiddle"> ';
+    }
+
     for ($i = $history->maxsubmissionnum; $i >= 0; $i--) {
 
         $submission = $history->allsubmissions[$i];
         $grade = $history->allgrades[$i];
 
         if (($i == $history->maxsubmissionnum) && (isset($grade->grade))) {
-            $lastsubmissionclass = (($gradeitem->gradepass > 0)
-                && ($grade->grade >= $gradeitem->gradepass)) ? 'bg_green' : 'bg_orange';
+            if ($gradeitem->gradepass > 0) {
+                $lastsubmissionclass = ($grade->grade >= $gradeitem->gradepass) ? 'bg_green' : 'bg_orange';
+            } else {
+                $lastsubmissionclass = 'bg_white';
+            }
+
         } else {
             $lastsubmissionclass = '';
         }
@@ -2014,8 +2030,13 @@ function block_ned_marking_render_assign_submission_status(assign_submission_sta
         $CFG->wwwroot.'/blocks/ned_marking/pix/completed.gif" valign="absmiddle"> ';
     $savedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
         $CFG->wwwroot.'/blocks/ned_marking/pix/saved.gif" valign="absmiddle"> ';
-    $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    if ($gradeitem->gradepass > 0) {
+        $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
+            $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+    } else {
+        $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
+            $CFG->wwwroot.'/blocks/ned_marking/pix/graded.gif" valign="absmiddle"> ';
+    }
 
     $grade->gradefordisplay = $assign->display_grade($grade->grade, false);
 
@@ -2075,6 +2096,33 @@ function block_ned_marking_render_assign_submission_status(assign_submission_sta
     return $o;
 }
 
+function block_ned_marking_get_all_submissions_fix($userid, $assign) {
+    global $DB, $USER;
+
+    // If the userid is not null then use userid.
+    if (!$userid) {
+        $userid = $USER->id;
+    }
+
+    $params = array();
+
+    $params = array('assignment' => $assign->get_instance()->id, 'userid' => $userid, 'status' => 'reopened');
+
+    if ($submissions = $DB->get_records('assign_submission', $params, 'attemptnumber DESC')) {
+        array_shift($submissions);
+        if ($submissions) {
+            foreach ($submissions as $submission) {
+                if ($submission->status == 'reopened') {
+                    $rec = new stdClass();
+                    $rec->id = $submission->id;
+                    $rec->status = 'submitted';
+                    $DB->update_record('assign_submission', $rec);
+                }
+            }
+        }
+    }
+    return true;
+}
 function block_ned_marking_get_all_submissions($userid, $assign) {
     global $DB, $USER;
 
@@ -2171,31 +2219,43 @@ function block_ned_marking_process_add_attempt($userid, $assign) {
     }
 
     if ($assign->get_instance()->teamsubmission) {
-        $submission = $assign->get_group_submission($userid, 0, false);
+        $oldsubmission = $assign->get_group_submission($userid, 0, false);
     } else {
-        $submission = $assign->get_user_submission($userid, false);
+        $oldsubmission = $assign->get_user_submission($userid, false);
     }
 
-    if (!$submission) {
+    if ($oldsubmission->status == ASSIGN_SUBMISSION_STATUS_REOPENED) {
+        return true;
+    }
+    if (!$oldsubmission) {
         return false;
     }
 
     // No more than max attempts allowed.
     if ($assign->get_instance()->maxattempts != ASSIGN_UNLIMITED_ATTEMPTS &&
-        $submission->attemptnumber >= ($assign->get_instance()->maxattempts - 1)) {
+        $oldsubmission->attemptnumber >= ($assign->get_instance()->maxattempts - 1)) {
         return false;
     }
 
     // Create the new submission record for the group/user.
     if ($assign->get_instance()->teamsubmission) {
-        $submission = $assign->get_group_submission($userid, 0, true, $submission->attemptnumber + 1);
+        $newsubmission = $assign->get_group_submission($userid, 0, true, $oldsubmission->attemptnumber + 1);
     } else {
-        $submission = $assign->get_user_submission($userid, true, $submission->attemptnumber + 1);
+        $newsubmission = $assign->get_user_submission($userid, true, $oldsubmission->attemptnumber + 1);
     }
 
     // Set the status of the new attempt to reopened.
-    $submission->status = ASSIGN_SUBMISSION_STATUS_REOPENED;
-    block_ned_marking_update_submission($submission, $userid, false, $assign->get_instance()->teamsubmission, $assign);
+    $newsubmission->status = ASSIGN_SUBMISSION_STATUS_REOPENED;
+
+    // Give each submission plugin a chance to process the add_attempt.
+    $plugins = $assign->get_submission_plugins();
+    foreach ($plugins as $plugin) {
+        if ($plugin->is_enabled() && $plugin->is_visible()) {
+            $plugin->add_attempt($oldsubmission, $newsubmission);
+        }
+    }
+
+    block_ned_marking_update_submission($newsubmission, $userid, false, $assign->get_instance()->teamsubmission, $assign);
     return true;
 }
 
@@ -2515,7 +2575,8 @@ function block_ned_marking_assignment_status($mod, $userid) {
             'attemptnumber' => $attemptnumber), 'attemptnumber DESC', '*', 0, 1)) {
             $submissionisgraded = reset($submissionisgraded);
             if ($submissionisgraded->grade > -1) {
-                if ($submission->timemodified > $submissionisgraded->timemodified) {
+                if (($submission->timemodified > $submissionisgraded->timemodified)
+                    || ($submission->attemptnumber > $submissionisgraded->attemptnumber)) {
                     $graded = false;
                 } else {
                     $graded = true;
@@ -2535,11 +2596,7 @@ function block_ned_marking_assignment_status($mod, $userid) {
             }
         }
         if ($submission->status == 'reopened') {
-            if ($graded) {
-                return 'submitted';
-            } else {
-                return 'waitinggrade';
-            }
+            return 'submitted';
         }
         if ($submission->status == 'submitted') {
             if ($graded) {

@@ -40,6 +40,7 @@ if ($layout = get_config('block_ned_marking', 'pagelayout')) {
 }
 
 $courseid = required_param('courseid', PARAM_INT); // Course id.
+$id = optional_param('id', 0, PARAM_INT); // Mod id to look at.
 $mid = optional_param('mid', 0, PARAM_INT); // Mod id to look at.
 $cmid = 0;                                 // If no mid is specified, we'll select one in this variable.
 
@@ -65,7 +66,7 @@ $rownum = optional_param('rownum', 0, PARAM_INT);
 
 
 $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
-$activitytype = optional_param('activity_type', '0', PARAM_RAW);
+$activitytype = optional_param('activity_type', '0', PARAM_TEXT);
 $participants = optional_param('participants', '0', PARAM_INT);
 
 $includeorphaned = get_config('block_ned_marking', 'include_orphaned');
@@ -94,6 +95,7 @@ $pageparams = array('courseid' => $courseid,
     'timenow' => $timenow,
     'action' => $action,
     'expand' => $expand,
+    'activity_type' => $activitytype,
     'rownum' => $rownum,
     'page' => $page,
     'perpage' => $perpage,
@@ -119,8 +121,6 @@ if (!$isteacher = has_capability('moodle/grade:viewall', $context)) {
     print_error("Only teachers can use this page!");
 }
 
-require_login($course->id);
-
 // Array of functions to call for grading purposes for modules.
 $modgradesarray = array(
     'assign' => 'assign.submissions.fn.php',
@@ -128,6 +128,28 @@ $modgradesarray = array(
     'quiz' => 'quiz.submissions.fn.php',
     'forum' => 'forum.submissions.fn.php',
 );
+
+$gradingonly = false;
+if (($action == 'submitgrade') && ($id)
+    && !(optional_param('nosaveandprevious', null, PARAM_RAW))
+    && !(optional_param('nosaveandnext', null, PARAM_RAW)) ) {
+    $gradingonly = true;
+    // Grade activity first.
+    if (! $cmfograding = get_coursemodule_from_id('', $id)) {
+        print_error("Course Module ID was incorrect");
+    }
+    $selectedfunction = $modgradesarray[$cmfograding->modname];
+    if (!empty($selectedfunction)) {
+        $iid = $cmfograding->instance;
+        include($selectedfunction);
+
+        if (!$mid) {
+            $mid = 0;
+        }
+    }
+    $gradingonly = false;
+    $action = 'submitgrade';
+}
 
 // Filter modules.
 if ($activitytype) {
@@ -374,16 +396,29 @@ foreach ($selectedsection as $sectionnum) {
                                         $extra, $instance, $keepseparate);
                                 } else if ($show == 'unmarked') {
                                     $ung = $numstudents - $numgraded;
+                                    if (($action == 'submitgrade') && ($mid == $mod->id)) {
+                                        --$ung;
+                                    }
                                 } else if ($show == 'marked') {
                                     $ung = $numgraded;
+                                    if (($action == 'submitgrade') && ($mid == $mod->id)) {
+                                        ++$ung;
+                                    }
                                 } else {
                                     $ung = $numstudents - $numgraded;
+                                    if (($action == 'submitgrade') && ($mid == $mod->id)) {
+                                        --$ung;
+                                    }
                                 }
 
                                 $columnungraded[] = $ung;
                                 $totungraded += $ung;
                             } else {
                                 $columnungraded[] = 0;
+                            }
+
+                            if (($mid == $mod->id) && (end($columnungraded) == 0)) {
+                                $mid = 0;
                             }
 
                             // If we haven't specifically selected a mid, look for the oldest ungraded one.
@@ -649,9 +684,13 @@ foreach ($columnhtml as $index => $column) {
             </td>
             <td align="left" valign="top" class="right-sec">';
 
+if (!isset($selectedmod)) {
+    $selectedfunction = null;
+}
 if (!empty($selectedfunction)) {
     $iid = $selectedmod->id;
     include($selectedfunction);
+    echo $o;
 } else {
     echo '<div class="no-assign">No selected assignment</div>';
 }

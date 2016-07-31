@@ -48,9 +48,9 @@ if (($show == 'unmarked') || ($show == 'saved')) {
 
     if ($action == 'submitgrade') {
         if (optional_param('saveandshownext', null, PARAM_RAW)) {
-            // Ssave and show next.
+            // Save and show next.
             $action = 'grade';
-            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams)) {
+            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
                 $action = 'nextgrade';
             }
         } else if (optional_param('nosaveandprevious', null, PARAM_RAW)) {
@@ -62,7 +62,7 @@ if (($show == 'unmarked') || ($show == 'saved')) {
             // Save changes button.
 
             $action = 'grade';
-            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams)) {
+            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
                 $action = 'grade';
             }
         } else {
@@ -73,33 +73,34 @@ if (($show == 'unmarked') || ($show == 'saved')) {
         $action = 'grade';
     }
 
-    $returnparams = array('rownum' => optional_param('rownum', 0, PARAM_INT));
-    $assign->register_return_link($action, $returnparams);
+    if (!$gradingonly) {
+        $returnparams = array('rownum' => optional_param('rownum', 0, PARAM_INT));
+        $assign->register_return_link($action, $returnparams);
 
-    if (isset($_POST['onlinetext'])) {
-        unset($_POST['onlinetext']);
-    }
+        if (isset($_POST['onlinetext'])) {
+            unset($_POST['onlinetext']);
+        }
 
-    // Now show the right view page.
-    if ($action == 'previousgrade') {
-        $mform = null;
-        $_POST = null;
-        $o .= block_ned_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
-    } else if ($action == 'nextgrade') {
-        $mform = null;
-        $_POST = null;
-        $o .= block_ned_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
-    } else if ($action == 'grade') {
-        $mform = null;
-        $_POST = null;
-        $o .= block_ned_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
+        // Now show the right view page.
+        if ($action == 'previousgrade') {
+            $mform = null;
+            $_POST = null;
+            $o .= block_ned_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
+        } else if ($action == 'nextgrade') {
+            $mform = null;
+            $_POST = null;
+            $o .= block_ned_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
+        } else if ($action == 'grade') {
+            $mform = null;
+            $_POST = null;
+            $o .= block_ned_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
+        }
     }
-    echo $o;
 
 } else if ($show == 'marked') {
     if ($expand) {
         if (($action == 'submitgrade')  && (optional_param('savegrade', null, PARAM_RAW))) {
-            block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams);
+            block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly);
         }
         if (optional_param('nosaveandprevious', null, PARAM_RAW)) {
             $mform = null;
@@ -120,9 +121,9 @@ if (($show == 'unmarked') || ($show == 'saved')) {
             $assign, $ctx, $cm, $course, $pageparams);
     }
 
-    echo $o;
+    // echo $o;
 } else if ($show == 'unsubmitted') {
     $o .= block_ned_marking_view_submissions($mform, $offset = 0, $showattemptnumber = null,
         $assign, $ctx, $cm, $course, $pageparams);
-    echo $o;
+    // echo $o;
 }
