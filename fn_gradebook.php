@@ -303,6 +303,11 @@ $modnamesplural = get_module_types_names(true);
 $courseformatoptions = course_get_format($course)->get_format_options();
 $courseformat = course_get_format($course)->get_format();
 $coursenumsections = $courseformatoptions['numsections'];
+if ( isset($courseformatoptions['numsections'])) {
+    $coursenumsections = $courseformatoptions['numsections'];
+} else {
+    $coursenumsections = 10; // Default section number.
+}
 
 if ($courseformat == 'weeks') {
     $timenow = time();

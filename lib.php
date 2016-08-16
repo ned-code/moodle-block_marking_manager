@@ -124,7 +124,7 @@ function block_ned_marking_assign_count_ungraded($assign, $graded, $students,
         return $DB->count_records_sql($sql);
 
     } else if ($show == 'marked') {
-        $sqlunmarked = "SELECT s.userid
+        $sqlunmarked = "SELECT DISTINCT s.userid
                   FROM {assign_submission} s
                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
                   and s.userid=g.userid and  s.attemptnumber = g.attemptnumber)
@@ -278,7 +278,8 @@ function block_ned_marking_assign_students_ungraded($assign, $graded, $students,
                  WHERE s.assignment=$assign
                    AND (s.userid in ($studentlist))
                    AND s.status='submitted'
-                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)";
+                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                   AND s.latest = 1";
 
         if ($data = $DB->get_records_sql($sql)) {
             $arr = array();
@@ -1204,7 +1205,19 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     $group = optional_param('group', 0, PARAM_INT);
     $participants = optional_param('participants', 0, PARAM_INT);
 
-    if ($pageparams['userid']) {
+    if ($participants) {
+        $userid = $participants;
+
+        $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show']);
+        $useridlist = $arruser;
+        $last = false;
+
+        $rownum = array_search($userid, $useridlist);
+        if ($rownum == count($useridlist) - 1) {
+            $last = true;
+        }
+
+    } else if ($pageparams['userid']) {
         $userid = $pageparams['userid'];
 
         $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show']);
