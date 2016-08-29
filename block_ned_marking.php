@@ -186,9 +186,25 @@ class block_ned_marking extends block_list {
         // Course Teacher Menu.
         if (($this->page->course->id != SITEID)) {
 
-            if (isset($this->config->showunmarked) && $this->config->showunmarked) {
+            // CACHE.
+            $cachedatalast = get_config('block_ned_marking', 'cachedatalast');
+            $refreshmodecourse = get_config('block_ned_marking', 'refreshmodecourse');
 
-                $numunmarked = block_ned_marking_count_unmarked_activities($this->page->course, 'unmarked');
+            $supportedmodules = array('assign', 'forum', 'quiz');
+            list($insql, $params) = $DB->get_in_or_equal($supportedmodules);
+            $params = array_merge(array($this->page->course->id), $params);
+
+            if (isset($this->config->showunmarked) && $this->config->showunmarked) {
+                if ($refreshmodecourse == 'pageload') {
+                    $numunmarked = block_ned_marking_count_unmarked_activities($this->page->course, 'unmarked');
+                } else if ($refreshmodecourse == 'cron') {
+                    $sql = "SELECT SUM(m.unmarked) unmarked
+                              FROM {block_ned_marking_mod_cache} m
+                             WHERE m.courseid = ?
+                               AND m.modname {$insql}";
+                    $modcache = $DB->get_record_sql($sql, $params);
+                    $numunmarked = $modcache->unmarked;
+                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unmarked' .
                     '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_ned_marking').'</a>';
@@ -197,8 +213,16 @@ class block_ned_marking extends block_list {
             }
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
-
-                $nummarked = block_ned_marking_count_unmarked_activities($this->page->course, 'marked');
+                if ($refreshmodecourse == 'pageload') {
+                    $nummarked = block_ned_marking_count_unmarked_activities($this->page->course, 'marked');
+                } else if ($refreshmodecourse == 'cron') {
+                    $sql = "SELECT SUM(m.marked) marked
+                              FROM {block_ned_marking_mod_cache} m
+                             WHERE m.courseid = ?
+                               AND m.modname {$insql}";
+                    $modcache = $DB->get_record_sql($sql, $params);
+                    $nummarked = $modcache->marked;
+                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=marked' .
                     '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_ned_marking').'</a>';
@@ -207,8 +231,16 @@ class block_ned_marking extends block_list {
             }
 
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
-
-                $numunsubmitted = block_ned_marking_count_unmarked_activities($this->page->course, 'unsubmitted');
+                if ($refreshmodecourse == 'pageload') {
+                    $numunsubmitted = block_ned_marking_count_unmarked_activities($this->page->course, 'unsubmitted');
+                } else if ($refreshmodecourse == 'cron') {
+                    $sql = "SELECT SUM(m.unsubmitted) unsubmitted
+                              FROM {block_ned_marking_mod_cache} m
+                             WHERE m.courseid = ?
+                               AND m.modname {$insql}";
+                    $modcache = $DB->get_record_sql($sql, $params);
+                    $numunsubmitted = $modcache->unsubmitted;
+                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unsubmitted' .
                     '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_ned_marking').'</a>';
@@ -217,8 +249,16 @@ class block_ned_marking extends block_list {
             }
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
-
-                $numsaved = block_ned_marking_count_unmarked_activities($this->page->course, 'saved');
+                if ($refreshmodecourse == 'pageload') {
+                    $numsaved = block_ned_marking_count_unmarked_activities($this->page->course, 'saved');
+                } else if ($refreshmodecourse == 'cron') {
+                    $sql = "SELECT SUM(m.saved) saved
+                              FROM {block_ned_marking_mod_cache} m
+                             WHERE m.courseid = ?
+                               AND m.modname {$insql}";
+                    $modcache = $DB->get_record_sql($sql, $params);
+                    $numsaved = $modcache->saved;
+                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=saved' .
                     '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_ned_marking').'</a>';
@@ -282,13 +322,37 @@ class block_ned_marking extends block_list {
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot .
                     '/blocks/ned_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
             }
+
+            if ($refreshmodecourse == 'cron') {
+                if ($cachedatalast > 0) {
+                    $humantime = get_string('lastrefreshtime', 'block_ned_marking', block_ned_marking_human_timing($cachedatalast));
+                } else {
+                    $humantime = get_string('lastrefreshupdating', 'block_ned_marking');
+                }
+
+                $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_ned_marking'), '', null);
+                $refreshbutton = html_writer::link(
+                    new moodle_url('/blocks/ned_marking/update_cache.php'),
+                    $refreshicon,
+                    array('class' => 'fn_refresh_btn')
+                );
+                $refresh = html_writer::div(
+                    $humantime . $refreshbutton,
+                    'fn_refresh_wrapper_footer'
+                );
+
+                $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+                $this->content->icons[] = '';
+
+                $this->content->footer = $refresh;
+            }
         }
         return $this->content;
     }
 
     private function get_frontpage_content() {
 
-        global $DB, $USER, $CFG;
+        global $DB, $USER, $CFG, $OUTPUT;
 
         require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
@@ -359,6 +423,30 @@ class block_ned_marking extends block_list {
             $filter = '';
         }
 
+        // CACHE.
+        $cachedatalast = get_config('block_ned_marking', 'cachedatalast');
+        $refreshmodefrontpage = get_config('block_ned_marking', 'refreshmodefrontpage');
+        $refresh = '';
+
+        if ($refreshmodefrontpage == 'cron') {
+            if ($cachedatalast > 0) {
+                $humantime = get_string('lastrefreshtime', 'block_ned_marking', block_ned_marking_human_timing($cachedatalast));
+            } else {
+                $humantime = get_string('lastrefreshupdating', 'block_ned_marking');
+            }
+
+            $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_ned_marking'), '', null);
+            $refreshbutton = html_writer::link(
+                new moodle_url('/blocks/ned_marking/update_cache.php'),
+                $refreshicon,
+                array('class' => 'fn_refresh_btn')
+            );
+            $refresh = html_writer::div(
+                $humantime . $refreshbutton,
+                'fn_refresh_wrapper'
+            );
+        }
+
         // Courses - admin.
         if ($isadmin) {
 
@@ -390,7 +478,8 @@ class block_ned_marking extends block_list {
                 }
                 $expand = '<div class="fn-expand-btn"><button class="btn btn-mini btn-default" type="button"
                     onclick="togglecollapseall();">Collapse/Expand</button></div>';
-                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$expand.$text.'</dl></div>';
+
+                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$refresh.$text.'</dl></div>';
                 $this->content->icons[] = '';
             }
         } else {
@@ -420,7 +509,7 @@ class block_ned_marking extends block_list {
                 $text = block_ned_marking_build_ungraded_tree ($courses, $supportedmodules);
                 $expand = '<div class="fn-expand-btn"><button class="btn btn-mini btn-default" type="button"
                     onclick="togglecollapseall();">Collapse/Expand</button></div>';
-                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$expand.$text.'</dl></div>';
+                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$refresh.$text.'</dl></div>';
                 $this->content->icons[] = '';
             }
         }

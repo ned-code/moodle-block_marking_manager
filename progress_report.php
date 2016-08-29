@@ -66,7 +66,10 @@ if (!$isteacher) {
 
 $PAGE->requires->css('/blocks/ned_marking/css/styles.css');
 
-$PAGE->set_url('/progress_report.php', array('courseid' => $courseid));
+$PAGE->set_url(
+    new moodle_url('/blocks/ned_marking/progress_report.php'),
+    array('id' => $courseid)
+);
 
 if ($layout = get_config('block_ned_marking', 'pagelayout')) {
     $PAGE->set_pagelayout($layout);
@@ -265,7 +268,7 @@ $PAGE->set_title(get_string('progressreport', 'block_ned_marking'));
 $PAGE->set_heading($SITE->fullname);
 
 // Print header.
-$PAGE->navbar->add('Simple Gradebook', new moodle_url(''));
+$PAGE->navbar->add(get_string('progressreport', 'block_ned_marking'), new moodle_url(''));
 echo $OUTPUT->header();
 
 // The view options.
@@ -289,7 +292,7 @@ echo "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" 
 // TABLE.
 echo "<table class='simplegradebook'>";
 
-echo "<tr>";
+echo "<!--<tr>";
 echo "<th>Name</th>";
 echo "<th>%</th>";
 foreach ($weekactivitycount as $weeknum => $weekactivity) {
@@ -303,11 +306,11 @@ foreach ($weekactivitycount as $weeknum => $weekactivity) {
         }
     }
 }
-echo "</tr>";
+echo "</tr>-->";
 
 echo "<tr>";
-echo "<td class='mod-icon'></td>";
-echo "<td class='mod-icon'></td>";
+echo "<td class='mod-icon'>".get_string('name', 'block_ned_marking')."</td>";
+echo "<td class='mod-icon'>%</td>";
 foreach ($weekactivitycount as $key => $value) {
     if ($value['numofweek']) {
         foreach ($value['mod'] as $imagelink) {

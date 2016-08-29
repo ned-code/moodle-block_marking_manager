@@ -20,8 +20,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2016082800;
-$plugin->requires = 2014051200;
-$plugin->maturity = MATURITY_STABLE;
-$plugin->component = 'block_ned_marking';
-$plugin->release = '3.0';
+namespace block_ned_marking\task;
+
+
+class cache_course_data extends \core\task\scheduled_task {
+
+    public function get_name() {
+        return get_string('pluginname', 'block_ned_marking');
+    }
+
+    public function execute() {
+        global $CFG;
+        require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
+        block_ned_marking_cache_course_data();
+    }
+}

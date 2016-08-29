@@ -2674,7 +2674,9 @@ function block_ned_marking_get_block_config ($courseid, $blockname='ned_marking'
 }
 
 function block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide='', $showzeroungraded=0) {
-    global $CFG, $OUTPUT;
+    global $CFG, $DB, $OUTPUT;
+
+    $refreshmodefrontpage = get_config('block_ned_marking', 'refreshmodefrontpage');
 
     $text = '';
 
@@ -2690,7 +2692,14 @@ function block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $cl
             $totalungraded = 0;
             $moduletext = '';
             foreach ($supportedmodules as $supportedmodule) {
-                $numunmarked = block_ned_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                if ($refreshmodefrontpage == 'pageload') {
+                    $numunmarked = block_ned_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                } else if ($refreshmodefrontpage == 'cron') {
+                    $modcache = $DB->get_record('block_ned_marking_mod_cache',
+                        array('courseid' => $course->id, 'modname' => $supportedmodule)
+                    );
+                    $numunmarked = $modcache->unmarked;
+                }
                 $totalungraded += $numunmarked;
                 $gradelink = $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
                     $course->id . '&show=unmarked' . '&navlevel=top&mid=0&activity_type=' . $supportedmodule;
@@ -3001,4 +3010,141 @@ function block_ned_marking_footer(){
         'markingmanagercontainer-footer'
     );
     return $output;
+}
+
+function block_ned_marking_get_selected_courses($category, &$filtercourses) {
+    if ($category->courses) {
+        foreach ($category->courses as $course) {
+            $filtercourses[] = $course->id;
+        }
+    }
+    if ($category->categories) {
+        foreach ($category->categories as $subcat) {
+            block_ned_marking_get_selected_courses($subcat, $course);
+        }
+    }
+};
+
+function block_ned_marking_get_setting_courses () {
+    global $DB;
+
+    $filtercourses = array();
+
+    $configcategory = get_config('block_ned_marking', 'category');
+    $configcourse = get_config('block_ned_marking', 'course');
+
+    if (empty($configcategory) && empty($configcategory)) {
+
+        $sql = "SELECT c.id FROM {course} c WHERE c.id <> ?";
+        if ($courses = $DB->get_records_sql($sql, array(SITEID))) {
+            foreach ($courses as $subcatcourse) {
+                $filtercourses[] = $subcatcourse->id;
+            }
+        }
+    }
+
+    if ($configcategory) {
+        $selectedcategories = explode(',', $configcategory);
+        foreach ($selectedcategories as $categoryid) {
+
+            if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
+                foreach ($parentcatcourses as $catcourse) {
+                    $filtercourses[] = $catcourse->id;
+                }
+            }
+            if ($categorystructure = block_ned_marking_get_course_category_tree($categoryid)) {
+                foreach ($categorystructure as $category) {
+
+                    if ($category->courses) {
+                        foreach ($category->courses as $subcatcourse) {
+                            $filtercourses[] = $subcatcourse->id;
+                        }
+                    }
+                    if ($category->categories) {
+                        foreach ($category->categories as $subcategory) {
+                            block_ned_marking_get_selected_courses($subcategory, $filtercourses);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ($configcourse) {
+        $selectedcourses = explode(',', $configcourse);
+        $filtercourses = array_merge($filtercourses, $selectedcourses);
+    }
+
+    return $filtercourses;
+}
+
+function block_ned_marking_cache_course_data (progress_bar $progressbar = null) {
+    global $DB, $USER, $CFG;
+
+    require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
+    //require_once($CFG->dirroot . '/mod/forum/lib.php');
+    require_once($CFG->dirroot . '/course/lib.php');
+
+    $supportedmodules = array('assign', 'forum', 'quiz');
+
+    $filtercourses = block_ned_marking_get_setting_courses ();
+    set_config('cachedatalast', 0, 'block_ned_marking');
+
+    $numberofitems = count($filtercourses) * count($supportedmodules);
+    $counter = 0;
+    foreach ($filtercourses as $filtercourse) {
+        if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
+            foreach ($supportedmodules as $supportedmodule) {
+                $numunmarked = block_ned_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                $nummarked = block_ned_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
+                $numunsubmitted = block_ned_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
+                $numsaved = block_ned_marking_count_unmarked_activities($course, 'saved', $supportedmodule);
+
+                // block_ned_marking_mod_cache
+                $rec = new stdClass();
+                $rec->courseid = $course->id;
+                $rec->modname = $supportedmodule;
+                $rec->unmarked = $numunmarked;
+                $rec->marked = $nummarked;
+                $rec->unsubmitted = $numunsubmitted;
+                $rec->saved = $numsaved;
+                $rec->timecreated = time();
+
+                if ($modcache = $DB->get_record('block_ned_marking_mod_cache', array('courseid' => $course->id, 'modname' => $supportedmodule))) {
+                    $rec->id = $modcache->id;
+                    $DB->update_record('block_ned_marking_mod_cache', $rec);
+                } else {
+                    $DB->insert_record('block_ned_marking_mod_cache', $rec);
+                }
+                $counter++;
+                if (!is_null($progressbar)) {
+                    $donepercent = floor($counter / $numberofitems * 100);
+                    $progressbar->update_full($donepercent, "$counter of $numberofitems");
+                }
+            }
+        }
+    }
+    set_config('cachedatalast', time(), 'block_ned_marking');
+
+    return true;
+}
+
+function block_ned_marking_human_timing ($time) {
+    $time = time() - $time;
+    $time = ($time < 1) ? 1 : $time;
+    $tokens = array (
+        31536000 => 'year',
+        2592000 => 'month',
+        604800 => 'week',
+        86400 => 'day',
+        3600 => 'hour',
+        60 => 'minute',
+        1 => 'second'
+    );
+
+    foreach ($tokens as $unit => $text) {
+        if ($time < $unit) continue;
+        $numberofunits = floor($time / $unit);
+        return $numberofunits.' '.$text.(($numberofunits > 1) ? 's' : '');
+    }
 }

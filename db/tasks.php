@@ -20,8 +20,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2016082800;
-$plugin->requires = 2014051200;
-$plugin->maturity = MATURITY_STABLE;
-$plugin->component = 'block_ned_marking';
-$plugin->release = '3.0';
+$tasks = array(
+    array(
+        'classname' => 'block_ned_marking\task\cache_course_data',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '*/1',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    )
+);

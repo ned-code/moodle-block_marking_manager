@@ -40,6 +40,32 @@ $settings->add(
 
 $settings->add(
     new admin_setting_configselect(
+        'block_ned_marking/refreshmodefrontpage',
+        get_string('refreshmodefrontpage', 'block_ned_marking'),
+        '',
+        'pageload',
+        array(
+            'pageload' => get_string('pageload', 'block_ned_marking'),
+            'cron' => get_string('cron', 'block_ned_marking')
+        )
+    )
+);
+
+$settings->add(
+    new admin_setting_configselect(
+        'block_ned_marking/refreshmodecourse',
+        get_string('refreshmodecourse', 'block_ned_marking'),
+        '',
+        'pageload',
+        array(
+            'pageload' => get_string('pageload', 'block_ned_marking'),
+            'cron' => get_string('cron', 'block_ned_marking')
+        )
+    )
+);
+
+$settings->add(
+    new admin_setting_configselect(
         'block_ned_marking/showtopmessage',
         get_string('showtopmessage', 'block_ned_marking'),
         '',

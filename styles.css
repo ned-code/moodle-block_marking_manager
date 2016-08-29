@@ -505,7 +505,7 @@ table.simplegradebook th {
 }
 table.simplegradebook td.mod-icon {
     background-color: #F2F2F2;
-    color: #fff;
+    color: #666;
     padding: 4px;
     text-align: center;
     border: 1px black solid;
@@ -779,4 +779,24 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 #page-blocks-ned_marking-coursecategories  .ned-form-course-category {
     font-weight: bold;
+}
+.block_ned_marking  .fn_refresh_wrapper {
+    color: #999;
+    font-size: 0.95em;
+    text-align: right;
+}
+.block_ned_marking  .fn_refresh_wrapper_footer {
+    color: #999;
+    font-size: 0.95em;
+    text-align: center;
+}
+#page-blocks-ned_marking-update_cache #notice {
+    text-align: center;
+    width: 100%;
+}
+#page-blocks-ned_marking-update_cache .page-title {
+    text-align: center;
+}
+#page-blocks-ned_marking-progress_report .fn-menuwrapper .groupselector {
+    margin-right: 10px;
 }
