@@ -15,44 +15,44 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
-require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
-require_once($CFG->dirroot . '/blocks/ned_marking/coursecategories_form.php');
+require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
+require_once($CFG->dirroot . '/blocks/fn_marking/coursecategories_form.php');
 
 require_login();
 
 // Permission.
-require_capability('block/ned_marking:addinstance', context_system::instance(), $USER->id);
+require_capability('block/fn_marking:addinstance', context_system::instance(), $USER->id);
 
-$title = get_string('coursecategories', 'block_ned_marking');
+$title = get_string('coursecategories', 'block_fn_marking');
 $heading = $SITE->fullname;
 
-$PAGE->set_url('/blocks/ned_marking/coursecategories.php');
+$PAGE->set_url('/blocks/fn_marking/coursecategories.php');
 $PAGE->set_pagelayout('admin');
 $PAGE->set_context(context_system::instance());
 $PAGE->set_title($title);
 $PAGE->set_heading($heading);
 $PAGE->set_cacheable(true);
 
-$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
+$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
 
 $PAGE->requires->jquery();
-$PAGE->requires->js('/blocks/ned_marking/js/selection.js');
+$PAGE->requires->js('/blocks/fn_marking/js/selection.js');
 
-$PAGE->navbar->add(get_string('pluginname', 'block_ned_marking'),
-    new moodle_url('/admin/settings.php', array('section' => 'blocksettingned_marking')));
+$PAGE->navbar->add(get_string('pluginname', 'block_fn_marking'),
+    new moodle_url('/admin/settings.php', array('section' => 'blocksettingfn_marking')));
 
-$PAGE->navbar->add(get_string('coursecategories', 'block_ned_marking'),
-    new moodle_url('/blocks/ned_marking/coursecategories.php'));
+$PAGE->navbar->add(get_string('coursecategories', 'block_fn_marking'),
+    new moodle_url('/blocks/fn_marking/coursecategories.php'));
 
 $parameters = array();
-$configcategory = get_config('block_ned_marking', 'category');
-$configcourse = get_config('block_ned_marking', 'course');
+$configcategory = get_config('block_fn_marking', 'category');
+$configcourse = get_config('block_fn_marking', 'course');
 
 $parameters = array(
     'course' => $configcourse,
@@ -62,12 +62,12 @@ $parameters = array(
 $mform = new coursecategory_form(null, $parameters, 'post', '', array('id' => 'notification_form', 'class' => 'notification_form'));
 
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url('/admin/settings.php', array('section' => 'blocksettingned_marking')),
-        get_string('successful', 'block_ned_marking'));
+    redirect(new moodle_url('/admin/settings.php', array('section' => 'blocksettingfn_marking')),
+        get_string('successful', 'block_fn_marking'));
 } else if ($fromform = $mform->get_data()) {
 
-    set_config('category', '',  'block_ned_marking');
-    set_config('course', '',  'block_ned_marking');
+    set_config('category', '',  'block_fn_marking');
+    set_config('course', '',  'block_fn_marking');
 
     foreach ($_POST as $key => $value) {
         if (strpos($key, "category_") === 0) {
@@ -85,15 +85,15 @@ if ($mform->is_cancelled()) {
 
     if (isset($fromform->category)) {
         $fromform->category = implode(',', $fromform->category);
-        set_config('category', $fromform->category,  'block_ned_marking');
+        set_config('category', $fromform->category,  'block_fn_marking');
     }
 
     if (isset($fromform->course)) {
         $fromform->course = implode(',', $fromform->course);
-        set_config('course', $fromform->course,  'block_ned_marking');
+        set_config('course', $fromform->course,  'block_fn_marking');
     }
-    redirect(new moodle_url('/admin/settings.php', array('section' => 'blocksettingned_marking')),
-        get_string('successful', 'block_ned_marking'));
+    redirect(new moodle_url('/admin/settings.php', array('section' => 'blocksettingfn_marking')),
+        get_string('successful', 'block_fn_marking'));
     die;
 }
 echo $OUTPUT->header();

@@ -13,7 +13,7 @@ M.show_forum_panel = {
 
     showforumpanel: function() {
         var Y = this.Y;
-         var url = M.cfg.wwwroot + "/blocks/ned_marking/forum_view.php?id=" + this.mid;
+         var url = M.cfg.wwwroot + "/blocks/fn_marking/forum_view.php?id=" + this.mid;
         var div = Y.Node.create('</div><div/>');
         div.set("id", "forumiframecontainer");
 

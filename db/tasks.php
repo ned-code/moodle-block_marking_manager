@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $tasks = array(
     array(
-        'classname' => 'block_ned_marking\task\cache_course_data',
+        'classname' => 'block_fn_marking\task\cache_course_data',
         'blocking' => 0,
-        'minute' => '0',
-        'hour' => '*/1',
+        'minute' => '*/15',
+        'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'

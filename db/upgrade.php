@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function xmldb_block_ned_marking_upgrade($oldversion) {
+function xmldb_block_fn_marking_upgrade($oldversion) {
     global $DB;
     if ($oldversion < 2016082501) {
 
         $dbman = $DB->get_manager();
 
-        // Define table block_ned_marking_mod_cache to be created.
-        $table = new xmldb_table('block_ned_marking_mod_cache');
+        // Define table block_fn_marking_mod_cache to be created.
+        $table = new xmldb_table('block_fn_marking_mod_cache');
 
-        // Adding fields to table block_ned_marking_mod_cache.
+        // Adding fields to table block_fn_marking_mod_cache.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('courseid', XMLDB_TYPE_INTEGER, '18', null, null, null, null);
         $table->add_field('modname', XMLDB_TYPE_CHAR, '255', null, null, null, null);
@@ -39,11 +39,11 @@ function xmldb_block_ned_marking_upgrade($oldversion) {
         $table->add_field('saved', XMLDB_TYPE_INTEGER, '18', null, null, null, '0');
         $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '18', null, null, null, '0');
 
-        // Adding keys to table block_ned_marking_mod_cache.
+        // Adding keys to table block_fn_marking_mod_cache.
         $table->add_key('id', XMLDB_KEY_PRIMARY, array('id'));
         $table->add_key('ix_cor_mod', XMLDB_KEY_UNIQUE, array('courseid', 'modname'));
 
-        // Conditionally launch create table for block_ned_marking_mod_cache.
+        // Conditionally launch create table for block_fn_marking_mod_cache.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }

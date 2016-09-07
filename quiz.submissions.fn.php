@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -80,7 +80,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     );
     $headers = array(
         'userpicture' => '',
-        'name' => get_string('student', 'block_ned_marking'),
+        'name' => get_string('student', 'block_fn_marking'),
         'sumgrades' => 'Grades<br>/' . round($quiz->grade),
     );
     // Build Headers.
@@ -163,7 +163,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                 'qdir' => $columndir
             );
 
-            $sortingurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $qsortingparams);
+            $sortingurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $qsortingparams);
             $$column = "<a href=\"" . $sortingurl->out() . "\">" . $headers[$column] . "</a>$columnicon";
         }
     }
@@ -309,8 +309,8 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'dir' => $qdir,
         'qallparticipants' => 0
     );
-    $targetonurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetonparams);
-    $targetoffurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $targetoffparams);
+    $targetonurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $targetonparams);
+    $targetoffurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $targetoffparams);
 
     $o .= '<div class="quiz-top-menu"><div class="qdefault-view">';
     $o .= '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
@@ -337,7 +337,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
         'dir' => $qdir,
         'qallparticipants' => $qallparticipants
     );
-    $pagingurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php?', $qpagingparams);
+    $pagingurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $qpagingparams);
     $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingurl, 'page');
     $o .= $OUTPUT->render($pagingbar);
     $o .= html_writer::table($table);

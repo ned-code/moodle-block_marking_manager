@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,8 +30,8 @@ foreach (array_keys($themeconfig->layouts) as $layout) {
 
 $settings->add(
     new admin_setting_configselect(
-        'block_ned_marking/pagelayout',
-        get_string('pagelayout', 'block_ned_marking'),
+        'block_fn_marking/pagelayout',
+        get_string('pagelayout', 'block_fn_marking'),
         '',
         'course',
         $layouts
@@ -40,34 +40,34 @@ $settings->add(
 
 $settings->add(
     new admin_setting_configselect(
-        'block_ned_marking/refreshmodefrontpage',
-        get_string('refreshmodefrontpage', 'block_ned_marking'),
+        'block_fn_marking/refreshmodefrontpage',
+        get_string('refreshmodefrontpage', 'block_fn_marking'),
         '',
         'pageload',
         array(
-            'pageload' => get_string('pageload', 'block_ned_marking'),
-            'cron' => get_string('cron', 'block_ned_marking')
+            'pageload' => get_string('pageload', 'block_fn_marking'),
+            'cron' => get_string('cron', 'block_fn_marking')
         )
     )
 );
 
 $settings->add(
     new admin_setting_configselect(
-        'block_ned_marking/refreshmodecourse',
-        get_string('refreshmodecourse', 'block_ned_marking'),
+        'block_fn_marking/refreshmodecourse',
+        get_string('refreshmodecourse', 'block_fn_marking'),
         '',
         'pageload',
         array(
-            'pageload' => get_string('pageload', 'block_ned_marking'),
-            'cron' => get_string('cron', 'block_ned_marking')
+            'pageload' => get_string('pageload', 'block_fn_marking'),
+            'cron' => get_string('cron', 'block_fn_marking')
         )
     )
 );
 
 $settings->add(
     new admin_setting_configselect(
-        'block_ned_marking/showtopmessage',
-        get_string('showtopmessage', 'block_ned_marking'),
+        'block_fn_marking/showtopmessage',
+        get_string('showtopmessage', 'block_fn_marking'),
         '',
         0,
         array('0' => 'No', '1' => 'Yes')
@@ -75,23 +75,23 @@ $settings->add(
 );
 $settings->add(
     new admin_setting_confightmleditor(
-        'block_ned_marking/topmessage',
-        get_string('topmessage', 'block_ned_marking'),
+        'block_fn_marking/topmessage',
+        get_string('topmessage', 'block_fn_marking'),
         '',
         ''
     )
 );
 $settings->add(
     new admin_setting_configselect(
-        'block_ned_marking/include_orphaned',
-        get_string('include_orphaned', 'block_ned_marking'),
+        'block_fn_marking/include_orphaned',
+        get_string('include_orphaned', 'block_fn_marking'),
         '',
         0,
         array('0' => 'No', '1' => 'Yes')
     )
 );
-$coursecaturl = new moodle_url('/blocks/ned_marking/coursecategories.php');
-$settings->add( new admin_setting_configempty('block_ned_marking/teamsubmissiongroupingid',
-    get_string('coursecategoriesincluded', 'block_ned_marking'),
-    '<a class="btn" href="'.$coursecaturl->out().'">'.get_string('selectcategories', 'block_ned_marking').'</a>')
+$coursecaturl = new moodle_url('/blocks/fn_marking/coursecategories.php');
+$settings->add( new admin_setting_configempty('block_fn_marking/teamsubmissiongroupingid',
+    get_string('coursecategoriesincluded', 'block_fn_marking'),
+    '<a class="btn" href="'.$coursecaturl->out().'">'.get_string('selectcategories', 'block_fn_marking').'</a>')
 );

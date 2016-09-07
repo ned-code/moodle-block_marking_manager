@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,8 +46,8 @@ $datestring->secs = get_string('secs');
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 20, PARAM_INT);
 
-$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
-$PAGE->set_url('/blocks/ned_marking/fn_summaries.php', array('id' => $id, 'show' => $show, 'navlevel' => 'top'));
+$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
+$PAGE->set_url('/blocks/fn_marking/fn_summaries.php', array('id' => $id, 'show' => $show, 'navlevel' => 'top'));
 
 if (!$course = $DB->get_record("course", array("id" => $id))) {
     print_error("Course ID was incorrect");
@@ -91,26 +91,26 @@ $modarray = array($mods, $modnames, $modnamesplural, $modnamesused);
 // Grab list of students.
 switch ($show) {
     case 'notloggedin':
-        $studentsresult = block_ned_marking_get_notloggedin($course, $days);
-        $name = get_string('blocktitle', 'block_ned_marking');
-        $title = "" . get_string('title:notlogin', 'block_ned_marking') . " $days days";
+        $studentsresult = block_fn_marking_get_notloggedin($course, $days);
+        $name = get_string('blocktitle', 'block_fn_marking');
+        $title = "" . get_string('title:notlogin', 'block_fn_marking') . " $days days";
         break;
 
     case 'notsubmittedany':
         $lastweek = time() - (60 * 60 * 24 * $days);
-        $studentsresult = block_ned_marking_get_notsubmittedany($course, $lastweek, false, $sections, $students);
+        $studentsresult = block_fn_marking_get_notsubmittedany($course, $lastweek, false, $sections, $students);
         // Students array is indexed by studentid; paging needs it to be sequential.
         $studentsresult = array_values($studentsresult);
-        $name = get_string('blocktitle', 'block_ned_marking');
-        $title = "" . get_string('title:notsubmittedanyactivity', 'block_ned_marking') . " $days days";
+        $name = get_string('blocktitle', 'block_fn_marking');
+        $title = "" . get_string('title:notsubmittedanyactivity', 'block_fn_marking') . " $days days";
         break;
 
     case 'failing':
-        $studentsresult = block_ned_marking_get_failing($course, $percent);
+        $studentsresult = block_fn_marking_get_failing($course, $percent);
         // Comes back indexed by studentid; reindex.
         $studentsresult = array_values($studentsresult);
-        $name = get_string('blocktitle', 'block_ned_marking');
-        $title = "" . get_string('title:failingwithgradelessthanxpercent', 'block_ned_marking') . " $percent%";
+        $name = get_string('blocktitle', 'block_fn_marking');
+        $title = "" . get_string('title:failingwithgradelessthanxpercent', 'block_fn_marking') . " $percent%";
         break;
     default:
         break;
@@ -123,7 +123,7 @@ $PAGE->set_heading($heading);
 echo $OUTPUT->header();
 
 echo '<div class="fn-menuwrapper"><a class="btn" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.
-    get_string('close', 'block_ned_marking').'</a></div>';
+    get_string('close', 'block_fn_marking').'</a></div>';
 echo "<div id='marking-interface'>";
 echo "<h4 class='head-title'>$title</h4>\n";
 
@@ -214,6 +214,6 @@ echo '</td></tr></table>';
 
 echo "</div>";
 
-echo block_ned_marking_footer();
+echo block_fn_marking_footer();
 
 echo $OUTPUT->footer($course);

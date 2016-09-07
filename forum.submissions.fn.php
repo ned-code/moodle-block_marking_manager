@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -137,12 +137,12 @@ if (($show == 'unmarked') || ($show == 'marked')) {
                               <table width="100%" border="0">
                                 <tr>
                                   <td valign="top" nowrap style="text-align: right">'.
-                                        get_string('forum', 'block_ned_marking').': </td>
+                                        get_string('forum', 'block_fn_marking').': </td>
                                   <td valign="top" class="forum-header-data">'.$forum->name.'</td>
                                 </tr>
                                 <tr>
                                   <td valign="top" nowrap style="text-align: right">'.
-                                        get_string('type', 'block_ned_marking').': </td>
+                                        get_string('type', 'block_fn_marking').': </td>
                                   <td valign="top" class="forum-header-data">'.$forumtypes[$forum->type].'</td>
                                 </tr>
                               </table>
@@ -151,17 +151,17 @@ if (($show == 'unmarked') || ($show == 'marked')) {
                               <table width="100%" border="0">
                                 <tr>
                                   <td valign="top" nowrap style="text-align: right">'.
-                                        get_string('scale', 'block_ned_marking').': </td>
+                                        get_string('scale', 'block_fn_marking').': </td>
                                   <td valign="top" class="forum-header-data">/'.$forum->scale.'</td>
                                 </tr>
                                 <tr>
                                   <td valign="top" nowrap style="text-align: right">'.
-                                        get_string('whocanrate', 'block_ned_marking').': </td>
+                                        get_string('whocanrate', 'block_fn_marking').': </td>
                                   <td valign="top" class="forum-header-data">'.$rolenamestring.'</td>
                                 </tr>
                                 <tr>
                                   <td valign="top" nowrap style="text-align: right">'.
-                                        get_string('aggregatetype', 'block_ned_marking').': </td>
+                                        get_string('aggregatetype', 'block_fn_marking').': </td>
                                   <td valign="top" class="forum-header-data">'. $rm->get_aggregate_types()[$forum->assessed].'</td>
                                 </tr>
                               </table>
@@ -171,7 +171,7 @@ if (($show == 'unmarked') || ($show == 'marked')) {
         $o .='</div>';
 
         $o .= '<div style="overflow: hidden; margin: 10px 0px 0px;">';
-        $o .= '<div style="float: left;">'.get_string('student_have_posted', 'block_ned_marking').'</div>';
+        $o .= '<div style="float: left;">'.get_string('student_have_posted', 'block_fn_marking').'</div>';
         if (($show == 'marked') && $stposts) {
             $o .= '<div style="float: right;" ><button id="showForum">Click to see all  rated discussion.</button></div>';
         } else if (($show == 'unmarked') && $stposts) {
@@ -183,10 +183,10 @@ if (($show == 'unmarked') || ($show == 'marked')) {
         $o .= '<table width="100%" border="0" cellspacing="0" valign="top" cellpadding="0"
                 id="fn-forum-grading" class="generaltable">';
         $o .= "<tr>";
-        $o .= "<th colspan='2' class='fn-student'>".get_string('student', 'block_ned_marking')." </th>
-              <th class='fn-posts'>".get_string('posts', 'block_ned_marking')."</th>
-              <th class='fn-replies'>".get_string('replies', 'block_ned_marking')."</th>
-              <th class='fn-rating'>".get_string('rating', 'block_ned_marking')."</th>";
+        $o .= "<th colspan='2' class='fn-student'>".get_string('student', 'block_fn_marking')." </th>
+              <th class='fn-posts'>".get_string('posts', 'block_fn_marking')."</th>
+              <th class='fn-replies'>".get_string('replies', 'block_fn_marking')."</th>
+              <th class='fn-rating'>".get_string('rating', 'block_fn_marking')."</th>";
         $o .= "</tr>";
 
         foreach ($stposts as $stpost) {
@@ -249,7 +249,7 @@ $vars = array('mid' => $mid, 'spinner' => $OUTPUT->pix_url('i/loading').'');
 
 $jsmodule1 = array(
     'name' => 'M.show_forum_panel',
-    'fullpath' => '/blocks/ned_marking/module1.js',
+    'fullpath' => '/blocks/fn_marking/module1.js',
     'requires' => array('base', 'node', 'event-base', 'event', 'panel')
 );
 

@@ -15,23 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_ned_marking\task;
+namespace block_fn_marking\task;
 
 
 class cache_course_data extends \core\task\scheduled_task {
 
     public function get_name() {
-        return get_string('pluginname', 'block_ned_marking');
+        return get_string('pluginname', 'block_fn_marking');
     }
 
     public function execute() {
         global $CFG;
-        require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
-        block_ned_marking_cache_course_data();
+        require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
+        block_fn_marking_cache_course_data();
     }
 }

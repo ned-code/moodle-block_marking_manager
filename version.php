@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2016082800;
+$plugin->version  = 2016090600;
 $plugin->requires = 2014051200;
 $plugin->maturity = MATURITY_STABLE;
-$plugin->component = 'block_ned_marking';
+$plugin->component = 'block_fn_marking';
 $plugin->release = '3.0';

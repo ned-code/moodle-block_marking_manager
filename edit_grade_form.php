@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -114,8 +114,8 @@ class mod_assignment_grading_form_fn extends moodleform {
         $mform->addElement('html', '<td class="marking-headB">');
         if ($this->_customdata->submission->timemodified) {
             $icon = $CFG->wwwroot . '/pix/f/text.gif';
-            $icon2 = $CFG->wwwroot . '/blocks/ned_marking/pix/fullscreen_maximize.gif';
-            $icon3 = $CFG->wwwroot . '/blocks/ned_marking/pix/completed.gif';
+            $icon2 = $CFG->wwwroot . '/blocks/fn_marking/pix/fullscreen_maximize.gif';
+            $icon3 = $CFG->wwwroot . '/blocks/fn_marking/pix/completed.gif';
             $mform->addElement('html', '<table cellpadding="0" cellspacing="0" border="0" width="100%" class="resourse-tab">');
 
             if (!isset($this->_customdata->submissions)) {

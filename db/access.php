@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $capabilities = array(
-    'block/ned_marking:myaddinstance' => array(
+    'block/fn_marking:myaddinstance' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(
@@ -32,7 +32,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/my:manageblocks'
     ),
 
-    'block/ned_marking:addinstance' => array(
+    'block/fn_marking:addinstance' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => array(
@@ -44,7 +44,7 @@ $capabilities = array(
     ),
 
 
-    'block/ned_marking:viewblock' => array(
+    'block/fn_marking:viewblock' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_BLOCK,
@@ -58,7 +58,7 @@ $capabilities = array(
         )
     ),
 
-    'block/ned_marking:viewreadonly' => array(
+    'block/fn_marking:viewreadonly' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_BLOCK,

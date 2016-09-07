@@ -1,11 +1,9 @@
 .markingmanagercontainer-footer {
     background-color: #dfdfdf;
-    border-radius: 20px;
     color: #494949;
+    margin: 50px auto 0;
     overflow: hidden;
     padding: 5px 20px;
-    max-width: 800px;
-    margin: 50px auto 0;
 }
 .markingmanagercontainer-footer .markingmanager-version {
     color: black;
@@ -34,4 +32,18 @@
 }
 a.markingmanagercontainer-footer-link {
     color: #0000EE;
+}
+#page-blocks-fn_marking-fn_gradebook .ned-hide-blocks {
+    margin-left: 5px;
+}
+.zoomin #block-region-side-post, .zoomin #block-region-side-pre {
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden;
+    margin-left: 0;
+    display: none;
+}
+.zoomin #region-main {
+    width: 100% !important;
+    margin-left: 0px;
 }

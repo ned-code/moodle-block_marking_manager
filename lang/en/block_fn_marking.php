@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -118,9 +118,9 @@ $string['config_days_help'] = '<p>This setting allows to set  </p>
 $string['config_percent'] = 'Set the percent of marks';
 $string['config_percent_help'] = '<p>This setting allows to set  </p>
 <p>the percent of marks and after setting the percent you will see the number of student marks below x percent.</p>';
-$string['ned_marking:addinstance'] = 'Add instance';
-$string['ned_marking:viewblock'] = 'View block';
-$string['ned_marking:viewreadonly'] = 'View readonly';
+$string['fn_marking:addinstance'] = 'Add instance';
+$string['fn_marking:viewblock'] = 'View block';
+$string['fn_marking:viewreadonly'] = 'View readonly';
 $string['simplegradebook'] = 'Progress Report';
 $string['studentlist'] = 'Student List';
 $string['moodlegradebook'] = 'Open Moodle Gradebook';
@@ -161,7 +161,7 @@ $string['close'] = 'Close';
 $string['sectiontitles'] = 'Section titles';
 $string['config_sectiontitles'] = 'Section titles';
 $string['config_sectiontitles_help'] = '<p>blank=course default.</p>';
-$string['ned_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
+$string['fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
 $string['listcourseszeroungraded'] = 'List courses with zero ungraded activities';
 $string['version'] = 'Version';
 $string['visitpluginhome'] = 'Vist plugin home page';

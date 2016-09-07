@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,7 +32,7 @@ $courseid = optional_param('id', 0, PARAM_INT);
 $group = optional_param('group', 0, PARAM_INT);
 $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
 
-$blocksettings = block_ned_marking_get_block_config($courseid, 'ned_marking');
+$blocksettings = block_fn_marking_get_block_config($courseid, 'fn_marking');
 
 $SESSION->currentgroup[$courseid] = $group;
 
@@ -64,14 +64,14 @@ if (!$isteacher) {
     print_error("Only teachers can use this page!");
 }
 
-$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
+$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
 
 $PAGE->set_url(
-    new moodle_url('/blocks/ned_marking/progress_report.php'),
+    new moodle_url('/blocks/fn_marking/progress_report.php'),
     array('id' => $courseid)
 );
 
-if ($layout = get_config('block_ned_marking', 'pagelayout')) {
+if ($layout = get_config('block_fn_marking', 'pagelayout')) {
     $PAGE->set_pagelayout($layout);
 } else {
     $PAGE->set_pagelayout('course');
@@ -216,7 +216,7 @@ for ($i = 0; $i < $upto; $i++) {
                                             $simplegradebook[$key]['avg'][] = array('grade' => 0, 'grademax' => $item->grademax);
                                         }
                                     }
-                                } else if ($modstatus = block_ned_marking_assignment_status($mod, $key, true)) {
+                                } else if ($modstatus = block_fn_marking_assignment_status($mod, $key, true)) {
 
                                     switch ($modstatus) {
                                         case 'submitted':
@@ -264,11 +264,11 @@ for ($i = 0; $i < $upto; $i++) {
     $weekactivitycount[$i]['numofweek'] = $numberofitem;
 }
 
-$PAGE->set_title(get_string('progressreport', 'block_ned_marking'));
+$PAGE->set_title(get_string('progressreport', 'block_fn_marking'));
 $PAGE->set_heading($SITE->fullname);
 
 // Print header.
-$PAGE->navbar->add(get_string('progressreport', 'block_ned_marking'), new moodle_url(''));
+$PAGE->navbar->add(get_string('progressreport', 'block_fn_marking'), new moodle_url(''));
 echo $OUTPUT->header();
 
 // The view options.
@@ -281,14 +281,14 @@ $viewform = '<div class="groupselector">'.$OUTPUT->render($select).'</div>';
 
 
 echo '<div class="fn-menuwrapper">';
-groups_print_course_menu($course, $CFG->wwwroot.'/blocks/ned_marking/progress_report.php?id='.
+groups_print_course_menu($course, $CFG->wwwroot.'/blocks/fn_marking/progress_report.php?id='.
     $course->id.'&unsubmitted='.$unsubmitted);
 echo $viewform;
 echo '</div>';
 echo '<div class="tablecontainer">';
 echo "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />" .
     '<a href="' . $CFG->wwwroot . '/grade/report/index.php?id=' . $course->id .
-    '&navlevel=top">' . get_string('moodlegradebook', 'block_ned_marking') . '</a>';
+    '&navlevel=top">' . get_string('moodlegradebook', 'block_fn_marking') . '</a>';
 // TABLE.
 echo "<table class='simplegradebook'>";
 
@@ -309,7 +309,7 @@ foreach ($weekactivitycount as $weeknum => $weekactivity) {
 echo "</tr>-->";
 
 echo "<tr>";
-echo "<td class='mod-icon'>".get_string('name', 'block_ned_marking')."</td>";
+echo "<td class='mod-icon'>".get_string('name', 'block_fn_marking')."</td>";
 echo "<td class='mod-icon'>%</td>";
 foreach ($weekactivitycount as $key => $value) {
     if ($value['numofweek']) {
@@ -359,7 +359,7 @@ foreach ($simplegradebook as $studentid => $studentreport) {
 
     foreach ($studentreport['grade'] as $sgrades) {
         foreach ($sgrades as $sgrade) {
-            echo '<td class="'.$studentclass.' icon">'.'<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/'.
+            echo '<td class="'.$studentclass.' icon">'.'<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/'.
                 $sgrade.'" height="16" width="16" alt="">'.'</td>';
         }
     }
@@ -368,8 +368,8 @@ foreach ($simplegradebook as $studentid => $studentreport) {
 
 echo "</table>";
 echo "</div>";
-echo '<div style="text-align:center;"><img src="'.$CFG->wwwroot.'/blocks/ned_marking/pix/gradebook_key.png"></div>';
+echo '<div style="text-align:center;"><img src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/gradebook_key.png"></div>';
 
-echo block_ned_marking_footer();
+echo block_fn_marking_footer();
 
 echo $OUTPUT->footer();

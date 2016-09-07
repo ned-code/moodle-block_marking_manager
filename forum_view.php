@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,11 +26,11 @@ $version = reset($version);
 
 if ($version >= 2015051100) {
     // MOODLE 2.9.
-    require_once($CFG->dirroot.'/blocks/ned_marking/forum_view_29.php');
+    require_once($CFG->dirroot.'/blocks/fn_marking/forum_view_29.php');
 } else if ($version >= 2014111000) {
     // MOODLE 2.8.
-    require_once($CFG->dirroot.'/blocks/ned_marking/forum_view_28.php');
+    require_once($CFG->dirroot.'/blocks/fn_marking/forum_view_28.php');
 } else {
     // MOODLE 2.7.
-    require_once($CFG->dirroot.'/blocks/ned_marking/forum_view_27.php');
+    require_once($CFG->dirroot.'/blocks/fn_marking/forum_view_27.php');
 }

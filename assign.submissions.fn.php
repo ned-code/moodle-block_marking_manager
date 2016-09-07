@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,7 +36,7 @@ require_once("$CFG->dirroot/repository/lib.php");
 require_once("$CFG->dirroot/grade/grading/lib.php");
 require_once($CFG->dirroot.'/mod/assign/lib.php');
 require_once($CFG->dirroot.'/mod/assign/locallib.php');
-require_once($CFG->dirroot.'/blocks/ned_marking/assign_edit_grade_form.php');
+require_once($CFG->dirroot.'/blocks/fn_marking/assign_edit_grade_form.php');
 
 $assign = new assign($ctx, $cm, $course);
 
@@ -50,7 +50,7 @@ if (($show == 'unmarked') || ($show == 'saved')) {
         if (optional_param('saveandshownext', null, PARAM_RAW)) {
             // Save and show next.
             $action = 'grade';
-            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
+            if (block_fn_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
                 $action = 'nextgrade';
             }
         } else if (optional_param('nosaveandprevious', null, PARAM_RAW)) {
@@ -62,7 +62,7 @@ if (($show == 'unmarked') || ($show == 'saved')) {
             // Save changes button.
 
             $action = 'grade';
-            if (block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
+            if (block_fn_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly)) {
                 $action = 'grade';
             }
         } else {
@@ -85,45 +85,45 @@ if (($show == 'unmarked') || ($show == 'saved')) {
         if ($action == 'previousgrade') {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
         } else if ($action == 'nextgrade') {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
         } else if ($action == 'grade') {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
         }
     }
 
 } else if ($show == 'marked') {
     if ($expand) {
         if (($action == 'submitgrade')  && (optional_param('savegrade', null, PARAM_RAW))) {
-            block_ned_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly);
+            block_fn_marking_process_save_grade($mform, $assign, $ctx, $course, $pageparams, $gradingonly);
         }
         if (optional_param('nosaveandprevious', null, PARAM_RAW)) {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, -1, $assign, $ctx, $cm, $course, $pageparams);
         } else if (optional_param('nosaveandnext', null, PARAM_RAW)) {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, 1, $assign, $ctx, $cm, $course, $pageparams);
         } else {
             $mform = null;
             $_POST = null;
-            $o .= block_ned_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
+            $o .= block_fn_marking_view_single_grade_page($mform, 0, $assign, $ctx, $cm, $course, $pageparams);
         }
 
     } else {
-        $o .= block_ned_marking_view_submissions($mform, $offset = 0, $showattemptnumber = null,
+        $o .= block_fn_marking_view_submissions($mform, $offset = 0, $showattemptnumber = null,
             $assign, $ctx, $cm, $course, $pageparams);
     }
 
     // echo $o;
 } else if ($show == 'unsubmitted') {
-    $o .= block_ned_marking_view_submissions($mform, $offset = 0, $showattemptnumber = null,
+    $o .= block_fn_marking_view_submissions($mform, $offset = 0, $showattemptnumber = null,
         $assign, $ctx, $cm, $course, $pageparams);
     // echo $o;
 }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/ned_marking/db" VERSION="20160828" COMMENT="XMLDB file for Moodle blocks/ned_marking"
+<XMLDB PATH="blocks/fn_marking/db" VERSION="20160828" COMMENT="XMLDB file for Moodle blocks/fn_marking"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="block_ned_marking_mod_cache" COMMENT="block_ned_marking_mod_cache table retrofitted from MySQL">
+    <TABLE NAME="block_fn_marking_mod_cache" COMMENT="block_fn_marking_mod_cache table retrofitted from MySQL">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="18" NOTNULL="false" SEQUENCE="false"/>

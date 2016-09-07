@@ -15,18 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Simple  class for block ned_marking
+ * Simple  class for block fn_marking
  *
  * @copyright 2011 Moodlefn
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_ned_marking extends block_list {
+class block_fn_marking extends block_list {
 
     /**
      * Sets the block title
@@ -34,7 +34,7 @@ class block_ned_marking extends block_list {
      * @return none
      */
     public function init() {
-        $this->title = get_string('blocktitle', 'block_ned_marking');
+        $this->title = get_string('blocktitle', 'block_fn_marking');
     }
 
     /**
@@ -49,7 +49,7 @@ class block_ned_marking extends block_list {
         }
 
         if (empty($this->config->title)) {
-            $this->title = get_string('pluginname', 'block_ned_marking');
+            $this->title = get_string('pluginname', 'block_fn_marking');
         } else {
             $this->title = $this->config->title;
         }
@@ -134,7 +134,7 @@ class block_ned_marking extends block_list {
 
         if (($this->page->course->id == SITEID) || ($this->instance->pagetypepattern == 'my-index') ) {
             $PAGE->requires->jquery();
-            $PAGE->requires->js('/blocks/ned_marking/js/collapse.js');
+            $PAGE->requires->js('/blocks/fn_marking/js/collapse.js');
             $this->get_frontpage_content();
         } else {
             $this->get_standard_content();
@@ -167,7 +167,7 @@ class block_ned_marking extends block_list {
 
         global $CFG, $OUTPUT, $DB;
 
-        require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
+        require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
 
         $days = $this->config->days;
@@ -187,8 +187,8 @@ class block_ned_marking extends block_list {
         if (($this->page->course->id != SITEID)) {
 
             // CACHE.
-            $cachedatalast = get_config('block_ned_marking', 'cachedatalast');
-            $refreshmodecourse = get_config('block_ned_marking', 'refreshmodecourse');
+            $cachedatalast = get_config('block_fn_marking', 'cachedatalast');
+            $refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse');
 
             $supportedmodules = array('assign', 'forum', 'quiz');
             list($insql, $params) = $DB->get_in_or_equal($supportedmodules);
@@ -196,73 +196,73 @@ class block_ned_marking extends block_list {
 
             if (isset($this->config->showunmarked) && $this->config->showunmarked) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numunmarked = block_ned_marking_count_unmarked_activities($this->page->course, 'unmarked');
+                    $numunmarked = block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked');
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.unmarked) unmarked
-                              FROM {block_ned_marking_mod_cache} m
+                              FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
                                AND m.modname {$insql}";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numunmarked = $modcache->unmarked;
                 }
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unmarked' .
-                    '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_ned_marking').'</a>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/unmarked.gif"
+                    '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_fn_marking').'</a>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/unmarked.gif"
                                                 class="icon" alt="">';
             }
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
                 if ($refreshmodecourse == 'pageload') {
-                    $nummarked = block_ned_marking_count_unmarked_activities($this->page->course, 'marked');
+                    $nummarked = block_fn_marking_count_unmarked_activities($this->page->course, 'marked');
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.marked) marked
-                              FROM {block_ned_marking_mod_cache} m
+                              FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
                                AND m.modname {$insql}";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $nummarked = $modcache->marked;
                 }
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=marked' .
-                    '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_ned_marking').'</a>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/graded.gif"
+                    '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_fn_marking').'</a>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/graded.gif"
                                                 class="icon" alt="">';
             }
 
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numunsubmitted = block_ned_marking_count_unmarked_activities($this->page->course, 'unsubmitted');
+                    $numunsubmitted = block_fn_marking_count_unmarked_activities($this->page->course, 'unsubmitted');
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.unsubmitted) unsubmitted
-                              FROM {block_ned_marking_mod_cache} m
+                              FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
                                AND m.modname {$insql}";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numunsubmitted = $modcache->unsubmitted;
                 }
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unsubmitted' .
-                    '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_ned_marking').'</a>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/not_submitted.gif"
+                    '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_fn_marking').'</a>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/not_submitted.gif"
                                                 class="icon" alt="">';
             }
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numsaved = block_ned_marking_count_unmarked_activities($this->page->course, 'saved');
+                    $numsaved = block_fn_marking_count_unmarked_activities($this->page->course, 'saved');
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.saved) saved
-                              FROM {block_ned_marking_mod_cache} m
+                              FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
                                AND m.modname {$insql}";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numsaved = $modcache->saved;
                 }
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=saved' .
-                    '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_ned_marking').'</a>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/saved.gif"
+                    '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_fn_marking').'</a>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/saved.gif"
                                                 class="icon" alt="">';
             }
 
@@ -270,16 +270,16 @@ class block_ned_marking extends block_list {
             $this->content->icons[] = '';
 
             if (isset($this->config->showgradeslink) && $this->config->showgradeslink) {
-                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/ned_marking/progress_report.php?id=' .
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/progress_report.php?id=' .
                     $this->page->course->id .
-                    '">' . get_string('simplegradebook', 'block_ned_marking') . '</a>';
+                    '">' . get_string('simplegradebook', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
             }
 
             if (isset($this->config->showreportslink) && $this->config->showreportslink) {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/user/index.php?contextid='.$context->id.
                     '&sifirst=&silast=&roleid=5">' .
-                    get_string('studentlist', 'block_ned_marking') . '</a>';
+                    get_string('studentlist', 'block_fn_marking') . '</a>';
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/group') . "\" class=\"icon\" alt=\"\" />";
             }
 
@@ -292,47 +292,47 @@ class block_ned_marking extends block_list {
             $strstudents = get_string('students');
 
             if (isset($this->config->shownotloggedinuser) && $this->config->shownotloggedinuser) {
-                $numnotloggedin = block_ned_marking_count_notloggedin($this->page->course, $days);
+                $numnotloggedin = block_fn_marking_count_notloggedin($this->page->course, $days);
                 $this->content->items[] = '<span class="fn_summaries"><a href="'.
-                    $CFG->wwwroot.'/blocks/ned_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
+                    $CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
                     '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' '.$strstudents.' </a>'.
-                    get_string('notloggedin', 'block_ned_marking').' ' . $days . ' days</span>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/exclamation.png"
+                    get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
                     class="icon" alt=""><br><br>';
             }
 
             if ($this->config->showstudentnotsubmittedassignment) {
                 $now = time();
                 $lastweek = $now - (60 * 60 * 24 * $days);
-                $numnotsubmittedany = block_ned_marking_get_notsubmittedany($this->page->course, $lastweek, true, $sections, null);
+                $numnotsubmittedany = block_fn_marking_get_notsubmittedany($this->page->course, $lastweek, true, $sections, null);
                 $this->content->items[] = '<span class="fn_summaries"><a href="'.
-                    $CFG->wwwroot.'/blocks/ned_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
+                    $CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
                     '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' '.$strstudents.' </a>'.
-                    get_string('notsubmittedany', 'block_ned_marking').''.$days.' days</span>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/ned_marking/pix/exclamation.png"
+                    get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
+                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
                     class="icon" alt=""><br><br>';
             }
 
             if ($this->config->showstudentmarkslessthanfiftypercent) {
-                $numfailing = block_ned_marking_count_failing($this->page->course, $percent);
+                $numfailing = block_fn_marking_count_failing($this->page->course, $percent);
                 $this->content->items[] = '<span class="fn_summaries">
-                    <a href="'.$CFG->wwwroot.'/blocks/ned_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
+                    <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
                     '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' '.$strstudents.'</a>'.
-                    get_string('overallfailinggrade', 'block_ned_marking').''.$percent. '% </span>';
+                    get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
                 $this->content->icons[] = '<img src="' . $CFG->wwwroot .
-                    '/blocks/ned_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
+                    '/blocks/fn_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
             }
 
             if ($refreshmodecourse == 'cron') {
                 if ($cachedatalast > 0) {
-                    $humantime = get_string('lastrefreshtime', 'block_ned_marking', block_ned_marking_human_timing($cachedatalast));
+                    $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
                 } else {
-                    $humantime = get_string('lastrefreshupdating', 'block_ned_marking');
+                    $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
                 }
 
-                $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_ned_marking'), '', null);
+                $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
                 $refreshbutton = html_writer::link(
-                    new moodle_url('/blocks/ned_marking/update_cache.php'),
+                    new moodle_url('/blocks/fn_marking/update_cache.php'),
                     $refreshicon,
                     array('class' => 'fn_refresh_btn')
                 );
@@ -354,7 +354,7 @@ class block_ned_marking extends block_list {
 
         global $DB, $USER, $CFG, $OUTPUT;
 
-        require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
+        require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
         require_once($CFG->dirroot . '/course/lib.php');
 
@@ -368,54 +368,7 @@ class block_ned_marking extends block_list {
 
         $showzeroungraded = isset($this->config->listcourseszeroungraded) ? $this->config->listcourseszeroungraded : 1;
 
-        $getcourses = function($category, &$filtercourses){
-            if ($category->courses) {
-                foreach ($category->courses as $course) {
-                    $filtercourses[] = $course->id;
-                }
-            }
-            if ($category->categories) {
-                foreach ($category->categories as $subcat) {
-                    $getcourses($subcat, $course);
-                }
-            }
-        };
-        $filtercourses = array();
-        // CATEGORY.
-        if ($configcategory = get_config('block_ned_marking', 'category')) {
-
-            $selectedcategories = explode(',', $configcategory);
-
-            foreach ($selectedcategories as $categoryid) {
-
-                if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
-                    foreach ($parentcatcourses as $catcourse) {
-                        $filtercourses[] = $catcourse->id;
-                    }
-                }
-                if ($categorystructure = block_ned_marking_get_course_category_tree($categoryid)) {
-                    foreach ($categorystructure as $category) {
-
-                        if ($category->courses) {
-                            foreach ($category->courses as $subcatcourse) {
-                                $filtercourses[] = $subcatcourse->id;
-                            }
-                        }
-                        if ($category->categories) {
-                            foreach ($category->categories as $subcategory) {
-                                $getcourses($subcategory, $filtercourses);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // COURSE.
-        if ($configcourse = get_config('block_ned_marking', 'course')) {
-            $selectedcourses = explode(',', $configcourse);
-            $filtercourses = array_merge($filtercourses, $selectedcourses);
-        }
+        $filtercourses = block_fn_marking_get_setting_courses ();
 
         if ($filtercourses) {
             $filter = ' AND c.id IN ('.implode(',' , $filtercourses).')';
@@ -424,20 +377,20 @@ class block_ned_marking extends block_list {
         }
 
         // CACHE.
-        $cachedatalast = get_config('block_ned_marking', 'cachedatalast');
-        $refreshmodefrontpage = get_config('block_ned_marking', 'refreshmodefrontpage');
+        $cachedatalast = get_config('block_fn_marking', 'cachedatalast');
+        $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
         $refresh = '';
 
         if ($refreshmodefrontpage == 'cron') {
             if ($cachedatalast > 0) {
-                $humantime = get_string('lastrefreshtime', 'block_ned_marking', block_ned_marking_human_timing($cachedatalast));
+                $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
             } else {
-                $humantime = get_string('lastrefreshupdating', 'block_ned_marking');
+                $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
             }
 
-            $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_ned_marking'), '', null);
+            $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
             $refreshbutton = html_writer::link(
-                new moodle_url('/blocks/ned_marking/update_cache.php'),
+                new moodle_url('/blocks/fn_marking/update_cache.php'),
                 $refreshicon,
                 array('class' => 'fn_refresh_btn')
             );
@@ -462,36 +415,32 @@ class block_ned_marking extends block_list {
                 array(1, 1));
 
             if ($totalcoursenumber > 6) {
-                $classforhide = 'block_ned_marking_hide';
+                $classforhide = 'block_fn_marking_hide';
                 $classfordl = '';
             } else {
                 $classforhide = '';
                 $classfordl = ' class="expanded"';
             }
 
-            if ($courses = $DB->get_records_sql($sqlcourse, array(1, 1), 0, 10)) {
+            if ($courses = $DB->get_records_sql($sqlcourse, array(1, 1))) {
 
-                $text = block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide, $showzeroungraded);
+                $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide, $showzeroungraded, 10);
 
-                if ($totalcoursenumber > 10) {
-                    $text .= "<div class='fn-admin-warning' >".get_string('morethan10', 'block_ned_marking')."</div>";
+                if ($text) {
+                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $refresh . $text . '</dl></div>';
+                    $this->content->icons[] = '';
                 }
-                $expand = '<div class="fn-expand-btn"><button class="btn btn-mini btn-default" type="button"
-                    onclick="togglecollapseall();">Collapse/Expand</button></div>';
-
-                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$refresh.$text.'</dl></div>';
-                $this->content->icons[] = '';
             }
         } else {
 
             $sql = "SELECT ctx.id,
-                       ctx.instanceid AS courseid
-                  FROM {context} ctx
-            INNER JOIN {role_assignments} ra
-                    ON ctx.id = ra.contextid
-                 WHERE ctx.contextlevel = 50
-                   AND ra.roleid = 3
-                   AND ra.userid = ?";
+                           ctx.instanceid courseid
+                      FROM {context} ctx
+                INNER JOIN {role_assignments} ra
+                        ON ctx.id = ra.contextid
+                     WHERE ctx.contextlevel = 50
+                       AND ra.roleid = 3
+                       AND ra.userid = ?";
 
             if ($teachercourses = $DB->get_records_sql($sql, array($USER->id))) {
                 $courses = array();
@@ -506,11 +455,12 @@ class block_ned_marking extends block_list {
                         $courses[] = $course;
                     }
                 }
-                $text = block_ned_marking_build_ungraded_tree ($courses, $supportedmodules);
-                $expand = '<div class="fn-expand-btn"><button class="btn btn-mini btn-default" type="button"
-                    onclick="togglecollapseall();">Collapse/Expand</button></div>';
-                $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">'.$refresh.$text.'</dl></div>';
-                $this->content->icons[] = '';
+                $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules);
+
+                if ($text) {
+                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $refresh . $text . '</dl></div>';
+                    $this->content->icons[] = '';
+                }
             }
         }
 

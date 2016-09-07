@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,10 +25,10 @@ require_once($CFG->dirroot . '/lib/gradelib.php');
 require_once($CFG->dirroot . '/lib/grade/constants.php');
 require_once($CFG->dirroot . '/lib/grade/grade_grade.php');
 require_once($CFG->dirroot . '/lib/grade/grade_item.php');
-require_once($CFG->dirroot . '/blocks/ned_marking/locallib.php');
+require_once($CFG->dirroot . '/blocks/fn_marking/locallib.php');
 require_once($CFG->dirroot . '/mod/assignment/lib.php');
 
-function block_ned_marking_assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
+function block_fn_marking_assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
     global $DB;
 
     $studentlist = implode(',', array_keys($students));
@@ -81,7 +81,7 @@ function block_ned_marking_assignment_count_ungraded($assignment, $graded, $stud
     }
 }
 
-function block_ned_marking_assign_count_ungraded($assign, $graded, $students,
+function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                                                  $show='unmarked', $extra=false, $instance, $keepseparate=1) {
     global $DB;
 
@@ -194,7 +194,7 @@ function block_ned_marking_assign_count_ungraded($assign, $graded, $students,
     }
 }
 
-function block_ned_marking_quiz_count_ungraded($quizid, $graded, $students, $show='unmarked',
+function block_fn_marking_quiz_count_ungraded($quizid, $graded, $students, $show='unmarked',
                                                $extra=false, $instance, $keepseparate=1) {
     global $DB;
 
@@ -219,6 +219,7 @@ function block_ned_marking_quiz_count_ungraded($quizid, $graded, $students, $sho
                   FROM {quiz_attempts} qa
                  WHERE qa.quiz = ?
                    AND qa.state = 'finished'
+                   AND qa.userid IN ($studentlist)
                    AND qa.sumgrades IS NULL";
 
             return $DB->count_records_sql($sql, array($quizid));
@@ -232,6 +233,7 @@ function block_ned_marking_quiz_count_ungraded($quizid, $graded, $students, $sho
                   FROM {quiz_attempts} qa
                  WHERE qa.quiz = ?
                    AND qa.state = 'finished'
+                   AND qa.userid IN ($studentlist)
                    AND qa.sumgrades >= 0";
 
         return $DB->count_records_sql($sql, array($quizid));
@@ -242,6 +244,7 @@ function block_ned_marking_quiz_count_ungraded($quizid, $graded, $students, $sho
                   FROM {quiz_attempts} qa
                  WHERE qa.quiz = ?
                    AND qa.state = 'finished'
+                   AND qa.userid IN ($studentlist)
                    AND qa.sumgrades >= 0";
 
         if ($attempts = $DB->get_records_sql($sql, array($quizid))) {
@@ -257,7 +260,7 @@ function block_ned_marking_quiz_count_ungraded($quizid, $graded, $students, $sho
 
 }
 
-function block_ned_marking_assign_students_ungraded($assign, $graded, $students, $show='unmarked',
+function block_fn_marking_assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                                                     $extra=false, $instance, $sort=false) {
     global $DB, $CFG;
 
@@ -463,7 +466,7 @@ function block_ned_marking_assign_students_ungraded($assign, $graded, $students,
     }
 }
 
-function block_ned_marking_assignment_oldest_ungraded($assignment) {
+function block_fn_marking_assignment_oldest_ungraded($assignment) {
     global $CFG, $DB;
 
     $sql = 'SELECT MIN(timemodified) FROM ' . $CFG->prefix . 'assignment_submissions ' .
@@ -471,7 +474,7 @@ function block_ned_marking_assignment_oldest_ungraded($assignment) {
     return $DB->get_field_sql($sql);
 }
 
-function block_ned_marking_assign_oldest_ungraded($assign) {
+function block_fn_marking_assign_oldest_ungraded($assign) {
     global $CFG, $DB;
 
     $sql = "SELECT MIN(s.timemodified)
@@ -481,7 +484,7 @@ function block_ned_marking_assign_oldest_ungraded($assign) {
     return $DB->get_field_sql($sql);
 }
 
-function block_ned_marking_forum_count_ungraded($forumid, $graded, $students, $show='unmarked') {
+function block_fn_marking_forum_count_ungraded($forumid, $graded, $students, $show='unmarked') {
     global $CFG, $DB;
 
     // Get students from forum_posts.
@@ -515,7 +518,7 @@ function block_ned_marking_forum_count_ungraded($forumid, $graded, $students, $s
     }
 }
 
-function block_ned_marking_count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) {
+function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) {
 
     global $CFG, $DB;
 
@@ -559,7 +562,7 @@ function block_ned_marking_count_unmarked_students(&$course, $mod, $info='unmark
                     $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                     $numgraded = count($gradedarray);
                     $numstudents = count($students);
-                    $ungradedfunction = 'block_ned_marking_' . $mod->modname . '_students_ungraded';
+                    $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_students_ungraded';
                     if (function_exists($ungradedfunction)) {
                         $extra = false;
                         $ung = $ungradedfunction($instance->id, $gradedarray, $students, $info, $extra, $instance, $sort);
@@ -574,7 +577,7 @@ function block_ned_marking_count_unmarked_students(&$course, $mod, $info='unmark
 
 }
 
-function block_ned_marking_count_unmarked_activities(&$course, $info='unmarked', $module='') {
+function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', $module='') {
 
     global $CFG, $DB, $sections;
 
@@ -582,7 +585,7 @@ function block_ned_marking_count_unmarked_activities(&$course, $info='unmarked',
     $isteacheredit = has_capability('moodle/course:update', $context);
     $marker = has_capability('moodle/grade:viewall', $context);
 
-    $includeorphaned = get_config('block_ned_marking', 'include_orphaned');
+    $includeorphaned = get_config('block_fn_marking', 'include_orphaned');
 
     // FIND CURRENT WEEK.
     $courseformatoptions = course_get_format($course)->get_format_options();
@@ -703,7 +706,7 @@ function block_ned_marking_count_unmarked_activities(&$course, $info='unmarked',
                                     $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                                     $numgraded = count($gradedarray);
                                     $numstudents = count($students);
-                                    $ungradedfunction = 'block_ned_marking_' . $mod->modname . '_count_ungraded';
+                                    $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_count_ungraded';
                                     if (function_exists($ungradedfunction)) {
                                         $extra = false;
                                         $ung = $ungradedfunction($instance->id, $gradedarray, $students, $info, $extra, $instance);
@@ -725,12 +728,12 @@ function block_ned_marking_count_unmarked_activities(&$course, $info='unmarked',
     return $totungraded;
 }
 
-function block_ned_marking_count_notloggedin($course, $days) {
-    $truants = block_ned_marking_get_notloggedin($course, $days);
+function block_fn_marking_count_notloggedin($course, $days) {
+    $truants = block_fn_marking_get_notloggedin($course, $days);
     return count($truants);
 }
 
-function block_ned_marking_get_notloggedin($course, $days) {
+function block_fn_marking_get_notloggedin($course, $days) {
     // Grab context.
     $context = context_course::instance($course->id);
 
@@ -757,7 +760,7 @@ function block_ned_marking_get_notloggedin($course, $days) {
     return $truants;
 }
 
-function block_ned_marking_get_failing($course, $percent) {
+function block_fn_marking_get_failing($course, $percent) {
     // Grab context.
     $context = context_course::instance($course->id);
 
@@ -791,11 +794,11 @@ function block_ned_marking_get_failing($course, $percent) {
     return $failing;
 }
 
-function block_ned_marking_count_failing($course, $percent) {
-    return count(block_ned_marking_get_failing($course, $percent));
+function block_fn_marking_count_failing($course, $percent) {
+    return count(block_fn_marking_get_failing($course, $percent));
 }
 
-function block_ned_marking_get_notsubmittedany($course, $since = 0, $count = false, $sections, $students) {
+function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = false, $sections, $students) {
 
     // Grab context.
     $context = context_course::instance($course->id);
@@ -804,7 +807,7 @@ function block_ned_marking_get_notsubmittedany($course, $since = 0, $count = fal
     $currentgroup = groups_get_course_group($course, true);
 
     // Grab modgradesarry.
-    $modgradesarray = block_ned_marking_get_active_mods();
+    $modgradesarray = block_fn_marking_get_active_mods();
 
     if (!isset($students)) {
         $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
@@ -820,7 +823,7 @@ function block_ned_marking_get_notsubmittedany($course, $since = 0, $count = fal
                     if (isset($modgradesarray[$mod->modname])) {
                         require_once('locallib.php');
                         // Build mod method.
-                        $f = 'block_ned_marking_' . $mod->modname . '_get_notsubmittedany';
+                        $f = 'block_fn_marking_' . $mod->modname . '_get_notsubmittedany';
                         // Make sure function exists.
                         if (!function_exists($f)) {
                             continue;
@@ -857,7 +860,7 @@ function block_ned_marking_get_notsubmittedany($course, $since = 0, $count = fal
     }
 }
 
-function block_ned_marking_get_active_mods($which = 'grades') {
+function block_fn_marking_get_active_mods($which = 'grades') {
 
     // Array of functions to call for grading purposes for modules.
     $modgradesarray = array(
@@ -888,7 +891,7 @@ function block_ned_marking_get_active_mods($which = 'grades') {
     }
 }
 
-function block_ned_marking_is_graded($userid, $assign) {
+function block_fn_marking_is_graded($userid, $assign) {
     $grade = $assign->get_user_grade($userid, false);
     if ($grade) {
         return ($grade->grade !== null && $grade->grade >= 0);
@@ -896,7 +899,7 @@ function block_ned_marking_is_graded($userid, $assign) {
     return false;
 }
 
-function block_ned_marking_get_grading_instance($userid, $grade, $gradingdisabled, $assign) {
+function block_fn_marking_get_grading_instance($userid, $grade, $gradingdisabled, $assign) {
     global $CFG, $USER;
 
     $grademenu = make_grades_menu($assign->get_instance()->grade);
@@ -929,12 +932,12 @@ function block_ned_marking_get_grading_instance($userid, $grade, $gradingdisable
     return $gradinginstance;
 }
 
-function block_ned_marking_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign) {
+function block_fn_marking_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign) {
     global $USER, $CFG, $DB;
 
     $grade = $assign->get_user_grade($userid, true, $attemptnumber);
     $gradingdisabled = $assign->grading_disabled($userid);
-    $gradinginstance = block_ned_marking_get_grading_instance($userid, $grade, $gradingdisabled, $assign);
+    $gradinginstance = block_fn_marking_get_grading_instance($userid, $grade, $gradingdisabled, $assign);
     if (!$gradingdisabled) {
         if ($gradinginstance) {
             $grade->grade = $gradinginstance->submit_and_get_grade($formdata->advancedgrading,
@@ -963,7 +966,7 @@ function block_ned_marking_apply_grade_to_user($formdata, $userid, $attemptnumbe
     $adminconfig = $assign->get_admin_config();
     $gradebookplugin = $adminconfig->feedback_plugin_for_gradebook;
 
-    $feedbackplugins = block_ned_marking_load_plugins('assignfeedback', $assign);
+    $feedbackplugins = block_fn_marking_load_plugins('assignfeedback', $assign);
 
     // Call save in plugins.
     foreach ($feedbackplugins as $plugin) {
@@ -988,7 +991,7 @@ function block_ned_marking_apply_grade_to_user($formdata, $userid, $attemptnumbe
 
 }
 
-function block_ned_marking_load_plugins($subtype, $assign) {
+function block_fn_marking_load_plugins($subtype, $assign) {
     global $CFG;
     $result = array();
 
@@ -1016,7 +1019,7 @@ function block_ned_marking_load_plugins($subtype, $assign) {
     return $result;
 }
 
-function block_ned_marking_process_outcomes($userid, $formdata, $assign) {
+function block_fn_marking_process_outcomes($userid, $formdata, $assign) {
     global $CFG, $USER;
 
     if (empty($CFG->enableoutcomes)) {
@@ -1049,7 +1052,7 @@ function block_ned_marking_process_outcomes($userid, $formdata, $assign) {
 
 }
 
-function block_ned_marking_process_save_grade(&$mform, $assign, $context, $course, $pageparams, $gradingonly = true) {
+function block_fn_marking_process_save_grade(&$mform, $assign, $context, $course, $pageparams, $gradingonly = true) {
     global $CFG;
     // Include grade form.
     require_once($CFG->dirroot . '/mod/assign/gradeform.php');
@@ -1118,13 +1121,13 @@ function block_ned_marking_process_save_grade(&$mform, $assign, $context, $cours
             $members = $assign->get_submission_group_members($groupid, true);
             foreach ($members as $member) {
                 // User may exist in multple groups (which should put them in the default group).
-                block_ned_marking_apply_grade_to_user($formdata, $member->id, $attemptnumber. $assign);
-                block_ned_marking_process_outcomes($member->id, $formdata, $assign);
+                block_fn_marking_apply_grade_to_user($formdata, $member->id, $attemptnumber. $assign);
+                block_fn_marking_process_outcomes($member->id, $formdata, $assign);
             }
         } else {
-            block_ned_marking_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign);
+            block_fn_marking_apply_grade_to_user($formdata, $userid, $attemptnumber, $assign);
 
-            block_ned_marking_process_outcomes($userid, $formdata, $assign);
+            block_fn_marking_process_outcomes($userid, $formdata, $assign);
         }
         $maxattemptsreached = !empty($submission) &&
             $submission->attemptnumber >= ($instance->maxattempts - 1) &&
@@ -1169,7 +1172,7 @@ function block_ned_marking_process_save_grade(&$mform, $assign, $context, $cours
             $shouldreopen = false;
         }
         if ($shouldreopen && !$maxattemptsreached) {
-            block_ned_marking_process_add_attempt($userid, $assign);
+            block_fn_marking_process_add_attempt($userid, $assign);
         }
     } else {
         return false;
@@ -1177,7 +1180,7 @@ function block_ned_marking_process_save_grade(&$mform, $assign, $context, $cours
     return true;
 }
 
-function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $context,
+function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $context,
                                                   $cm, $course, $pageparams, $showattemptnumber=null) {
     global $DB, $CFG;
 
@@ -1190,7 +1193,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     // Need submit permission to submit an assignment.
     $readonly = false;
     if (! has_capability('mod/assign:grade', $context)) {
-        if (has_capability('block/ned_marking:viewreadonly', $context)) {
+        if (has_capability('block/fn_marking:viewreadonly', $context)) {
             $readonly = true;
         } else {
             require_capability('mod/assign:grade', $context);
@@ -1208,7 +1211,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     if ($participants) {
         $userid = $participants;
 
-        $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show']);
+        $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show']);
         $useridlist = $arruser;
         $last = false;
 
@@ -1220,7 +1223,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     } else if ($pageparams['userid']) {
         $userid = $pageparams['userid'];
 
-        $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show']);
+        $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show']);
         $useridlist = $arruser;
         $last = false;
 
@@ -1230,12 +1233,12 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
         }
 
     } else {
-        $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show']);
+        $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show']);
         $useridlist = optional_param('useridlist', '', PARAM_TEXT);
         if ($useridlist) {
             $useridlist = explode(',', $useridlist);
         } else {
-            $useridlist = block_ned_marking_get_grading_userid_list($assign);
+            $useridlist = block_fn_marking_get_grading_userid_list($assign);
         }
         $useridlist = $arruser;
         $last = false;
@@ -1287,8 +1290,8 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
         $data = new stdClass();
     }
 
-    block_ned_marking_get_all_submissions_fix($userid, $assign);
-    $allsubmissions = block_ned_marking_get_all_submissions($userid, $assign);
+    block_fn_marking_get_all_submissions_fix($userid, $assign);
+    $allsubmissions = block_fn_marking_get_all_submissions($userid, $assign);
 
     if ($attemptnumber != -1) {
         $params = array('attemptnumber' => $attemptnumber + 1,
@@ -1323,7 +1326,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     $version = reset($version);
 
     if (count($allsubmissions) > 1 && $attemptnumber == -1) {
-        $allgrades = block_ned_marking_get_all_grades($userid, $assign);
+        $allgrades = block_fn_marking_get_all_grades($userid, $assign);
 
         if ($version >= 2013051405) {
             $history = new assign_attempt_history($allsubmissions,
@@ -1353,7 +1356,7 @@ function block_ned_marking_view_single_grade_page($mform, $offset=0, $assign, $c
     return $o;
 }
 
-function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign, $ctx, $cm, $course, $pageparams) {
+function block_fn_marking_view_submissions($mform, $offset=0, $showattemptnumber=null, $assign, $ctx, $cm, $course, $pageparams) {
     global $DB, $CFG, $OUTPUT;
 
     $o = '';
@@ -1364,7 +1367,7 @@ function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumbe
     // Need submit permission to submit an assignment.
     $readonly = false;
     if (! has_capability('mod/assign:grade', $ctx)) {
-        if (has_capability('block/ned_marking:viewreadonly', $ctx)) {
+        if (has_capability('block/fn_marking:viewreadonly', $ctx)) {
             $readonly = true;
         } else {
             require_capability('mod/assign:grade', $ctx);
@@ -1372,14 +1375,14 @@ function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumbe
     }
 
     $rownum = optional_param('rownum', 0, PARAM_INT) + $offset;
-    $arruser = block_ned_marking_count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['sort']);
+    $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['sort']);
 
     $useridlist = optional_param('useridlist', '', PARAM_TEXT);
 
     if ($useridlist) {
         $useridlist = explode(',', $useridlist);
     } else {
-        $useridlist = block_ned_marking_get_grading_userid_list($assign);
+        $useridlist = block_fn_marking_get_grading_userid_list($assign);
     }
     $useridlist = $arruser;
     $last = false;
@@ -1457,7 +1460,7 @@ function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumbe
 
             // Get all the submissions (for the history view).
             list($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber)
-                = block_ned_marking_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign);
+                = block_fn_marking_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign);
 
             if ($grade) {
                 $data = new stdClass();
@@ -1474,7 +1477,7 @@ function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumbe
                 $o .= $assign->get_renderer()->edit_previous_feedback_warning($attemptnumber, $maxattemptnumber);
             }
 
-            $o .= block_ned_marking_render_assign_submission_history_summary(
+            $o .= block_fn_marking_render_assign_submission_history_summary(
                 new assign_submission_history($allsubmissions, $allgrades, $attemptnumber,
                 $maxattemptnumber, $assign->get_submission_plugins(),
                 $assign->get_feedback_plugins(),
@@ -1490,14 +1493,14 @@ function block_ned_marking_view_submissions($mform, $offset=0, $showattemptnumbe
             $msg = get_string('viewgradingformforstudent',
                 'assign',
                 array('id' => $user->id, 'fullname' => fullname($user)));
-            block_ned_marking_add_to_log_legacy($assign, 'view grading form', $msg);
+            block_fn_marking_add_to_log_legacy($assign, 'view grading form', $msg);
 
         }
     }
     return $o;
 }
 
-function block_ned_marking_get_submission_history($submission, $grade, $user, $showattemptnumber, $assign) {
+function block_fn_marking_get_submission_history($submission, $grade, $user, $showattemptnumber, $assign) {
     global $DB;
 
     $attemptnumber = ($submission) ? $submission->attemptnumber : 1;
@@ -1536,7 +1539,7 @@ function block_ned_marking_get_submission_history($submission, $grade, $user, $s
     return array($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber);
 }
 
-function block_ned_marking_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign) {
+function block_fn_marking_get_submission_history_view($submission, $grade, $user, $showattemptnumber, $assign) {
     global $DB;
 
     $attemptnumber = ($submission) ? $submission->attemptnumber : 1;
@@ -1575,7 +1578,7 @@ function block_ned_marking_get_submission_history_view($submission, $grade, $use
     return array($allsubmissions, $allgrades, $attemptnumber, $maxattemptnumber);
 }
 
-function block_ned_marking_add_resubmission($userid, $assign) {
+function block_fn_marking_add_resubmission($userid, $assign) {
     global $DB;
 
     $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
@@ -1596,11 +1599,11 @@ function block_ned_marking_add_resubmission($userid, $assign) {
     // Set the submission's status to resubmission.
     $DB->set_field('assign_submission', 'status', ASSIGN_SUBMISSION_STATUS_RESUBMISSION, array('id' => $submission->id));
 
-    block_ned_marking_add_to_log_legacy($assign, 'add resubmission', get_string('addresubmissionforstudent', 'assign',
+    block_fn_marking_add_to_log_legacy($assign, 'add resubmission', get_string('addresubmissionforstudent', 'assign',
         array('id' => $user->id, 'fullname' => fullname($user))));
 }
 
-function block_ned_marking_remove_resubmission($userid, $assign) {
+function block_fn_marking_remove_resubmission($userid, $assign) {
     global $DB;
 
     $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
@@ -1618,11 +1621,11 @@ function block_ned_marking_remove_resubmission($userid, $assign) {
     $DB->set_field('assign_submission', 'status', ASSIGN_SUBMISSION_STATUS_SUBMITTED, array('id' => $submission->id));
 
     // Set the submission's status to resubmission.
-    block_ned_marking_add_to_log_legacy($assign, 'remove resubmission', get_string('removeresubmissionforstudent', 'assign',
+    block_fn_marking_add_to_log_legacy($assign, 'remove resubmission', get_string('removeresubmissionforstudent', 'assign',
         array('id' => $user->id, 'fullname' => fullname($user))));
 }
 
-function block_ned_marking_get_grading_userid_list($assign) {
+function block_fn_marking_get_grading_userid_list($assign) {
     global $CFG;
 
     require_once($CFG->dirroot.'/mod/assign/gradingtable.php');
@@ -1635,7 +1638,7 @@ function block_ned_marking_get_grading_userid_list($assign) {
     return $useridlist;
 }
 
-function block_ned_marking_get_user_submission($assign, $userid, $create, $attemptnumber = null) {
+function block_fn_marking_get_user_submission($assign, $userid, $create, $attemptnumber = null) {
     global $DB, $USER, $pageparams;
 
     if (!$userid) {
@@ -1674,7 +1677,7 @@ function block_ned_marking_get_user_submission($assign, $userid, $create, $attem
     return false;
 }
 
-function block_ned_marking_get_user_grade($assign, $userid) {
+function block_fn_marking_get_user_grade($assign, $userid) {
     global $DB, $USER;
 
     if (!$userid) {
@@ -1689,15 +1692,15 @@ function block_ned_marking_get_user_grade($assign, $userid) {
     return false;
 }
 
-function block_ned_marking_is_graded_($assign, $userid) {
-    $grade = block_ned_marking_get_user_grade($assign, $userid);
+function block_fn_marking_is_graded_($assign, $userid) {
+    $grade = block_fn_marking_get_user_grade($assign, $userid);
     if ($grade) {
         return ($grade->grade !== null && $grade->grade >= 0);
     }
     return false;
 }
 
-function block_ned_marking_render_assign_submission_history(assign_submission_history $history, $assignrenderer) {
+function block_fn_marking_render_assign_submission_history(assign_submission_history $history, $assignrenderer) {
     global $OUTPUT, $DB;
     $historyout = '';
     for ($i = $history->maxattemptnumber; $i > 0; $i--) {
@@ -1806,7 +1809,7 @@ function block_ned_marking_render_assign_submission_history(assign_submission_hi
     return $o;
 }
 
-function block_ned_marking_render_assign_submission_history_summary(assign_submission_history $history,
+function block_fn_marking_render_assign_submission_history_summary(assign_submission_history $history,
                                                                     $assignrenderer, $user, $assign) {
     global $OUTPUT, $DB, $CFG, $pageparams;
     $historyout = '';
@@ -1830,7 +1833,7 @@ function block_ned_marking_render_assign_submission_history_summary(assign_submi
 
         $resubtype = $assign->get_instance()->attemptreopenmethod;
         if ($resubtype != ASSIGN_ATTEMPT_REOPEN_METHOD_NONE) {
-            if (block_ned_marking_reached_resubmission_limit($maxattemptnumber, $assign)) {
+            if (block_fn_marking_reached_resubmission_limit($maxattemptnumber, $assign)) {
                 $resubstatus = get_string('atmaxresubmission', 'assign');
             } else if ($resubtype == ASSIGN_ATTEMPT_REOPEN_METHOD_MANUAL) {
 
@@ -1893,17 +1896,17 @@ function block_ned_marking_render_assign_submission_history_summary(assign_submi
     $t->data[] = new html_table_row(array($cell));
 
     $submittedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/text.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/text.gif" valign="absmiddle"> ';
     $markedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/completed.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $savedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/saved.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
     if  ($gradeitem->gradepass > 0) {
         $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-            $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+            $CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
     } else {
         $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-            $CFG->wwwroot.'/blocks/ned_marking/pix/graded.gif" valign="absmiddle"> ';
+            $CFG->wwwroot.'/blocks/fn_marking/pix/graded.gif" valign="absmiddle"> ';
     }
 
     for ($i = $history->maxsubmissionnum; $i >= 0; $i--) {
@@ -1940,12 +1943,12 @@ function block_ned_marking_render_assign_submission_history_summary(assign_submi
                 $cell3->text = '<div style="float:left;">'.$cell3->text.'
                                 </div>
                                 <div style="float:right;">
-                                <a href="'.$CFG->wwwroot.'/blocks/ned_marking/fn_gradebook.php?courseid='.
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.
                                 $pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.
                                 $pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].
                                 '&expand=1&userid='.$user->id.'">
                                 <img width="16" height="16" border="0" alt="Assignment" src="'.
-                                $CFG->wwwroot.'/blocks/ned_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
+                                $CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
                 $cell2->attributes['class'] = $lastsubmissionclass;
@@ -1979,7 +1982,7 @@ function block_ned_marking_render_assign_submission_history_summary(assign_submi
     return $o;
 }
 
-function block_ned_marking_render_assign_submission_status(assign_submission_status $status, $assign, $user,
+function block_fn_marking_render_assign_submission_status(assign_submission_status $status, $assign, $user,
                                                            $grade, $assignrenderer) {
     global $OUTPUT, $DB, $CFG, $pageparams;
     $o = '';
@@ -2038,17 +2041,17 @@ function block_ned_marking_render_assign_submission_status(assign_submission_sta
     $t->data[] = new html_table_row(array($cell));
 
     $submittedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/text.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/text.gif" valign="absmiddle"> ';
     $markedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/completed.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $savedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-        $CFG->wwwroot.'/blocks/ned_marking/pix/saved.gif" valign="absmiddle"> ';
+        $CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
     if ($gradeitem->gradepass > 0) {
         $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-            $CFG->wwwroot.'/blocks/ned_marking/pix/incomplete.gif" valign="absmiddle"> ';
+            $CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
     } else {
         $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
-            $CFG->wwwroot.'/blocks/ned_marking/pix/graded.gif" valign="absmiddle"> ';
+            $CFG->wwwroot.'/blocks/fn_marking/pix/graded.gif" valign="absmiddle"> ';
     }
 
     $grade->gradefordisplay = $assign->display_grade($grade->grade, false);
@@ -2072,12 +2075,12 @@ function block_ned_marking_render_assign_submission_status(assign_submission_sta
             $cell3->text = '<div style="float:left;">'.$cell3->text.'
                                 </div>
                                 <div style="float:right;">
-                                <a href="'.$CFG->wwwroot.'/blocks/ned_marking/fn_gradebook.php?courseid='.
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.
                 $pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.
                 $pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].
                 '&expand=1&userid='.$user->id.'">
                                 <img width="16" height="16" border="0" alt="Assignment" src="'.
-                $CFG->wwwroot.'/blocks/ned_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
+                $CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
             $cell2->attributes['class'] = $lastsubmissionclass;
@@ -2109,7 +2112,7 @@ function block_ned_marking_render_assign_submission_status(assign_submission_sta
     return $o;
 }
 
-function block_ned_marking_get_all_submissions_fix($userid, $assign) {
+function block_fn_marking_get_all_submissions_fix($userid, $assign) {
     global $DB, $USER;
 
     // If the userid is not null then use userid.
@@ -2136,7 +2139,7 @@ function block_ned_marking_get_all_submissions_fix($userid, $assign) {
     }
     return true;
 }
-function block_ned_marking_get_all_submissions($userid, $assign) {
+function block_fn_marking_get_all_submissions($userid, $assign) {
     global $DB, $USER;
 
     // If the userid is not null then use userid.
@@ -2166,7 +2169,7 @@ function block_ned_marking_get_all_submissions($userid, $assign) {
     return $submissions;
 }
 
-function block_ned_marking_get_all_grades($userid, $assign) {
+function block_fn_marking_get_all_grades($userid, $assign) {
     global $DB, $USER, $PAGE;
 
     // If the userid is not null then use userid.
@@ -2223,7 +2226,7 @@ function block_ned_marking_get_all_grades($userid, $assign) {
     return $grades;
 }
 
-function block_ned_marking_process_add_attempt($userid, $assign) {
+function block_fn_marking_process_add_attempt($userid, $assign) {
     require_capability('mod/assign:grade', $assign->get_context());
     require_sesskey();
 
@@ -2268,11 +2271,11 @@ function block_ned_marking_process_add_attempt($userid, $assign) {
         }
     }
 
-    block_ned_marking_update_submission($newsubmission, $userid, false, $assign->get_instance()->teamsubmission, $assign);
+    block_fn_marking_update_submission($newsubmission, $userid, false, $assign->get_instance()->teamsubmission, $assign);
     return true;
 }
 
-function block_ned_marking_update_submission(stdClass $submission, $userid, $updatetime, $teamsubmission, $assign) {
+function block_fn_marking_update_submission(stdClass $submission, $userid, $updatetime, $teamsubmission, $assign) {
     global $DB;
 
     if ($teamsubmission) {
@@ -2284,12 +2287,12 @@ function block_ned_marking_update_submission(stdClass $submission, $userid, $upd
     }
     $result = $DB->update_record('assign_submission', $submission);
     if ($result) {
-        block_ned_marking_gradebook_item_update($submission, null, $assign);
+        block_fn_marking_gradebook_item_update($submission, null, $assign);
     }
     return $result;
 }
 
-function block_ned_marking_gradebook_item_update($submission=null, $grade=null, $assign) {
+function block_fn_marking_gradebook_item_update($submission=null, $grade=null, $assign) {
 
     // Do not push grade to gradebook if blind marking is active as
     // the gradebook would reveal the students.
@@ -2309,7 +2312,7 @@ function block_ned_marking_gradebook_item_update($submission=null, $grade=null, 
             return;
         }
 
-        $gradebookgrade = block_ned_marking_convert_submission_for_gradebook($submission);
+        $gradebookgrade = block_fn_marking_convert_submission_for_gradebook($submission);
 
     } else {
         $gradebookgrade = $assign->convert_grade_for_gradebook($grade);
@@ -2324,7 +2327,7 @@ function block_ned_marking_gradebook_item_update($submission=null, $grade=null, 
     return assign_grade_item_update($assignx, $gradebookgrade);
 }
 
-function block_ned_marking_convert_submission_for_gradebook(stdClass $submission) {
+function block_fn_marking_convert_submission_for_gradebook(stdClass $submission) {
     $gradebookgrade = array();
 
     $gradebookgrade['userid'] = $submission->userid;
@@ -2334,7 +2337,7 @@ function block_ned_marking_convert_submission_for_gradebook(stdClass $submission
     return $gradebookgrade;
 }
 
-function block_ned_marking_render_assign_attempt_history(assign_attempt_history $history) {
+function block_fn_marking_render_assign_attempt_history(assign_attempt_history $history) {
     $o = '';
 
     $submittedstr = get_string('submitted', 'assign');
@@ -2502,7 +2505,7 @@ class assign_submission_history implements renderable {
     }
 }
 
-function block_ned_marking_reached_resubmission_limit($submissionnum, $assign) {
+function block_fn_marking_reached_resubmission_limit($submissionnum, $assign) {
     $maxresub = $assign->get_instance()->maxattempts;
     if ($maxresub == ASSIGN_UNLIMITED_ATTEMPTS) {
         return false;
@@ -2510,7 +2513,7 @@ function block_ned_marking_reached_resubmission_limit($submissionnum, $assign) {
     return ($submissionnum >= $maxresub);
 }
 
-function block_ned_marking_assignment_status($mod, $userid) {
+function block_fn_marking_assignment_status($mod, $userid) {
     global $CFG, $DB, $USER, $SESSION;
 
     if (isset($SESSION->completioncache)) {
@@ -2623,14 +2626,14 @@ function block_ned_marking_assignment_status($mod, $userid) {
     }
 }
 
-function block_ned_marking_add_to_log_legacy_ ($courseid, $module, $action, $url='', $info='', $cm=0, $user=0) {
+function block_fn_marking_add_to_log_legacy_ ($courseid, $module, $action, $url='', $info='', $cm=0, $user=0) {
     $manager = get_log_manager();
     if (method_exists($manager, 'legacy_add_to_log')) {
         $manager->legacy_add_to_log($courseid, $module, $action, $url, $info, $cm, $user);
     }
 }
 
-function block_ned_marking_add_to_log_legacy($assign, $action = '', $info = '', $url='', $return = false) {
+function block_fn_marking_add_to_log_legacy($assign, $action = '', $info = '', $url='', $return = false) {
     global $USER;
 
     $fullurl = 'view.php?id=' . $assign->get_course_module()->id;
@@ -2650,10 +2653,10 @@ function block_ned_marking_add_to_log_legacy($assign, $action = '', $info = '', 
     if ($return) {
         return $args;
     }
-    call_user_func_array('block_ned_marking_add_to_log_legacy_', $args);
+    call_user_func_array('block_fn_marking_add_to_log_legacy_', $args);
 }
 
-function block_ned_marking_get_block_config ($courseid, $blockname='ned_marking') {
+function block_fn_marking_get_block_config ($courseid, $blockname='fn_marking') {
     global $DB;
 
     $sql = "SELECT bi.id,
@@ -2673,35 +2676,42 @@ function block_ned_marking_get_block_config ($courseid, $blockname='ned_marking'
     }
 }
 
-function block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide='', $showzeroungraded=0) {
+function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide='', $showzeroungraded=0, $maxcourse=10) {
     global $CFG, $DB, $OUTPUT;
 
-    $refreshmodefrontpage = get_config('block_ned_marking', 'refreshmodefrontpage');
+    $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
 
     $text = '';
+    $counter = 0;
 
     if (is_array($courses) && !empty($courses)) {
 
         $modnamesplural = get_module_types_names(true);
 
         foreach ($courses as $course) {
+            if ($counter >= $maxcourse) {
+                continue;
+            }
             $courseicon = $OUTPUT->pix_icon('i/course', '', null, array('class' => 'gm_icon'));
-            $courselink = $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+            $courselink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                 $course->id . '&show=unmarked' . '&navlevel=top&mid=0';
 
             $totalungraded = 0;
             $moduletext = '';
             foreach ($supportedmodules as $supportedmodule) {
                 if ($refreshmodefrontpage == 'pageload') {
-                    $numunmarked = block_ned_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                    $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
                 } else if ($refreshmodefrontpage == 'cron') {
-                    $modcache = $DB->get_record('block_ned_marking_mod_cache',
+                    if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
                         array('courseid' => $course->id, 'modname' => $supportedmodule)
-                    );
-                    $numunmarked = $modcache->unmarked;
+                    )) {
+                        $numunmarked = $modcache->unmarked;
+                    } else {
+                        $numunmarked = 0;
+                    }
                 }
                 $totalungraded += $numunmarked;
-                $gradelink = $CFG->wwwroot . '/blocks/ned_marking/fn_gradebook.php?courseid=' .
+                $gradelink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $course->id . '&show=unmarked' . '&navlevel=top&mid=0&activity_type=' . $supportedmodule;
                 $moduleicon = '<img src="' . $CFG->wwwroot . '/mod/' . $supportedmodule . '/pix/icon.png" class="icon" alt="">';
 
@@ -2709,7 +2719,7 @@ function block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $cl
                     $moduletext .= '<dd id="cmid' . $supportedmodule . '" class="module ' . $classforhide . '">' . "\n";
                     $moduletext .= '<div class="bullet" onclick="$(\'dd#cmid' . $supportedmodule .
                         ' > div.toggle\').toggleClass(\'open\');$(\'dd#cmid' .
-                        $supportedmodule . ' > ul\').toggleClass(\'block_ned_marking_hide\');"></div>';
+                        $supportedmodule . ' > ul\').toggleClass(\'block_fn_marking_hide\');"></div>';
                     $moduletext .= '<a href="' . $gradelink . '">' . $moduleicon . '</a>';
                     $moduletext .= '<a href="' . $gradelink . '" >' . $modnamesplural[$supportedmodule] . '</a>' .
                         ' <span class="fn-ungraded-num">(' . $numunmarked . ')</span>';
@@ -2720,27 +2730,40 @@ function block_ned_marking_build_ungraded_tree ($courses, $supportedmodules, $cl
             if (($totalungraded == 0) && !$showzeroungraded) {
                 $done;
             } else {
-                $coursetext = '<dt id="courseid' . $course->id . '" class="cmod">
-                                 <div class="toggle open" onclick="$(\'dt#courseid' . $course->id .
-                    ' > div.toggle\').toggleClass(\'open\');$(\'dt#courseid' .
-                    $course->id . ' ~ dd\').toggleClass(\'block_ned_marking_hide\');"></div>
+                if ($totalungraded == 0) {
+                    $coursetext = '<dt id="courseid' . $course->id . '" class="cmod">
+                                 <div class="togglezero"></div>
                                  ' . $courseicon . '
                                  <a href="' . $courselink . '">' . $course->shortname . '</a> (' . $totalungraded . ')
                             </dt>';
+                } else {
+                    $coursetext = '<dt id="courseid' . $course->id . '" class="cmod">
+                                 <div class="toggle open" onclick="$(\'dt#courseid' . $course->id .
+                        ' > div.toggle\').toggleClass(\'open\');$(\'dt#courseid' .
+                        $course->id . ' ~ dd\').toggleClass(\'block_fn_marking_hide\');"></div>
+                                 ' . $courseicon . '
+                                 <a href="' . $courselink . '">' . $course->shortname . '</a> (' . $totalungraded . ')
+                            </dt>';
+                }
+                $counter++;
                 $text .= '<div>'.$coursetext.$moduletext.'</div>';
             }
         }
     }
 
+    if ($counter >= $maxcourse) {
+        $text .= "<div class='fn-admin-warning' >".get_string('morethan10', 'block_fn_marking')."</div>";
+    }
+
     return $text;
 }
 
-function  block_ned_marking_get_course_category_tree($id = 0, $depth = 0) {
+function  block_fn_marking_get_course_category_tree($id = 0, $depth = 0) {
     global $DB, $CFG;
     require_once($CFG->libdir . '/coursecatlib.php');
 
     $viewhiddencats = has_capability('moodle/category:viewhiddencategories', context_system::instance());
-    $categories = block_ned_marking_get_child_categories($id);
+    $categories = block_fn_marking_get_child_categories($id);
     $categoryids = array();
     foreach ($categories as $key => &$category) {
         if (!$category->visible && !$viewhiddencats) {
@@ -2749,7 +2772,7 @@ function  block_ned_marking_get_course_category_tree($id = 0, $depth = 0) {
         }
         $categoryids[$category->id] = $category;
         if (empty($CFG->maxcategorydepth) || $depth <= $CFG->maxcategorydepth) {
-            list($category->categories, $subcategories) = block_ned_marking_get_course_category_tree_($category->id, $depth + 1);
+            list($category->categories, $subcategories) = block_fn_marking_get_course_category_tree_($category->id, $depth + 1);
 
             foreach ($subcategories as $subid => $subcat) {
                 $categoryids[$subid] = $subcat;
@@ -2795,7 +2818,7 @@ function  block_ned_marking_get_course_category_tree($id = 0, $depth = 0) {
     return $categories;
 }
 
-function  block_ned_marking_get_child_categories($parentid) {
+function  block_fn_marking_get_child_categories($parentid) {
     global $DB;
 
     $rv = array();
@@ -2814,7 +2837,7 @@ function  block_ned_marking_get_child_categories($parentid) {
     return $rv;
 }
 
-function  block_ned_marking_category_tree_form($structures, $categoryids='', $courseids='') {
+function  block_fn_marking_category_tree_form($structures, $categoryids='', $courseids='') {
     if ($categoryids == '0') {
         $rootcategorychecked = 'checked="checked"';
     } else {
@@ -2831,15 +2854,15 @@ function  block_ned_marking_category_tree_form($structures, $categoryids='', $co
     $content = '<ul id="course-category-tree" class="course-category-tree">
                <li>
                <input id="category_0" class="_checkbox" type="checkbox" '.$rootcategorychecked.' name="category_0" value="0">
-               <span class="ned-form-course-category">'.get_string('allcategories', 'block_ned_marking').'</span>';
+               <span class="ned-form-course-category">'.get_string('allcategories', 'block_fn_marking').'</span>';
     $content .= '<ul>';
     foreach ($structures as $structure) {
         $content .= '<li>';
         if (in_array($structure->id, $categoryids)) {
-            $content .= block_ned_marking_checkbox_checked('category_'.$structure->id, 'category_'.$structure->id,
+            $content .= block_fn_marking_checkbox_checked('category_'.$structure->id, 'category_'.$structure->id,
                     '_checkbox', $structure->id) . ' <span class="ned-form-course-category">'. $structure->name . '</span>';
         } else {
-            $content .= block_ned_marking_checkbox('category_'.$structure->id, 'category_'.$structure->id,
+            $content .= block_fn_marking_checkbox('category_'.$structure->id, 'category_'.$structure->id,
                     '_checkbox', $structure->id) . ' <span class="ned-form-course-category">'. $structure->name . '</span>';
         }
 
@@ -2847,18 +2870,18 @@ function  block_ned_marking_category_tree_form($structures, $categoryids='', $co
             $content .= '<ul>';
             foreach ($structure->courses as $course) {
                 if (in_array($course->id, $courseids)) {
-                    $content .= html_writer::tag('li',  block_ned_marking_checkbox_checked('course_'.$course->id,
+                    $content .= html_writer::tag('li',  block_fn_marking_checkbox_checked('course_'.$course->id,
                             'course_'.$course->id, '_checkbox', $course->id) . ' <span class="ned-form-course">'.
                         $course->fullname.'</span>');
                 } else {
-                    $content .= html_writer::tag('li',  block_ned_marking_checkbox('course_'.$course->id,
+                    $content .= html_writer::tag('li',  block_fn_marking_checkbox('course_'.$course->id,
                             'course_'.$course->id, '_checkbox', $course->id) . ' <span class="ned-form-course">'.
                         $course->fullname.'</span>');
                 }
             }
             $content .= '</ul>';
         }
-        $content .= block_ned_marking_sub_category_tree_form($structure, $categoryids, $courseids);
+        $content .= block_fn_marking_sub_category_tree_form($structure, $categoryids, $courseids);
         $content .= '</li>';
     }
     $content .= '</ul>';
@@ -2867,34 +2890,34 @@ function  block_ned_marking_category_tree_form($structures, $categoryids='', $co
     return $content;
 }
 
-function  block_ned_marking_sub_category_tree_form($structure, $categoryids=null, $courseids=null) {
+function  block_fn_marking_sub_category_tree_form($structure, $categoryids=null, $courseids=null) {
     $content = "<ul>";
     if ($structure->categories) {
         foreach ($structure->categories as $category) {
             $content .= '<li>';
             if (in_array($category->id, $categoryids)) {
-                $content .= block_ned_marking_checkbox_checked('category_'.$category->id, 'category_'.$category->id,
+                $content .= block_fn_marking_checkbox_checked('category_'.$category->id, 'category_'.$category->id,
                         '_checkbox', $category->id) . ' <span class="ned-form-course-category"">'. $category->name.'</span>';
             } else {
-                $content .= block_ned_marking_checkbox('category_'.$category->id, 'category_'.$category->id,
+                $content .= block_fn_marking_checkbox('category_'.$category->id, 'category_'.$category->id,
                         '_checkbox', $category->id) . ' <span class="ned-form-course-category"">'. $category->name.'</span>';
             }
             if ($category->courses) {
                 $content .= '<ul>';
                 foreach ($category->courses as $course) {
                     if (in_array($course->id, $courseids)) {
-                        $content .= html_writer::tag('li',  block_ned_marking_checkbox_checked('course_'.$course->id,
+                        $content .= html_writer::tag('li',  block_fn_marking_checkbox_checked('course_'.$course->id,
                                 'course_'.$course->id, '_checkbox', $course->id) . ' <span class="ned-form-course">'.
                             $course->fullname.'</span>');
                     } else {
-                        $content .= html_writer::tag('li',  block_ned_marking_checkbox('course_'.$course->id,
+                        $content .= html_writer::tag('li',  block_fn_marking_checkbox('course_'.$course->id,
                                 'course_'.$course->id, '_checkbox', $course->id) . ' <span class="ned-form-course">'.
                             $course->fullname.'</span>');
                     }
                 }
                 $content .= '</ul>';
             }
-            $content .= block_ned_marking_sub_category_tree_form($category, $categoryids, $courseids);
+            $content .= block_fn_marking_sub_category_tree_form($category, $categoryids, $courseids);
             $content .= '</li>';
         }
     }
@@ -2902,7 +2925,7 @@ function  block_ned_marking_sub_category_tree_form($structure, $categoryids=null
     return $content;
 }
 
-function block_ned_marking_get_course_category_tree_($id = 0, $depth = 0) {
+function block_fn_marking_get_course_category_tree_($id = 0, $depth = 0) {
     global $DB, $CFG;
     $categories = array();
     $categoryids = array();
@@ -2919,7 +2942,7 @@ function block_ned_marking_get_course_category_tree_($id = 0, $depth = 0) {
         $categories[] = $category;
         $categoryids[$category->id] = $category;
         if (empty($CFG->maxcategorydepth) || $depth <= $CFG->maxcategorydepth) {
-            list($category->categories, $subcategories) = block_ned_marking_get_course_category_tree_(
+            list($category->categories, $subcategories) = block_fn_marking_get_course_category_tree_(
                 $category->id, $depth + 1);
             foreach ($subcategories as $subid => $subcat) {
                 $categoryids[$subid] = $subcat;
@@ -2964,45 +2987,45 @@ function block_ned_marking_get_course_category_tree_($id = 0, $depth = 0) {
     return $categories;
 }
 
-function block_ned_marking_checkbox($name, $id , $class, $value) {
+function block_fn_marking_checkbox($name, $id , $class, $value) {
     return html_writer::empty_tag('input', array(
             'value' => $value, 'type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => $class
         )
     );
 }
 
-function block_ned_marking_checkbox_checked($name, $id , $class, $value) {
+function block_fn_marking_checkbox_checked($name, $id , $class, $value) {
     return html_writer::empty_tag('input', array(
             'value' => $value, 'type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => $class, 'checked' => 'checked'
         )
     );
 }
-function block_ned_marking_footer(){
+function block_fn_marking_footer(){
     global $OUTPUT;
 
     $output = '';
 
     $pluginman = core_plugin_manager::instance();
-    $pluginfo = $pluginman->get_plugin_info('block_ned_marking');
+    $pluginfo = $pluginman->get_plugin_info('block_fn_marking');
 
     $output = html_writer::div(
         html_writer::div(
             html_writer::link(
                 'http://ned.ca/marking-manager',
-                get_string('pluginname', 'block_ned_marking'),
+                get_string('pluginname', 'block_fn_marking'),
                 array('target' => '_blank')
             ),
             'markingmanagercontainer-footer-left'
         ) .
         html_writer::div(
-            get_string('version', 'block_ned_marking') . ': ' .
+            get_string('version', 'block_fn_marking') . ': ' .
             html_writer::span($pluginfo->versiondb, 'markingmanager-version'),
             'markingmanagercontainer-footer-center'
         ) .
         html_writer::div(
             html_writer::link(
                 'http://ned.ca',
-                html_writer::img($OUTPUT->pix_url('ned_26', 'block_ned_marking'), 'NED'),
+                html_writer::img($OUTPUT->pix_url('ned_26', 'block_fn_marking'), 'NED'),
                 array('target' => '_blank')
             ),
             'markingmanagercontainer-footer-right'
@@ -3012,7 +3035,7 @@ function block_ned_marking_footer(){
     return $output;
 }
 
-function block_ned_marking_get_selected_courses($category, &$filtercourses) {
+function block_fn_marking_get_selected_courses($category, &$filtercourses) {
     if ($category->courses) {
         foreach ($category->courses as $course) {
             $filtercourses[] = $course->id;
@@ -3020,18 +3043,18 @@ function block_ned_marking_get_selected_courses($category, &$filtercourses) {
     }
     if ($category->categories) {
         foreach ($category->categories as $subcat) {
-            block_ned_marking_get_selected_courses($subcat, $course);
+            block_fn_marking_get_selected_courses($subcat, $course);
         }
     }
 };
 
-function block_ned_marking_get_setting_courses () {
+function block_fn_marking_get_setting_courses () {
     global $DB;
 
     $filtercourses = array();
 
-    $configcategory = get_config('block_ned_marking', 'category');
-    $configcourse = get_config('block_ned_marking', 'course');
+    $configcategory = get_config('block_fn_marking', 'category');
+    $configcourse = get_config('block_fn_marking', 'course');
 
     if (empty($configcategory) && empty($configcategory)) {
 
@@ -3052,7 +3075,7 @@ function block_ned_marking_get_setting_courses () {
                     $filtercourses[] = $catcourse->id;
                 }
             }
-            if ($categorystructure = block_ned_marking_get_course_category_tree($categoryid)) {
+            if ($categorystructure = block_fn_marking_get_course_category_tree($categoryid)) {
                 foreach ($categorystructure as $category) {
 
                     if ($category->courses) {
@@ -3062,7 +3085,7 @@ function block_ned_marking_get_setting_courses () {
                     }
                     if ($category->categories) {
                         foreach ($category->categories as $subcategory) {
-                            block_ned_marking_get_selected_courses($subcategory, $filtercourses);
+                            block_fn_marking_get_selected_courses($subcategory, $filtercourses);
                         }
                     }
                 }
@@ -3078,29 +3101,29 @@ function block_ned_marking_get_setting_courses () {
     return $filtercourses;
 }
 
-function block_ned_marking_cache_course_data (progress_bar $progressbar = null) {
+function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
     global $DB, $USER, $CFG;
 
-    require_once($CFG->dirroot . '/blocks/ned_marking/lib.php');
+    require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
     //require_once($CFG->dirroot . '/mod/forum/lib.php');
     require_once($CFG->dirroot . '/course/lib.php');
 
     $supportedmodules = array('assign', 'forum', 'quiz');
 
-    $filtercourses = block_ned_marking_get_setting_courses ();
-    set_config('cachedatalast', 0, 'block_ned_marking');
+    $filtercourses = block_fn_marking_get_setting_courses ();
+    set_config('cachedatalast', 0, 'block_fn_marking');
 
     $numberofitems = count($filtercourses) * count($supportedmodules);
     $counter = 0;
     foreach ($filtercourses as $filtercourse) {
         if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
             foreach ($supportedmodules as $supportedmodule) {
-                $numunmarked = block_ned_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
-                $nummarked = block_ned_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
-                $numunsubmitted = block_ned_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
-                $numsaved = block_ned_marking_count_unmarked_activities($course, 'saved', $supportedmodule);
+                $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
+                $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
+                $numsaved = block_fn_marking_count_unmarked_activities($course, 'saved', $supportedmodule);
 
-                // block_ned_marking_mod_cache
+                // block_fn_marking_mod_cache
                 $rec = new stdClass();
                 $rec->courseid = $course->id;
                 $rec->modname = $supportedmodule;
@@ -3110,11 +3133,11 @@ function block_ned_marking_cache_course_data (progress_bar $progressbar = null) 
                 $rec->saved = $numsaved;
                 $rec->timecreated = time();
 
-                if ($modcache = $DB->get_record('block_ned_marking_mod_cache', array('courseid' => $course->id, 'modname' => $supportedmodule))) {
+                if ($modcache = $DB->get_record('block_fn_marking_mod_cache', array('courseid' => $course->id, 'modname' => $supportedmodule))) {
                     $rec->id = $modcache->id;
-                    $DB->update_record('block_ned_marking_mod_cache', $rec);
+                    $DB->update_record('block_fn_marking_mod_cache', $rec);
                 } else {
-                    $DB->insert_record('block_ned_marking_mod_cache', $rec);
+                    $DB->insert_record('block_fn_marking_mod_cache', $rec);
                 }
                 $counter++;
                 if (!is_null($progressbar)) {
@@ -3124,12 +3147,12 @@ function block_ned_marking_cache_course_data (progress_bar $progressbar = null) 
             }
         }
     }
-    set_config('cachedatalast', time(), 'block_ned_marking');
+    set_config('cachedatalast', time(), 'block_fn_marking');
 
     return true;
 }
 
-function block_ned_marking_human_timing ($time) {
+function block_fn_marking_human_timing ($time) {
     $time = time() - $time;
     $time = ($time < 1) ? 1 : $time;
     $tokens = array (

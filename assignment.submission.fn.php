@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -377,7 +377,7 @@ function get_user_submissions() {
 function fn_print_submission(&$assignment) {
     global $CFG;
     // Use a general assignment marking class.
-    require_once($CFG->dirroot.'/blocks/ned_marking/assignment_marking.class.php');
+    require_once($CFG->dirroot.'/blocks/fn_marking/assignment_marking.class.php');
     $marker = new assignment_marking($assignment);
     $marker->print_submission();
 

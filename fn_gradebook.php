@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,15 +29,21 @@ require_once($CFG->dirroot . '/mod/forum/lib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 
 $PAGE->requires->jquery();
-$PAGE->requires->js('/blocks/ned_marking/js/popup.js');
-$PAGE->requires->js('/blocks/ned_marking/js/quiz.js');
-$PAGE->requires->css('/blocks/ned_marking/css/styles.css');
+$PAGE->requires->js('/blocks/fn_marking/js/popup.js');
+$PAGE->requires->js('/blocks/fn_marking/js/quiz.js');
+$PAGE->requires->js('/blocks/fn_marking/js/fullscreen.js', true);
+$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
 
-if ($layout = get_config('block_ned_marking', 'pagelayout')) {
+if ($layout = get_config('block_fn_marking', 'pagelayout')) {
     $PAGE->set_pagelayout($layout);
 } else {
     $PAGE->set_pagelayout('course');
 }
+
+user_preference_allow_ajax_update('block_fn_marking_zoom', PARAM_TEXT);
+$hideblocks = get_user_preferences('block_fn_marking_zoom',  'nozoom');
+$PAGE->add_body_class($hideblocks);
+
 
 $courseid = required_param('courseid', PARAM_INT); // Course id.
 $id = optional_param('id', 0, PARAM_INT); // Mod id to look at.
@@ -69,20 +75,20 @@ $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
 $activitytype = optional_param('activity_type', '0', PARAM_TEXT);
 $participants = optional_param('participants', '0', PARAM_INT);
 
-$includeorphaned = get_config('block_ned_marking', 'include_orphaned');
+$includeorphaned = get_config('block_fn_marking', 'include_orphaned');
 
 $SESSION->currentgroup[$courseid] = $group;
 
 // KEEP SEPARATE CONFIG.
 $keepseparate = 1; // Default value.
-if ($blockconfig = block_ned_marking_get_block_config ($courseid)) {
+if ($blockconfig = block_fn_marking_get_block_config ($courseid)) {
     if (isset($blockconfig->keepseparate)) {
         $keepseparate = $blockconfig->keepseparate;
     }
 }
 
 $PAGE->set_url(
-    new moodle_url('/blocks/ned_marking/fn_gradebook.php',
+    new moodle_url('/blocks/fn_marking/fn_gradebook.php',
         array('courseid' => $courseid, 'mid' => $mid, 'view' => $view, 'show' => $show,'dir' => $dir)
     )
 );
@@ -166,7 +172,7 @@ $modgradedisparray = array(
     'forum' => 'grades.fn.html'
 );
 
-$strgrades = get_string("headertitle", 'block_ned_marking');
+$strgrades = get_string("headertitle", 'block_fn_marking');
 $strgrade = get_string("grade");
 $strmax = get_string("maximumshort");
 
@@ -254,7 +260,21 @@ if (($view == 'less') || ($view == 'more')) {
             unset($showopts['saved']);
         }
     }
-    $urlshow = new moodle_url('fn_gradebook.php', array('courseid' => $courseid, 'dir' => $dir, 'sort' => $sort, 'view' => $view));
+
+    $urlshow = new moodle_url(
+        'fn_gradebook.php',
+        array(
+            'courseid' => $courseid,
+            'dir' => $dir,
+            'sort' => $sort,
+            'view' => $view,
+            'mid' => $mid,
+            'activity_type' => $activitytype,
+            'view' => $view,
+            'group' => $group,
+            'participants' => $participants,
+        )
+    );
     $showform = $OUTPUT->single_select($urlshow, 'show', $showopts, $selected = $show, '', $formid = 'fnshow');
 }
 
@@ -394,7 +414,7 @@ foreach ($selectedsection as $sectionnum) {
                                 $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                                 $numgraded = count($gradedarray);
                                 $numstudents = count($students);
-                                $ungradedfunction = 'block_ned_marking_' . $mod->modname . '_count_ungraded';
+                                $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_count_ungraded';
                                 if (function_exists($ungradedfunction)) {
                                     $extra = false;
                                     $ung = $ungradedfunction($instance->id, $gradedarray, $students, $show,
@@ -428,7 +448,7 @@ foreach ($selectedsection as $sectionnum) {
 
                             // If we haven't specifically selected a mid, look for the oldest ungraded one.
                             if (($mid == 0) && !empty($ung)) {
-                                $oldestfunc = 'block_ned_marking_' . $mod->modname . '_oldest_ungraded';
+                                $oldestfunc = 'block_fn_marking_' . $mod->modname . '_oldest_ungraded';
                                 if (function_exists($oldestfunc)) {
                                     $told = $oldestfunc($mod->instance);
                                     if (empty($cold) || ($told < $cold)) {
@@ -469,11 +489,11 @@ foreach ($selectedsection as $sectionnum) {
                                     "<IMG border=0 VALIGN=absmiddle src=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\" " .
                                     "height=16 width=16 alt=\"$mod->name\"></a>";
                             if (($view == 'less') && (strlen($instance->name) > 16)) {
-                                $name = substr($instance->name, 0, 16) . '&hellip;';
+                                $name = substr($instance->name, 0, 30) . '&hellip;';
                             } else {
                                 $name = $instance->name;
                             }
-                            $modurl = new moodle_url('/blocks/ned_marking/fn_gradebook.php', array(
+                            $modurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php', array(
                                 'courseid' => $course->id,
                                 'show' => $show,
                                 'sort' => $sort,
@@ -510,7 +530,7 @@ $button = '';
 // Check to see if groups are being used in this assignment.
 if (!empty($cm)) {
     if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used.
-        $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/ned_marking/' .
+        $groupform = groups_print_activity_menu($cm, $CFG->wwwroot . '/blocks/fn_marking/' .
             "fn_gradebook.php?courseid=$courseid&mid=$mid&show=$show&sort=$sort&dir=$dir&mode=single&view=$view", true);
     } else {
         $currentgroup = false;
@@ -610,16 +630,22 @@ groups_print_course_menu($course, $groupurl->out());
 echo "&nbsp;&nbsp;";
 echo $participantsform . "&nbsp;&nbsp;";
 echo $viewform . " ";
+
+echo html_writer::link('#',
+    html_writer::img($OUTPUT->pix_url('fullscreen', 'block_fn_marking'), ''),
+    array('class' => 'ned-hide-blocks')
+);
+
 echo '</div>';
 
-echo '<table border="0" cellpadding="5" cellspacing="0" style="margin: auto;"><tr><td>';
+echo '<table class="block" border="0" cellpadding="5" cellspacing="0" style="margin: auto;"><tr><td>';
 
-$showtopmessage = get_config('block_ned_marking', 'showtopmessage');
-$topmessage     = get_config('block_ned_marking', 'topmessage');
+$showtopmessage = get_config('block_fn_marking', 'showtopmessage');
+$topmessage     = get_config('block_fn_marking', 'topmessage');
 
 $blockconfig = new stdClass();
 
-if ($blockinstance = $DB->get_record('block_instances', array('blockname' => 'ned_marking', 'parentcontextid' => $context->id))) {
+if ($blockinstance = $DB->get_record('block_instances', array('blockname' => 'fn_marking', 'parentcontextid' => $context->id))) {
     if (!empty($blockinstance->configdata)) {
         $blockconfig = unserialize(base64_decode($blockinstance->configdata));
     }
@@ -700,12 +726,12 @@ if (!empty($selectedfunction)) {
     echo '<div class="no-assign">No selected assignment</div>';
 }
 $pluginman = core_plugin_manager::instance();
-$pluginfo = $pluginman->get_plugin_info('block_ned_marking');
+$pluginfo = $pluginman->get_plugin_info('block_fn_marking');
 echo '</td>
         </tr>
         <tr>
         <td colspan="2">
-            '.block_ned_marking_footer().'
+            '.block_fn_marking_footer().'
         <td>
         </tr>
     </table>

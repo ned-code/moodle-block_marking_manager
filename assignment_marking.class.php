@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    block_ned_marking
+ * @package    block_fn_marking
  * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -43,7 +43,7 @@ class assignment_marking {
         require_once($CFG->libdir.'/gradelib.php');
         require_once("$CFG->dirroot/repository/lib.php");
         require_once("$CFG->dirroot/grade/grading/lib.php");
-        require_once($CFG->dirroot.'/blocks/ned_marking/edit_grade_form.php');
+        require_once($CFG->dirroot.'/blocks/fn_marking/edit_grade_form.php');
 
         $course     = $this->assignment->course;
         $assignment = $this->assignment->assignment;
