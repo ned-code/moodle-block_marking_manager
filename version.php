@@ -16,7 +16,9 @@
 
 /**
  * @package    block_fn_marking
+ * @subpackage NED
  * @copyright  Michael Gardener <mgardener@cissq.com>
+ * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
