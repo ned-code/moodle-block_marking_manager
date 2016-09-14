@@ -83,7 +83,7 @@ $PAGE->set_context($context);
 //$currentgroup = get_current_group($course->id);
 $currentgroup = $SESSION->currentgroup[$course->id];
 
-$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
 
 $simplegradebook = array();
 $weekactivitycount = array();

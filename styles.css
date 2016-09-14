@@ -163,6 +163,11 @@ table.saprate-table .teacher-comments .comment-boxs textarea {
     border: 1px solid #555555 !important;
     padding: 5px;
 }
+.fnmarkingblock .marking-total > td:first-child,
+.fnmarkingblock .normal > td:first-child,
+.fnmarkingblock .highlight > td:first-child {
+    text-align: right;
+}
 .no-assign {
     text-align: center;
     padding-top: 20px;
@@ -312,13 +317,14 @@ div.fn_plugin_wrapper {
 }
 .gradeform #fitem_id_addattempt .fitemtitle {
     width: 92% !important;
+    text-align: right !important;
 }
 .gradeform #fitem_id_addattempt .felement {
     /*margin-left:96% !important;
     width: 2% !important;*/
 }
 .gradeform #fitem_id_grade .fitemtitle {
-    width: 67% !important;
+    width: 73% !important;
     text-align: right !important;
 }
 .gradeform #fitem_id_grade .felement {
@@ -836,4 +842,15 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 #page-blocks-fn_marking-progress_report .fn-menuwrapper .groupselector {
     margin-right: 10px;
+}
+#page-blocks-fn_marking-fn_gradebook #fitem_id_editpdf .fitemtitle {
+    width: 135px;
+}
+#page-blocks-fn_marking-fn_gradebook #fitem_id_editpdf .felement.fstatic {
+    margin-left: 140px;
+}
+#page-blocks-fn_marking-fn_gradebook .fitem_ffilemanager .fitemtitle {
+    margin-bottom: -20px;
+    overflow: hidden;
+    width: 100% !important;
 }

@@ -36,7 +36,7 @@ if (! $cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id)) {
 $ctx = context_module::instance($cm->id);
 
 $currentgroup = groups_get_activity_group($cm, true);
-$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
 $studentids = implode(',', array_keys($students));
 
 // Paging options.

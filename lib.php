@@ -525,7 +525,7 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
     $context = context_course::instance($course->id);
 
     $currentgroup = groups_get_activity_group($mod, true);
-    $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
 
     // Array of functions to call for grading purposes for modules.
     $modgradesarray = array(
@@ -635,7 +635,7 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
         }
     }
 
-    if (!$students = get_enrolled_users($context, 'mod/assignment:submit', 0, 'u.*', 'u.id')) {
+    if (!$students = get_enrolled_users($context, 'mod/assign:submit', 0, 'u.*', 'u.id')) {
         return 0;
     }
 
@@ -739,7 +739,7 @@ function block_fn_marking_get_notloggedin($course, $days) {
 
     // Grab current group.
     $currentgroup = groups_get_course_group($course, true);;
-    $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
     // Calculate a the before.
     $now = time();
     $lastweek = $now - (60 * 60 * 24 * $days);
@@ -767,7 +767,7 @@ function block_fn_marking_get_failing($course, $percent) {
     $studentids = array();
     // Grab  current group.
     $currentgroup = groups_get_course_group($course, true);;
-    $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
 
     // Students array is keyed on id.
     if ($students) {
@@ -810,7 +810,7 @@ function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = fals
     $modgradesarray = block_fn_marking_get_active_mods();
 
     if (!isset($students)) {
-        $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+        $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
     }
 
     for ($i = 0; $i < count($sections); $i++) {
@@ -1410,10 +1410,9 @@ function block_fn_marking_view_submissions($mform, $offset=0, $showattemptnumber
         }
 
         if (count($unsubmitted) > 0) {
-
-            $image = "<A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">
-                <IMG BORDER=0 VALIGN=absmiddle SRC=\"$CFG->wwwroot/mod/$cm->modname/pix/icon.gif\" " .
-                "HEIGHT=16 WIDTH=16 ALT=\"$cm->modname\"></A>";
+            $url = new moodle_url('/mod/'.$cm->modname.'/view.php', array('id' => $cm->id));
+            $image = '<a href="'.$url->out().'"><img width="16" height="16" alt="'.
+                $cm->modname.'" src="'.$OUTPUT->pix_url('icon', $cm->modname).'"></a>';
 
             $o .= '<div class="unsubmitted_header">' . $image .
                 " Assignment: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" .

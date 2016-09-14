@@ -301,7 +301,7 @@ if ($mid) {
 $groupmembers = groups_get_members_by_role($group, $courseid);
 
 // Get a list of all students.
-if (!$students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id')) {
+if (!$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id')) {
     $students = array();
     $PAGE->set_title(get_string('course') . ': ' . $course->fullname);
     $PAGE->set_heading($course->fullname);
@@ -370,24 +370,24 @@ foreach ($selectedsection as $sectionnum) {
             $sectionmods = explode(",", $section->sequence);
             foreach ($sectionmods as $sectionmod) {
                 $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
-                $currentgroup = groups_get_activity_group($mod, true);
+                //$currentgroup = groups_get_activity_group($mod, true);
                 // Filter if individual user selected.
                 if ($participants && $group) {
-                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                     if (isset($groupmembers[5]->users[$participants])) {
                         $students = array();
                         $students[$participants] = $DB->get_record('user', array('id' => $participants));
                     } else {
                         $participants = 0;
-                        $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                        $students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                     }
                 } else if ($participants && !$group) {
                     $students = array();
                     $students[$participants] = $DB->get_record('user', array('id' => $participants));
-                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                 } else {
-                    $students = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
-                    $participantsarr = get_enrolled_users($context, 'mod/assignment:submit', $currentgroup, 'u.*', 'u.id');
+                    $students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                 }
 
                 // Don't count it if you can't see it.

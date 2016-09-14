@@ -141,7 +141,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         // Fix grade string for select form.
         if ($gradinginfo->items[0]->grades[$userid]->str_grade == "-") {
-            $stugrade = '-1';
+            $stugrade = '';
         } else {
             $stugrade = $gradinginfo->items[0]->grades[$userid]->str_grade;
         }
@@ -219,16 +219,15 @@ class mod_assign_grading_form_fn extends moodleform {
             if ($assignment->get_instance()->grade > 0) {
 
                 $attributes = array();
+                $attributes['size'] = 6;
                 if ($gradingdisabled) {
                     $attributes['disabled'] = 'disabled';
                 }
 
-                $grademenu = make_grades_menu($assignment->get_instance()->grade);
-                $grademenu['-1'] = 'Select';
-                $gradingelement = $mform->addElement('select', 'grade', get_string('grade', 'block_fn_marking'),
-                    $grademenu, $attributes);
+                $label = get_string('gradeoutof', 'assign', $assignment->get_instance()->grade).':';
+                $gradingelement = $mform->addElement('text', 'grade', $label, $attributes);
                 $mform->setDefault('grade', $stugrade);
-                $mform->setType('grade', PARAM_INT);
+                $mform->setType('grade', PARAM_FLOAT);
 
                 if ($gradingdisabled) {
                     $gradingelement->freeze();
