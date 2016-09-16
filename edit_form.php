@@ -47,6 +47,9 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addElement('header', 'configheader',
                             get_string('blocksettings', 'block_fn_marking'));
 
+        $mform->addElement('static', 'blockinfo', get_string('blockinfo', 'block_fn_marking'),
+            '<a target="_blank" href="http://ned.ca/marking-manager">http://ned.ca/marking-manager</a>');
+
         // Config title for the block.
         $mform->addElement('text', 'config_title',
                             get_string('setblocktitle', 'block_fn_marking'));

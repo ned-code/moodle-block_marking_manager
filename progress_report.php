@@ -65,6 +65,8 @@ if (!$isteacher) {
 }
 
 $PAGE->requires->css('/blocks/fn_marking/css/styles.css');
+$PAGE->requires->js('/blocks/fn_marking/textrotate.js');
+$PAGE->requires->js_function_call('textrotate_init', null, true);
 
 $PAGE->set_url(
     new moodle_url('/blocks/fn_marking/progress_report.php'),
@@ -189,6 +191,7 @@ for ($i = 0; $i < $upto; $i++) {
                             }
 
                             $weekactivitycount[$i]['mod'][] = $image;
+                            $weekactivitycount[$i]['modname'][] = $instance->name;
                             foreach ($simplegradebook as $key => $value) {
 
                                 if (($mod->modname == 'quiz') || ($mod->modname == 'forum')) {
@@ -307,6 +310,24 @@ foreach ($weekactivitycount as $weeknum => $weekactivity) {
     }
 }
 echo "</tr>-->";
+
+echo "<tr>";
+echo '<th scope="col" align="center"></th>';
+echo '<th scope="col" align="center"></th>';
+
+foreach ($weekactivitycount as $key => $value) {
+    if ($value['numofweek']) {
+        foreach ($value['mod'] as $index => $imagelink) {
+            $longactivityname = $value['modname'][$index];
+            $displayname= shorten_text($value['modname'][$index], 30);
+            $formattedactivityname = format_string($displayname, true, array('context' => $context));
+            echo '<th scope="col" align="center">'.
+                '<span class="completion-activityname">'.
+                $formattedactivityname.'</span></th>';;
+        }
+    }
+}
+echo "</tr>";
 
 echo "<tr>";
 echo "<td class='mod-icon'>".get_string('name', 'block_fn_marking')."</td>";
