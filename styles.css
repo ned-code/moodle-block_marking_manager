@@ -331,6 +331,14 @@ div.fn_plugin_wrapper {
     margin-left:68% !important;
     width: 32% !important;
 }
+.gradeform #fitem_id_grade.fitem_fselect .fitemtitle {
+    text-align: right !important;
+    width: 50% !important;
+}
+.gradeform #fitem_id_grade.fitem_fselect .felement {
+    margin-left: 50% !important;
+    width: 50% !important;
+}
 .gradeform #fitem_id_applytoall .fitemtitle {
     width: 88% !important;
 }

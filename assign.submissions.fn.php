@@ -80,7 +80,6 @@ if (($show == 'unmarked') || ($show == 'saved')) {
         if (isset($_POST['onlinetext'])) {
             unset($_POST['onlinetext']);
         }
-
         // Now show the right view page.
         if ($action == 'previousgrade') {
             $mform = null;

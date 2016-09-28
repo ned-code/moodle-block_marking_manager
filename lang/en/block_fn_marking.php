@@ -186,3 +186,4 @@ $string['lastrefreshtime'] = 'Last refresh: {$a} ago ';
 $string['lastrefreshupdating'] = 'Last refresh: Updating ';
 $string['name'] = 'Name';
 $string['blockinfo'] = 'Block info';
+$string['atmaxresubmission'] = 'At max resubmission';

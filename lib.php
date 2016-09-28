@@ -1093,7 +1093,7 @@ function block_fn_marking_process_save_grade(&$mform, $assign, $context, $course
     $pageparams['savegrade']  = true;
     $pageparams['attemptnumber']  = $attemptnumber;
     $pageparams['activity_type']  = $activitytype;
-    $pageparams['group']  = $group;
+    $pageparams['group']  = optional_param('group', 0, PARAM_INT);;
     $pageparams['participants']  = $participants;
 
     $formparams = array($assign, $data, $pageparams);
@@ -1113,9 +1113,9 @@ function block_fn_marking_process_save_grade(&$mform, $assign, $context, $course
         if ($instance->teamsubmission && $formdata->applytoall) {
             $groupid = 0;
             if ($assign->get_submission_group($userid)) {
-                $group = $assign->get_submission_group($userid);
+                $realgroup = $assign->get_submission_group($userid);
                 if ($group) {
-                    $groupid = $group->id;
+                    $groupid = $realgroup->id;
                 }
             }
             $members = $assign->get_submission_group_members($groupid, true);
@@ -1205,7 +1205,7 @@ function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $co
     $userid = optional_param('userid', 0, PARAM_INT);
     $attemptnumber = optional_param('attemptnumber', -1, PARAM_INT);
     $activitytype = $pageparams['activity_type'];
-    $group = optional_param('group', 0, PARAM_INT);
+    $group = $pageparams['group'];
     $participants = optional_param('participants', 0, PARAM_INT);
 
     if ($participants) {
@@ -1220,7 +1220,7 @@ function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $co
             $last = true;
         }
 
-    } else if ($pageparams['userid']) {
+    } elseif ($pageparams['userid']) {
         $userid = $pageparams['userid'];
 
         $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show']);
@@ -1310,7 +1310,6 @@ function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $co
         $pageparams['attemptnumber'] = $attemptnumber;
         $pageparams['maxattemptnumber'] = $maxattemptnumber;
         $pageparams['activity_type'] = $activitytype;
-        $pageparams['group'] = $group;
         $pageparams['participants'] = $participants;
 
         $formparams = array($assign, $data, $pageparams);
@@ -1833,7 +1832,7 @@ function block_fn_marking_render_assign_submission_history_summary(assign_submis
         $resubtype = $assign->get_instance()->attemptreopenmethod;
         if ($resubtype != ASSIGN_ATTEMPT_REOPEN_METHOD_NONE) {
             if (block_fn_marking_reached_resubmission_limit($maxattemptnumber, $assign)) {
-                $resubstatus = get_string('atmaxresubmission', 'assign');
+                $resubstatus = get_string('atmaxresubmission', 'block_fn_marking');
             } else if ($resubtype == ASSIGN_ATTEMPT_REOPEN_METHOD_MANUAL) {
 
                 if ($history->allsubmissions[(count($history->allsubmissions) - 1)]->status == 'reopened') {
