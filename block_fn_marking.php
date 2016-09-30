@@ -366,7 +366,7 @@ class block_fn_marking extends block_list {
         $isadmin   = is_siteadmin($USER->id);
         $text = '';
 
-        $showzeroungraded = isset($this->config->listcourseszeroungraded) ? $this->config->listcourseszeroungraded : 1;
+        $showzeroungraded = isset($this->config->listcourseszeroungraded) ? $this->config->listcourseszeroungraded : 0;
 
         $filtercourses = block_fn_marking_get_setting_courses ();
 
