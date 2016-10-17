@@ -1220,7 +1220,7 @@ function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $co
             $last = true;
         }
 
-    } elseif ($pageparams['userid']) {
+    } else if ($pageparams['userid']) {
         $userid = $pageparams['userid'];
 
         $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show']);
@@ -1899,7 +1899,7 @@ function block_fn_marking_render_assign_submission_history_summary(assign_submis
         $CFG->wwwroot.'/blocks/fn_marking/pix/completed.gif" valign="absmiddle"> ';
     $savedicon = '<img width="16" height="16" border="0" alt="Assignment" src="'.
         $CFG->wwwroot.'/blocks/fn_marking/pix/saved.gif" valign="absmiddle"> ';
-    if  ($gradeitem->gradepass > 0) {
+    if ($gradeitem->gradepass > 0) {
         $markediconincomplete = '<img width="16" height="16" border="0" alt="Assignment" src="'.
             $CFG->wwwroot.'/blocks/fn_marking/pix/incomplete.gif" valign="absmiddle"> ';
     } else {
@@ -2998,7 +2998,7 @@ function block_fn_marking_checkbox_checked($name, $id , $class, $value) {
         )
     );
 }
-function block_fn_marking_footer(){
+function block_fn_marking_footer() {
     global $OUTPUT;
 
     $output = '';
@@ -3103,7 +3103,6 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
     global $DB, $USER, $CFG;
 
     require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
-    //require_once($CFG->dirroot . '/mod/forum/lib.php');
     require_once($CFG->dirroot . '/course/lib.php');
 
     $supportedmodules = array('assign', 'forum', 'quiz');
@@ -3121,7 +3120,6 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
                 $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
                 $numsaved = block_fn_marking_count_unmarked_activities($course, 'saved', $supportedmodule);
 
-                // block_fn_marking_mod_cache
                 $rec = new stdClass();
                 $rec->courseid = $course->id;
                 $rec->modname = $supportedmodule;
@@ -3131,7 +3129,8 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
                 $rec->saved = $numsaved;
                 $rec->timecreated = time();
 
-                if ($modcache = $DB->get_record('block_fn_marking_mod_cache', array('courseid' => $course->id, 'modname' => $supportedmodule))) {
+                if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
+                    array('courseid' => $course->id, 'modname' => $supportedmodule))) {
                     $rec->id = $modcache->id;
                     $DB->update_record('block_fn_marking_mod_cache', $rec);
                 } else {
@@ -3164,7 +3163,9 @@ function block_fn_marking_human_timing ($time) {
     );
 
     foreach ($tokens as $unit => $text) {
-        if ($time < $unit) continue;
+        if ($time < $unit) {
+            continue;
+        }
         $numberofunits = floor($time / $unit);
         return $numberofunits.' '.$text.(($numberofunits > 1) ? 's' : '');
     }

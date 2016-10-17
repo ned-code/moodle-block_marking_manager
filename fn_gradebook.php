@@ -77,6 +77,13 @@ $participants = optional_param('participants', '0', PARAM_INT);
 
 $includeorphaned = get_config('block_fn_marking', 'include_orphaned');
 
+// Check teacher's group.
+if ($usergroups = groups_get_all_groups($courseid, $USER->id)) {
+    if (!isset($usergroups[$group])) {
+        $group = key($usergroups);
+    }
+}
+
 $SESSION->currentgroup[$courseid] = $group;
 
 // KEEP SEPARATE CONFIG.
@@ -89,7 +96,7 @@ if ($blockconfig = block_fn_marking_get_block_config ($courseid)) {
 
 $PAGE->set_url(
     new moodle_url('/blocks/fn_marking/fn_gradebook.php',
-        array('courseid' => $courseid, 'mid' => $mid, 'view' => $view, 'show' => $show,'dir' => $dir)
+        array('courseid' => $courseid, 'mid' => $mid, 'view' => $view, 'show' => $show, 'dir' => $dir)
     )
 );
 
@@ -221,6 +228,7 @@ $urlview = new moodle_url(
         'group' => $group
     )
 );
+
 $select = new single_select($urlview, 'view', $viewopts, $selected = $view, '');
 $select->formid = 'fnview';
 
@@ -277,8 +285,6 @@ if (($view == 'less') || ($view == 'more')) {
     );
     $showform = $OUTPUT->single_select($urlshow, 'show', $showopts, $selected = $show, '', $formid = 'fnshow');
 }
-
-
 
 if ($mid) {
     if (!$coursemodule = $DB->get_record('course_modules', array('id' => $mid))) {
@@ -370,7 +376,7 @@ foreach ($selectedsection as $sectionnum) {
             $sectionmods = explode(",", $section->sequence);
             foreach ($sectionmods as $sectionmod) {
                 $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
-                //$currentgroup = groups_get_activity_group($mod, true);
+
                 // Filter if individual user selected.
                 if ($participants && $group) {
                     $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
