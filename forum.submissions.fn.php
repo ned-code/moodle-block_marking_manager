@@ -62,24 +62,25 @@ $forum->intro = trim($forum->intro);
 $studentidlist = implode(',', array_keys($students));
 
 // Get students from forum_posts.
-$stposts = $DB->get_records_sql("SELECT DISTINCT u.*, (
-                                    SELECT COUNT(r.rating) AS rawgrade
-                                                                 FROM mdl_user us
-                                                            LEFT JOIN mdl_forum_posts fp
-                                                                   ON us.id=fp.userid
-                                                            LEFT JOIN mdl_rating r
-                                                                   ON r.itemid=fp.id
-                                                                WHERE r.contextid = 227
-                                                                  AND r.component = 'mod_forum'
-                                                                  AND r.ratingarea = 'post'
-                                                                  AND fp.userid = u.id
-                                    ) AS numofrating
-                                 FROM {forum_discussions} d
-                                 INNER JOIN {forum_posts} p ON p.discussion = d.id
-                                 INNER JOIN {user} u ON u.id = p.userid
-                                 WHERE d.forum = $forum->id AND
-                                 u.id in ($studentidlist)
-                                 ORDER BY numofrating ASC");
+$stposts = $DB->get_records_sql("SELECT DISTINCT u.*, 
+                                                 (SELECT COUNT(r.rating) rawgrade
+                                                    FROM {user} us
+                                               LEFT JOIN {forum_posts} fp
+                                                      ON us.id=fp.userid
+                                               LEFT JOIN {rating} r
+                                                      ON r.itemid=fp.id
+                                                   WHERE r.contextid = {$modcontext->id}
+                                                     AND r.component = 'mod_forum'
+                                                     AND r.ratingarea = 'post'
+                                                     AND fp.userid = u.id) numofrating
+                                   FROM {forum_discussions} d
+                             INNER JOIN {forum_posts} p 
+                                     ON p.discussion = d.id
+                             INNER JOIN {user} u 
+                                     ON u.id = p.userid
+                                  WHERE d.forum = {$forum->id} 
+                                    AND u.id IN ($studentidlist)
+                               ORDER BY numofrating ASC");
 
 
 // Show all the unsubmitted users.
@@ -197,7 +198,7 @@ if (($show == 'unmarked') || ($show == 'marked')) {
             $sqlposts = "SELECT COUNT(fd.id) FROM {forum_discussions} fd WHERE fd.userid = ? AND fd.forum = ?";
             $numberofposts = $DB->count_records_sql($sqlposts, array($stpost->id, $forum->id));
 
-            $sqlreply = "SELECT Count(fp.id)
+            $sqlreply = "SELECT COUNT(fp.id)
                            FROM {forum_posts} fp
                      INNER JOIN {forum_discussions} fd
                              ON fp.discussion = fd.id
