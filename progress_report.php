@@ -162,7 +162,6 @@ for ($i = 0; $i < $upto; $i++) {
                 if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
                     continue;
                 }
-                global $DB;
                 $instance = $DB->get_record($mod->modname, array("id" => $mod->instance));
                 $item = $DB->get_record('grade_items', array("itemtype" => 'mod', "itemmodule" => $mod->modname,
                     "iteminstance" => $mod->instance));
@@ -172,8 +171,7 @@ for ($i = 0; $i < $upto; $i++) {
                     require_once($libfile);
                     $gradefunction = $mod->modname . "_get_user_grades";
 
-
-                    if ((($mod->modname != 'forum') || (($instance->assessed > 0) && has_capability('mod/forum:rate', $mcontext)))
+                    if ((($mod->modname != 'forum') || ($instance->assessed > 0))
                         && isset($modgradesarray[$mod->modname])) {
 
                         if (function_exists($gradefunction)) {
@@ -223,21 +221,22 @@ for ($i = 0; $i < $upto; $i++) {
 
                                     switch ($modstatus) {
                                         case 'submitted':
-                                            if ($grade = $gradefunction($instance, $key)) {
+                                            //if ($grade = $gradefunction($instance, $key)) {
+                                            if ($grade = block_fn_marking_gradebook_grade($item->id, $key)) {
                                                 if ($item->gradepass > 0) {
-                                                    if ($grade[$key]->rawgrade >= $item->gradepass) {
+                                                    if ($grade >= $item->gradepass) {
                                                         $simplegradebook[$key]['grade'][$i][$mod->id] = 'marked.gif'; // Passed.
-                                                        $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                        $simplegradebook[$key]['avg'][] = array('grade' => $grade,
                                                             'grademax' => $item->grademax);
                                                     } else {
                                                         $simplegradebook[$key]['grade'][$i][$mod->id] = 'incomplete.gif'; // Fail.
-                                                        $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                        $simplegradebook[$key]['avg'][] = array('grade' => $grade,
                                                             'grademax' => $item->grademax);
                                                     }
                                                 } else {
                                                     // Graded (grade-to-pass is not set).
                                                     $simplegradebook[$key]['grade'][$i][$mod->id] = 'graded_.gif';
-                                                    $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                    $simplegradebook[$key]['avg'][] = array('grade' => $grade,
                                                         'grademax' => $item->grademax);
                                                 }
                                             }

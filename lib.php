@@ -3170,3 +3170,13 @@ function block_fn_marking_human_timing ($time) {
         return $numberofunits.' '.$text.(($numberofunits > 1) ? 's' : '');
     }
 }
+
+function block_fn_marking_gradebook_grade ($itemid, $userid) {
+    global $DB;
+
+    if ($grade = $DB->get_record('grade_grades', array('itemid' => $itemid, 'userid' => $userid))) {
+        return $grade->finalgrade;
+    } else {
+        return false;
+    }
+}
