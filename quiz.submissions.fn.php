@@ -313,8 +313,15 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     $targetoffurl = new moodle_url('/blocks/fn_marking/fn_gradebook.php?', $targetoffparams);
 
     $o .= '<div class="quiz-top-menu"><div class="qdefault-view">';
+
     $o .= '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
-        '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> Moodle default view</a>';
+        '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> '.
+        get_string('moodledefaultview', 'block_fn_marking').'</a>';
+
+    $o .= '&nbsp;&nbsp;&nbsp;<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
+        '&mode=grading"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> '.
+        get_string('manualgrading', 'block_fn_marking').'</a>';
+
     $o .= '</div><div class="qall-participants">';
     if ($qallparticipants) {
         $o .= '<input checked="checked" id="qall-participants-chk" type="checkbox" name="qallparticipants" data-target="' .

@@ -165,7 +165,7 @@ class block_fn_marking extends block_list {
      */
     private function get_standard_content() {
 
-        global $CFG, $OUTPUT, $DB;
+        global $CFG, $USER, $OUTPUT, $DB;
 
         require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
@@ -189,19 +189,27 @@ class block_fn_marking extends block_list {
             // CACHE.
             $cachedatalast = get_config('block_fn_marking', 'cachedatalast');
             $refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse');
+            $isingroup = block_fn_marking_isinagroup($this->page->course->id, $USER->id);
 
             $supportedmodules = array('assign', 'forum', 'quiz');
             list($insql, $params) = $DB->get_in_or_equal($supportedmodules);
             $params = array_merge(array($this->page->course->id), $params);
+            if ($isingroup) {
+                $params[] = $USER->id;
+            } else {
+                $params[] = 0;
+            }
 
             if (isset($this->config->showunmarked) && $this->config->showunmarked) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numunmarked = block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked');
+                    $numunmarked = block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked', '', $USER->id);
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.unmarked) unmarked
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
-                               AND m.modname {$insql}";
+                               AND m.modname {$insql}
+                               AND m.userid = ?
+                               AND m.expired = 0";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numunmarked = $modcache->unmarked;
                 }
@@ -214,12 +222,14 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
                 if ($refreshmodecourse == 'pageload') {
-                    $nummarked = block_fn_marking_count_unmarked_activities($this->page->course, 'marked');
+                    $nummarked = block_fn_marking_count_unmarked_activities($this->page->course, 'marked', '', $USER->id);
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.marked) marked
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
-                               AND m.modname {$insql}";
+                               AND m.modname {$insql}
+                               AND m.userid = ?
+                               AND m.expired = 0";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $nummarked = $modcache->marked;
                 }
@@ -232,12 +242,14 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numunsubmitted = block_fn_marking_count_unmarked_activities($this->page->course, 'unsubmitted');
+                    $numunsubmitted = block_fn_marking_count_unmarked_activities($this->page->course, 'unsubmitted', '', $USER->id);
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.unsubmitted) unsubmitted
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
-                               AND m.modname {$insql}";
+                               AND m.modname {$insql}
+                               AND m.userid = ?
+                               AND m.expired = 0";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numunsubmitted = $modcache->unsubmitted;
                 }
@@ -250,12 +262,14 @@ class block_fn_marking extends block_list {
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
                 if ($refreshmodecourse == 'pageload') {
-                    $numsaved = block_fn_marking_count_unmarked_activities($this->page->course, 'saved');
+                    $numsaved = block_fn_marking_count_unmarked_activities($this->page->course, 'saved', '', $USER->id);
                 } else if ($refreshmodecourse == 'cron') {
                     $sql = "SELECT SUM(m.saved) saved
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
-                               AND m.modname {$insql}";
+                               AND m.modname {$insql}
+                               AND m.userid = ?
+                               AND m.expired = 0";
                     $modcache = $DB->get_record_sql($sql, $params);
                     $numsaved = $modcache->saved;
                 }
@@ -432,6 +446,10 @@ class block_fn_marking extends block_list {
                 }
             }
         } else {
+            $teacherroles = get_roles_with_capability('moodle/grade:edit', CAP_ALLOW);
+
+            list($sqlin, $params) = $DB->get_in_or_equal(array_keys($teacherroles));
+            $params[] = $USER->id;
 
             $sql = "SELECT ctx.id,
                            ctx.instanceid courseid
@@ -439,10 +457,10 @@ class block_fn_marking extends block_list {
                 INNER JOIN {role_assignments} ra
                         ON ctx.id = ra.contextid
                      WHERE ctx.contextlevel = 50
-                       AND ra.roleid = 3
+                       AND ra.roleid {$sqlin}
                        AND ra.userid = ?";
 
-            if ($teachercourses = $DB->get_records_sql($sql, array($USER->id))) {
+            if ($teachercourses = $DB->get_records_sql($sql, $params)) {
                 $courses = array();
                 foreach ($teachercourses as $teachercourse) {
                     if ($filtercourses) {

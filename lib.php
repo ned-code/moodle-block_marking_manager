@@ -261,7 +261,7 @@ function block_fn_marking_quiz_count_ungraded($quizid, $graded, $students, $show
 }
 
 function block_fn_marking_assign_students_ungraded($assign, $graded, $students, $show='unmarked',
-                                                    $extra=false, $instance, $sort=false) {
+                                                    $extra=false, $instance, $sort=false, $keepseparate=1) {
     global $DB, $CFG;
 
     $studentlist = implode(',', array_keys($students));
@@ -270,11 +270,19 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
         return 0;
     }
 
+    if (!$keepseparate) {
+        $showdraft = false;
+    } else if ($instance->submissiondrafts) {
+        $showdraft = true;
+    } else {
+        $showdraft = false;
+    }
+
     $subtable = 'assign_submission';
 
     if (($show == 'unmarked') || ($show == 'all')) {
-
-        $sql = "SELECT DISTINCT s.userid
+        if ($showdraft) {
+            $sql = "SELECT DISTINCT s.userid
                   FROM {assign_submission} s
                   LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
                   and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
@@ -283,6 +291,17 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
                    AND s.status='submitted'
                    AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
                    AND s.latest = 1";
+        } else {
+            $sql = "SELECT DISTINCT s.userid
+                  FROM {assign_submission} s
+                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
+                  and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
+                 WHERE s.assignment=$assign
+                   AND (s.userid in ($studentlist))
+                   AND s.status  IN ('submitted', 'draft')
+                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                   AND s.latest = 1";
+        }
 
         if ($data = $DB->get_records_sql($sql)) {
             $arr = array();
@@ -424,7 +443,9 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
         return $unsubmitted = array_values($unsubmitted);
 
     } else if ($show == 'saved') {
-
+        if (!$showdraft) {
+            return false;
+        }
         // CHECK DRAFT is_Graded.
         $sqldraft = "SELECT s.userid,
                             s.timemodified AS submissiontime,
@@ -522,6 +543,13 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
 
     global $CFG, $DB;
 
+    $keepseparate = 1; // Default value.
+    if ($blockconfig = block_fn_marking_get_block_config ($course->id)) {
+        if (isset($blockconfig->keepseparate)) {
+            $keepseparate = $blockconfig->keepseparate;
+        }
+    }
+
     $context = context_course::instance($course->id);
 
     $currentgroup = groups_get_activity_group($mod, true);
@@ -565,7 +593,7 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
                     $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_students_ungraded';
                     if (function_exists($ungradedfunction)) {
                         $extra = false;
-                        $ung = $ungradedfunction($instance->id, $gradedarray, $students, $info, $extra, $instance, $sort);
+                        $ung = $ungradedfunction($instance->id, $gradedarray, $students, $info, $extra, $instance, $sort, $keepseparate);
                         return $ung;
                     } else {
                         $ung = $numstudents - $numgraded;
@@ -577,7 +605,7 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
 
 }
 
-function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', $module='') {
+function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', $module='', $userid=0) {
 
     global $CFG, $DB, $sections;
 
@@ -635,7 +663,16 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
         }
     }
 
-    if (!$students = get_enrolled_users($context, 'mod/assign:submit', 0, 'u.*', 'u.id')) {
+    $groupstudents = false;
+    if ($userid) {
+        $groupstudents = block_fn_marking_mygroup_members($course->id, $userid);
+    }
+    if ($groupstudents === false) {
+        $students = get_enrolled_users($context, 'mod/assign:submit', 0, 'u.*', 'u.id');
+    } else {
+        $students = $groupstudents;
+    }
+    if (!$students) {
         return 0;
     }
 
@@ -734,12 +771,21 @@ function block_fn_marking_count_notloggedin($course, $days) {
 }
 
 function block_fn_marking_get_notloggedin($course, $days) {
+    global $USER;
+
     // Grab context.
     $context = context_course::instance($course->id);
 
-    // Grab current group.
-    $currentgroup = groups_get_course_group($course, true);;
-    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+    $groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id);
+
+    if ($groupstudents === false) {
+        // Grab current group.
+        $currentgroup = groups_get_course_group($course, true);
+        $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+    } else {
+        $students = $groupstudents;
+    }
+
     // Calculate a the before.
     $now = time();
     $lastweek = $now - (60 * 60 * 24 * $days);
@@ -2675,7 +2721,7 @@ function block_fn_marking_get_block_config ($courseid, $blockname='fn_marking') 
 }
 
 function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide='', $showzeroungraded=0, $maxcourse=10) {
-    global $CFG, $DB, $OUTPUT;
+    global $CFG, $DB, $OUTPUT, $USER;
 
     $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
 
@@ -2690,6 +2736,12 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
             if ($counter >= $maxcourse) {
                 continue;
             }
+            $isingroup = block_fn_marking_isinagroup($course->id, $USER->id);
+            if ($isingroup) {
+                $userid = $USER->id;
+            } else {
+                $userid = 0;
+            }
             $courseicon = $OUTPUT->pix_icon('i/course', '', null, array('class' => 'gm_icon'));
             $courselink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                 $course->id . '&show=unmarked' . '&navlevel=top&mid=0';
@@ -2698,10 +2750,10 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
             $moduletext = '';
             foreach ($supportedmodules as $supportedmodule) {
                 if ($refreshmodefrontpage == 'pageload') {
-                    $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                    $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $USER->id);
                 } else if ($refreshmodefrontpage == 'cron') {
                     if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
-                        array('courseid' => $course->id, 'modname' => $supportedmodule)
+                        array('courseid' => $course->id, 'modname' => $supportedmodule, 'userid' => $userid, 'expired' => 0)
                     )) {
                         $numunmarked = $modcache->unmarked;
                     } else {
@@ -3112,8 +3164,14 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
 
     $numberofitems = count($filtercourses) * count($supportedmodules);
     $counter = 0;
+    $DB->execute("UPDATE {block_fn_marking_mod_cache} SET expired = ?", array(time()));
     foreach ($filtercourses as $filtercourse) {
+
         if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
+
+            $context = context_course::instance($course->id);
+            $teachers = get_users_by_capability($context, 'moodle/grade:viewall');
+
             foreach ($supportedmodules as $supportedmodule) {
                 $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
                 $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
@@ -3128,14 +3186,47 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
                 $rec->unsubmitted = $numunsubmitted;
                 $rec->saved = $numsaved;
                 $rec->timecreated = time();
+                $rec->expired = 0;
 
                 if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
-                    array('courseid' => $course->id, 'modname' => $supportedmodule))) {
+                    array('courseid' => $course->id, 'modname' => $supportedmodule, 'userid' => 0))) {
                     $rec->id = $modcache->id;
                     $DB->update_record('block_fn_marking_mod_cache', $rec);
                 } else {
                     $DB->insert_record('block_fn_marking_mod_cache', $rec);
                 }
+
+                // Teachers in a group.
+                if ($teachers) {
+                    foreach ($teachers as $teacher) {
+                        if ($groupstudents = block_fn_marking_mygroup_members($course->id, $teacher->id)) {
+                            $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $teacher->id);
+                            $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule, $teacher->id);
+                            $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule, $teacher->id);
+                            $numsaved = block_fn_marking_count_unmarked_activities($course, 'saved', $supportedmodule, $teacher->id);
+
+                            $rec = new stdClass();
+                            $rec->courseid = $course->id;
+                            $rec->modname = $supportedmodule;
+                            $rec->unmarked = $numunmarked;
+                            $rec->marked = $nummarked;
+                            $rec->unsubmitted = $numunsubmitted;
+                            $rec->saved = $numsaved;
+                            $rec->timecreated = time();
+                            $rec->expired = 0;
+                            $rec->userid = $teacher->id;
+
+                            if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
+                                array('courseid' => $course->id, 'modname' => $supportedmodule, 'userid' => $teacher->id))) {
+                                $rec->id = $modcache->id;
+                                $DB->update_record('block_fn_marking_mod_cache', $rec);
+                            } else {
+                                $DB->insert_record('block_fn_marking_mod_cache', $rec);
+                            }
+                        }
+                    }
+                }
+
                 $counter++;
                 if (!is_null($progressbar)) {
                     $donepercent = floor($counter / $numberofitems * 100);
@@ -3178,5 +3269,111 @@ function block_fn_marking_gradebook_grade ($itemid, $userid) {
         return $grade->finalgrade;
     } else {
         return false;
+    }
+}
+
+function block_fn_marking_isinagroup($courseid, $userid) {
+    global $DB;
+
+    $sql = "SELECT g.* 
+              FROM {groups_members} gm 
+              JOIN {groups} g 
+                ON gm.groupid = g.id 
+             WHERE g.courseid = ? 
+               AND gm.userid = ?";
+
+    return $DB->record_exists_sql($sql, array($courseid, $userid));
+}
+
+function block_fn_marking_mygroup_members($courseid, $userid) {
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot.'/group/lib.php');
+
+    $members = array();
+    $sql = "SELECT g.* 
+              FROM {groups_members} gm 
+              JOIN {groups} g 
+                ON gm.groupid = g.id 
+             WHERE g.courseid = ? 
+               AND gm.userid = ?";
+
+    if ($groups = $DB->get_records_sql($sql, array($courseid, $userid))) {
+        foreach ($groups as $group) {
+            if($groupmembers = groups_get_members_by_role($group->id, $courseid)) {
+                foreach ($groupmembers as $groupmember) {
+                    if ((!empty($groupmember->shortname)) && ($groupmember->shortname == 'student')) {
+                        $members +=$groupmember->users;
+                    }
+                }
+            }
+        }
+        return $members;
+    } else  {
+        return false;
+    }
+}
+
+function block_fn_marking_groups_print_course_menu($course, $urlroot, $return=false, $activegroup=false) {
+    global $USER, $OUTPUT;
+
+    if (!$groupmode = $course->groupmode) {
+        if ($return) {
+            return '';
+        } else {
+            return;
+        }
+    }
+
+    $context = context_course::instance($course->id);
+    $aag = has_capability('moodle/site:accessallgroups', $context);
+
+    $usergroups = array();
+    if ($groupmode == VISIBLEGROUPS or $aag) {
+        $allowedgroups = groups_get_all_groups($course->id, 0, $course->defaultgroupingid);
+        // Get user's own groups and put to the top.
+        $usergroups = groups_get_all_groups($course->id, $USER->id, $course->defaultgroupingid);
+    } else {
+        $allowedgroups = groups_get_all_groups($course->id, $USER->id, $course->defaultgroupingid);
+    }
+
+    if ($activegroup === false) {
+        $activegroup = groups_get_course_group($course, true, $allowedgroups);
+    }
+
+    $groupsmenu = array();
+    if (!$allowedgroups or $groupmode == VISIBLEGROUPS or $groupmode == SEPARATEGROUPS or $aag) {
+        $groupsmenu[0] = get_string('allparticipants');
+    }
+
+    $groupsmenu += groups_sort_menu_options($allowedgroups, $usergroups);
+
+    if ($groupmode == VISIBLEGROUPS) {
+        $grouplabel = get_string('groupsvisible');
+    } else {
+        $grouplabel = get_string('groupsseparate');
+    }
+
+    if ($aag and $course->defaultgroupingid) {
+        if ($grouping = groups_get_grouping($course->defaultgroupingid)) {
+            $grouplabel = $grouplabel . ' (' . format_string($grouping->name) . ')';
+        }
+    }
+
+    if (count($groupsmenu) == 1) {
+        $groupname = reset($groupsmenu);
+        $output = $grouplabel.': '.$groupname;
+    } else {
+        $select = new single_select(new moodle_url($urlroot), 'group', $groupsmenu, $activegroup, null, 'selectgroup');
+        $select->label = $grouplabel;
+        $output = $OUTPUT->render($select);
+    }
+
+    $output = '<div class="groupselector">'.$output.'</div>';
+
+    if ($return) {
+        return $output;
+    } else {
+        echo $output;
     }
 }

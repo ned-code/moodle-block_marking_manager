@@ -85,7 +85,12 @@ $PAGE->set_context($context);
 //$currentgroup = get_current_group($course->id);
 $currentgroup = $SESSION->currentgroup[$course->id];
 
-$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+if (($groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id)) && ($currentgroup === 0)) {
+    $students = $groupstudents;
+} else {
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+}
+
 
 $simplegradebook = array();
 $weekactivitycount = array();
@@ -283,8 +288,8 @@ $viewform = '<div class="groupselector">'.$OUTPUT->render($select).'</div>';
 
 
 echo '<div class="fn-menuwrapper">';
-groups_print_course_menu($course, $CFG->wwwroot.'/blocks/fn_marking/progress_report.php?id='.
-    $course->id.'&unsubmitted='.$unsubmitted);
+block_fn_marking_groups_print_course_menu($course, $CFG->wwwroot.'/blocks/fn_marking/progress_report.php?id='.
+    $course->id.'&unsubmitted='.$unsubmitted, false, true);
 echo $viewform;
 echo '</div>';
 echo '<div class="tablecontainer">';

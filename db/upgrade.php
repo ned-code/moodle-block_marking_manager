@@ -22,6 +22,7 @@
 
 function xmldb_block_fn_marking_upgrade($oldversion) {
     global $DB;
+
     if ($oldversion < 2016082501) {
 
         $dbman = $DB->get_manager();
@@ -47,6 +48,31 @@ function xmldb_block_fn_marking_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
+    }
+
+    if ($oldversion < 2016111700) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('block_fn_marking_mod_cache');
+
+        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '11', null, null, null, '0', 'saved');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('expired', XMLDB_TYPE_INTEGER, '11', null, null, null, '0', 'userid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $key = new xmldb_key('ix_cor_mod', XMLDB_KEY_UNIQUE, array('courseid', 'modname'));
+        $dbman->drop_key($table, $key);
+
+        $key = new xmldb_key('ix_cor_mod_us', XMLDB_KEY_UNIQUE, array('courseid', 'modname', 'userid'));
+        $dbman->add_key($table, $key);
+
+        upgrade_block_savepoint(true, 2016111700, 'fn_marking');
     }
     return true;
 }

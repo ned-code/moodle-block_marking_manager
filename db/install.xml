@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/fn_marking/db" VERSION="20160828" COMMENT="XMLDB file for Moodle blocks/fn_marking"
+<XMLDB PATH="blocks/fn_marking/db" VERSION="20161117" COMMENT="XMLDB file for Moodle blocks/fn_marking"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -13,11 +13,13 @@
         <FIELD NAME="marked" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="unsubmitted" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="saved" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="expired" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="18" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="ix_cor_mod" TYPE="unique" FIELDS="courseid, modname"/>
+        <KEY NAME="ix_cor_mod_us" TYPE="unique" FIELDS="courseid, modname, userid"/>
       </KEYS>
     </TABLE>
   </TABLES>

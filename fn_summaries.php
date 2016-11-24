@@ -71,8 +71,14 @@ $isteacheredit = has_capability('moodle/course:update', $context);
 $context = context_course::instance($course->id);
 $viewallgroups = has_capability('moodle/site:accessallgroups', $context);
 
-$currentgroup = groups_get_course_group($course, true);
-$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+$groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id);
+
+if ($groupstudents === false) {
+    $currentgroup = groups_get_course_group($course, true);
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+} else {
+    $students = $groupstudents;
+}
 
 // Get a list of all students.
 if (!$students) {

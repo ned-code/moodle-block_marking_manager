@@ -77,13 +77,21 @@ $participants = optional_param('participants', '0', PARAM_INT);
 
 $includeorphaned = get_config('block_fn_marking', 'include_orphaned');
 
-// Check teacher's group.
-if ($usergroups = groups_get_all_groups($courseid, $USER->id)) {
-    if (!isset($usergroups[$group])) {
-        $group = key($usergroups);
-    }
+if (!$course = $DB->get_record("course", array("id" => $courseid))) {
+    print_error("Course ID was incorrect");
 }
 
+require_login($course);
+
+// Check teacher's group.
+/*
+ if (($course->groupmode == SEPARATEGROUPS) && ($course->groupmodeforce)) {
+    if ($usergroups = groups_get_all_groups($courseid, $USER->id)) {
+        if (!isset($usergroups[$group])) {
+            $group = key($usergroups);
+        }
+    }
+}*/
 $SESSION->currentgroup[$courseid] = $group;
 
 // KEEP SEPARATE CONFIG.
@@ -117,12 +125,6 @@ $pageparams = array('courseid' => $courseid,
     'view' => $view,
     'show' => $show
 );
-
-if (!$course = $DB->get_record("course", array("id" => $courseid))) {
-    print_error("Course ID was incorrect");
-}
-
-require_login($course);
 
 // Grab course context.
 $context = context_course::instance($course->id);
@@ -302,12 +304,11 @@ if ($mid) {
     // If comes from course page.
     $currentgroup = groups_get_course_group($course, true);
 }
-
 // Get current group members.
 $groupmembers = groups_get_members_by_role($group, $courseid);
 
 // Get a list of all students.
-if (!$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id')) {
+if (!$students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id')) {
     $students = array();
     $PAGE->set_title(get_string('course') . ': ' . $course->fullname);
     $PAGE->set_heading($course->fullname);
@@ -315,6 +316,13 @@ if (!$students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup
     echo $OUTPUT->heading(get_string("nostudentsyet"));
     echo $OUTPUT->footer($course);
     exit;
+}
+
+if ($group === 0) {
+    $groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id);
+    if ($groupstudents !== false) {
+        $students = $groupstudents;
+    }
 }
 
 $columnhtml = array();  // Accumulate column html in this array.
@@ -379,21 +387,21 @@ foreach ($selectedsection as $sectionnum) {
 
                 // Filter if individual user selected.
                 if ($participants && $group) {
-                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                    // $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                     if (isset($groupmembers[5]->users[$participants])) {
                         $students = array();
                         $students[$participants] = $DB->get_record('user', array('id' => $participants));
                     } else {
                         $participants = 0;
-                        $students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                        //$students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                     }
                 } else if ($participants && !$group) {
                     $students = array();
                     $students[$participants] = $DB->get_record('user', array('id' => $participants));
-                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                    //$participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                 } else {
-                    $students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
-                    $participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                    //$students = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
+                    //$participantsarr = get_enrolled_users($context, 'mod/assign:submit', $group, 'u.*', 'u.id');
                 }
 
                 // Don't count it if you can't see it.
@@ -591,7 +599,7 @@ if ($groupmembers) {
         $participantsopts[$groupmember->id] = fullname($groupmember);
     }
 } else {
-    foreach ($participantsarr as $groupmember) {
+    foreach ($students as $groupmember) {
         $participantsopts[$groupmember->id] = fullname($groupmember);
     }
 }
@@ -614,7 +622,6 @@ $participantsselect->formid = 'fn_participants';
 $participantsselect->label = 'Participants';
 $participantsform = '<div class="groupselector">'.$OUTPUT->render($participantsselect).'</div>';
 
-
 echo '<div class="fn-menuwrapper">';
 echo $activitytypeform . "&nbsp;&nbsp;";
 
@@ -632,7 +639,7 @@ $groupurl = new moodle_url(
         'view' => $view
     )
 );
-groups_print_course_menu($course, $groupurl->out());
+block_fn_marking_groups_print_course_menu($course, $groupurl->out(), false, $group);
 echo "&nbsp;&nbsp;";
 echo $participantsform . "&nbsp;&nbsp;";
 echo $viewform . " ";

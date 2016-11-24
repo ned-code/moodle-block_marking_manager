@@ -187,3 +187,5 @@ $string['lastrefreshupdating'] = 'Last refresh: Updating ';
 $string['name'] = 'Name';
 $string['blockinfo'] = 'Block info';
 $string['atmaxresubmission'] = 'At max resubmission';
+$string['moodledefaultview'] = 'Moodle default view';
+$string['manualgrading'] = 'Manual Grading';
