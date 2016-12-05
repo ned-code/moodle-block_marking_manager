@@ -684,7 +684,9 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
                 $sectionmods = explode(",", $section->sequence);
                 foreach ($sectionmods as $sectionmod) {
                     $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
-
+                    if (empty($mod)) {
+                        continue;
+                    }
                     if (!isset($modgradesarray[$mod->modname])) {
                         continue;
                     }
