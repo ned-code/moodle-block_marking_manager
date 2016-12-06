@@ -189,3 +189,4 @@ $string['blockinfo'] = 'Block info';
 $string['atmaxresubmission'] = 'At max resubmission';
 $string['moodledefaultview'] = 'Moodle default view';
 $string['manualgrading'] = 'Manual Grading';
+$string['nograde'] = 'No grade';

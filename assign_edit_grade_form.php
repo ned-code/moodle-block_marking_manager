@@ -240,6 +240,8 @@ class mod_assign_grading_form_fn extends moodleform {
                     if ($gradingdisabled) {
                         $gradingelement->freeze();
                     }
+                } else {
+                    $mform->addElement('html', get_string('nograde', 'block_fn_marking'));
                 }
             }
             $mform->addElement('html', '</td>');

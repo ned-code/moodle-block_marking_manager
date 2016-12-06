@@ -369,6 +369,9 @@ div.submissionhistory_summary {
 .submissionhistory_summary .bg_green {
     background-color: #d3e0bc !important;
 }
+.submissionhistory_summary .bg_grey {
+    background-color: lightgrey !important;
+}
 .submissionhistory_summary .cell.historyheader {
     background-color: #7092be;
     vertical-align: top;

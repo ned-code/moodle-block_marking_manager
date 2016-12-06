@@ -87,6 +87,8 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
 
     $studentlist = implode(',', array_keys($students));
 
+    $instance = $DB->get_record('assign', array('id' => $assign));
+
     if (empty($studentlist)) {
         return 0;
     }
@@ -98,58 +100,89 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
     } else {
         $showdraft = false;
     }
+    $comentjoin = '';
+    $comentwhereunmarked = '';
+    $comentwhernmarked = '';
 
+    if ($instance->grade == 0) {
+        $comentjoin = "LEFT JOIN {assignfeedback_comments} f ON g.assignment = f.assignment AND g.id = f.grade";
+        $comentwhereunmarked = " AND (f.commenttext = '' OR f.commenttext IS NULL)";
+        $comentwhernmarked = " AND f.commenttext <> ''";
+    }
     if (($show == 'unmarked') || ($show == 'all')) {
         if ($showdraft) {
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
                  LEFT JOIN {assign_grades} g
-                        ON (s.assignment=g.assignment AND s.userid=g.userid AND s.attemptnumber = g.attemptnumber)
+                        ON (s.assignment=g.assignment 
+                       AND s.userid=g.userid 
+                       AND s.attemptnumber = g.attemptnumber)
+                           $comentjoin
                      WHERE s.assignment=$assign
                        AND (s.userid in ($studentlist))
                        AND s.status='submitted'
                        AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                       AND s.latest = 1";
+                       AND s.latest = 1
+                           $comentwhereunmarked";
         } else {
             $sql = "SELECT COUNT(DISTINCT s.id)
                       FROM {assign_submission} s
                  LEFT JOIN {assign_grades} g
-                        ON (s.assignment=g.assignment AND s.userid=g.userid AND s.attemptnumber = g.attemptnumber)
+                        ON (s.assignment=g.assignment 
+                       AND s.userid=g.userid 
+                       AND s.attemptnumber = g.attemptnumber)
+                           $comentjoin
                      WHERE s.assignment=$assign
-                       AND (s.userid in ($studentlist))
+                       AND (s.userid IN ($studentlist))
                        AND s.status IN ('submitted', 'draft')
                        AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                       AND s.latest = 1";
+                       AND s.latest = 1
+                           $comentwhereunmarked";
         }
         return $DB->count_records_sql($sql);
 
     } else if ($show == 'marked') {
-        $sqlunmarked = "SELECT DISTINCT s.userid
-                  FROM {assign_submission} s
-                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
-                  and s.userid=g.userid and  s.attemptnumber = g.attemptnumber)
-                 WHERE s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND s.status='submitted'
-                  AND g.grade is null";
+        if ($instance->grade != 0) {
+            $sqlunmarked = "SELECT DISTINCT s.userid
+                          FROM {assign_submission} s
+                     LEFT JOIN {assign_grades} g 
+                            ON (s.assignment=g.assignment
+                           AND s.userid=g.userid 
+                           AND s.attemptnumber = g.attemptnumber)
+                         WHERE s.assignment=$assign
+                           AND (s.userid IN ($studentlist))
+                           AND s.status='submitted'
+                           AND g.grade IS NULL";
 
-        if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
-            $students = explode(',', $studentlist);
+            if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
+                $students = explode(',', $studentlist);
 
-            foreach ($unmarkedstus as $unmarkedstu) {
-                $students = array_diff($students, array($unmarkedstu->userid));
+                foreach ($unmarkedstus as $unmarkedstu) {
+                    $students = array_diff($students, array($unmarkedstu->userid));
+                }
+                $studentlist = implode(',', $students);
             }
-            $studentlist = implode(',', $students);
         }
-
         if (empty($studentlist)) {
             return 0;
         }
-
-        $sql = "SELECT COUNT(DISTINCT s.userid)
+        if ($instance->grade == 0) {
+            $sql = "SELECT COUNT(DISTINCT s.userid)
                   FROM {assign_submission} s
-                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment and s.userid=g.userid
-                  and s.attemptnumber = g.attemptnumber)
+             LEFT JOIN {assign_grades} g 
+                    ON (s.assignment=g.assignment and s.userid=g.userid
+                   AND s.attemptnumber = g.attemptnumber)
+                       $comentjoin
+                 WHERE s.assignment=$assign
+                   AND s.userid in ($studentlist)
+                   AND s.status IN ('submitted', 'resub', 'new')                    
+                       $comentwhernmarked";
+        } else {
+            $sql = "SELECT COUNT(DISTINCT s.userid)
+                  FROM {assign_submission} s
+             LEFT JOIN {assign_grades} g 
+                    ON (s.assignment=g.assignment and s.userid=g.userid
+                   AND s.attemptnumber = g.attemptnumber)
                  WHERE ((s.assignment=$assign
                    AND (s.userid in ($studentlist))
                    AND s.status IN ('submitted', 'resub')
@@ -160,6 +193,7 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                    AND g.grade is not null
                    AND g.grade <> -1
                    AND g.timemodified > s.timemodified))";
+        }
 
         return $DB->count_records_sql($sql);
 
@@ -266,6 +300,8 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
 
     $studentlist = implode(',', array_keys($students));
 
+    $instance = $DB->get_record('assign', array('id' => $assign));
+
     if (empty($studentlist)) {
         return 0;
     }
@@ -278,29 +314,47 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
         $showdraft = false;
     }
 
+    $comentjoin = '';
+    $comentwhereunmarked = '';
+    $comentwhernmarked = '';
+
+    if ($instance->grade == 0) {
+        $comentjoin = "LEFT JOIN {assignfeedback_comments} f ON g.assignment = f.assignment AND g.id = f.grade";
+        $comentwhereunmarked = " AND (f.commenttext = '' OR f.commenttext IS NULL)";
+        $comentwhernmarked = " AND f.commenttext <> ''";
+    }
+
     $subtable = 'assign_submission';
 
     if (($show == 'unmarked') || ($show == 'all')) {
         if ($showdraft) {
             $sql = "SELECT DISTINCT s.userid
-                  FROM {assign_submission} s
-                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
-                  and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
-                 WHERE s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND s.status='submitted'
-                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                   AND s.latest = 1";
+                      FROM {assign_submission} s
+                 LEFT JOIN {assign_grades} g 
+                        ON (s.assignment=g.assignment
+                       AND s.userid=g.userid 
+                       AND s.attemptnumber = g.attemptnumber)
+                           $comentjoin
+                     WHERE s.assignment=$assign
+                       AND (s.userid in ($studentlist))
+                       AND s.status='submitted'
+                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                       AND s.latest = 1
+                       $comentwhereunmarked";
         } else {
             $sql = "SELECT DISTINCT s.userid
-                  FROM {assign_submission} s
-                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
-                  and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
-                 WHERE s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND s.status  IN ('submitted', 'draft')
-                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                   AND s.latest = 1";
+                      FROM {assign_submission} s
+                 LEFT JOIN {assign_grades} g 
+                        ON (s.assignment=g.assignment
+                       AND s.userid=g.userid 
+                       AND s.attemptnumber = g.attemptnumber)
+                           $comentjoin
+                     WHERE s.assignment=$assign
+                       AND (s.userid IN ($studentlist))
+                       AND s.status  IN ('submitted', 'draft')
+                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                       AND s.latest = 1
+                           $comentwhereunmarked";
         }
 
         if ($data = $DB->get_records_sql($sql)) {
@@ -316,36 +370,50 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
     } else if ($show == 'marked') {
 
         $students = explode(',', $studentlist);
+        if ($instance->grade != 0) {
+            $sql = "SELECT s.userid
+                     FROM {assign_submission} s
+                LEFT JOIN {assign_grades} g 
+                       ON (s.assignment=g.assignment
+                      AND s.userid=g.userid 
+                      AND  s.attemptnumber = g.attemptnumber)
+                    WHERE s.assignment=$assign
+                      AND (s.userid in ($studentlist))
+                      AND s.status='submitted'
+                      AND (g.grade is null  OR g.grade = -1)";
 
-        $sqlunmarked = "SELECT s.userid
-                  FROM {assign_submission} s
-                  LEFT JOIN {assign_grades} g ON (s.assignment=g.assignment
-                  and s.userid=g.userid and  s.attemptnumber = g.attemptnumber)
-                 WHERE s.assignment=$assign
-                  AND (s.userid in ($studentlist))
-                  AND s.status='submitted'
-                  AND (g.grade is null  OR g.grade = -1)";
+            if ($unmarkedstus = $DB->get_records_sql($sql)) {
 
-        if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
-
-            foreach ($unmarkedstus as $unmarkedstu) {
-                $students = array_diff($students, array($unmarkedstu->userid));
+                foreach ($unmarkedstus as $unmarkedstu) {
+                    $students = array_diff($students, array($unmarkedstu->userid));
+                }
             }
+
+            $studentlist = implode(',', $students);
         }
 
-        $studentlist = implode(',', $students);
-
-        $sql = "SELECT Max(s.id) AS id,
-                       s.userid
-                  FROM {$CFG->prefix}assign_submission as s
-             LEFT JOIN {$CFG->prefix}assign_grades as g
-                    ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
-                 WHERE s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND g.grade is not null
-                   AND g.grade <> -1
-              GROUP BY s.userid";
-
+        if ($instance->grade == 0) {
+            $sql = "SELECT MAX(s.id) id,
+                           s.userid
+                      FROM {assign_submission} s
+                 LEFT JOIN {assign_grades} g
+                        ON (s.assignment=g.assignment AND s.userid=g.userid AND s.attemptnumber = g.attemptnumber)
+                     WHERE s.assignment=$assign
+                       AND s.userid IN ($studentlist)
+                       AND g.grade = -1
+                  GROUP BY s.userid";
+        } else {
+            $sql = "SELECT MAX(s.id) id,
+                           s.userid
+                      FROM {assign_submission} s
+                 LEFT JOIN {assign_grades} g
+                        ON (s.assignment=g.assignment AND s.userid=g.userid AND s.attemptnumber = g.attemptnumber)
+                     WHERE s.assignment=$assign
+                       AND (s.userid in ($studentlist))
+                       AND g.grade is not null
+                       AND g.grade <> -1
+                  GROUP BY s.userid";
+        }
         if ($data = $DB->get_records_sql($sql)) {
             if ($sort) {
                 $arrids = array();
@@ -357,10 +425,10 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
 
                 // CHECK DRAFT is_Graded.
                 $sqldraft = "SELECT s.id,
-                                    s.timemodified AS submissiontime,
-                                    g.timemodified AS gradetime
-                               FROM {$CFG->prefix}assign_submission as s
-                          LEFT JOIN {$CFG->prefix}assign_grades as g
+                                    s.timemodified  submissiontime,
+                                    g.timemodified  gradetime
+                               FROM {assign_submission} s
+                          LEFT JOIN {assign_grades} g
                                  ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
                               WHERE s.assignment = $assign
                                 AND s.userid IN ($studentlist)
@@ -378,8 +446,8 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
                 switch ($sort) {
                     case 'lowest':
                         $sqls = "SELECT s.userid
-                                   FROM {$CFG->prefix}assign_submission AS s
-                              LEFT JOIN {$CFG->prefix}assign_grades AS g
+                                   FROM {assign_submission} s
+                              LEFT JOIN {assign_grades} g
                                      ON (s.assignment = g.assignment AND s.userid = g.userid AND s.attemptnumber = g.attemptnumber)
                                   WHERE s.id IN (" . implode(',', $arrids) . ")
                                ORDER BY g.grade ASC";
@@ -387,8 +455,8 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
 
                     case 'highest':
                         $sqls = "SELECT s.userid
-                                   FROM {$CFG->prefix}assign_submission AS s
-                              LEFT JOIN {$CFG->prefix}assign_grades AS g
+                                   FROM {assign_submission} s
+                              LEFT JOIN {assign_grades} g
                                      ON (s.assignment = g.assignment AND s.userid = g.userid AND s.attemptnumber = g.attemptnumber)
                                   WHERE s.id IN (" . implode(',', $arrids) . ")
                                ORDER BY g.grade DESC";
@@ -396,15 +464,15 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
 
                     case 'date':
                         $sqls = "SELECT s.userid
-                                   FROM {$CFG->prefix}assign_submission AS s
+                                   FROM {assign_submission} s
                                   WHERE s.id IN (" . implode(',', $arrids) . ")
                                ORDER BY s.timemodified DESC";
                         break;
 
                     case 'alpha':
                         $sqls = "SELECT s.userid
-                                   FROM {$CFG->prefix}assign_submission AS s
-                             INNER JOIN {$CFG->prefix}user AS u
+                                   FROM {assign_submission} s
+                             INNER JOIN {user AS u
                                      ON s.userid = u.id
                                   WHERE s.id IN (" . implode(',', $arrids) . ")
                                ORDER BY u.lastname ASC";
@@ -450,8 +518,8 @@ function block_fn_marking_assign_students_ungraded($assign, $graded, $students, 
         $sqldraft = "SELECT s.userid,
                             s.timemodified AS submissiontime,
                             g.timemodified AS gradetime
-                       FROM {$CFG->prefix}assign_submission as s
-                  LEFT JOIN {$CFG->prefix}assign_grades as g
+                       FROM {assign_submission} s
+                  LEFT JOIN {assign_grades} g
                          ON (s.assignment=g.assignment and s.userid=g.userid and s.attemptnumber = g.attemptnumber)
                       WHERE s.assignment = $assign
                         AND s.userid IN ($studentlist)
@@ -690,13 +758,11 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
                     if (!isset($modgradesarray[$mod->modname])) {
                         continue;
                     }
-
                     if ($module) {
                         if ($module <> $mod->modname) {
                             continue;
                         }
                     }
-
                     // Don't count it if you can't see it.
                     $mcontext = context_module::instance($mod->id);
                     if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
@@ -1966,13 +2032,17 @@ function block_fn_marking_render_assign_submission_history_summary(assign_submis
             } else {
                 $lastsubmissionclass = 'bg_white';
             }
-
         } else {
             $lastsubmissionclass = '';
         }
-        if ($grade) {
 
-            $cell1 = new html_table_cell($grade->gradefordisplay);
+        if ($grade) {
+            if ($grade->grade == -1) {
+                $cell1 = new html_table_cell(get_string('nograde', 'block_fn_marking'));
+            } else {
+                $cell1 = new html_table_cell($grade->gradefordisplay);
+            }
+
             $cell1->rowspan = 2;
             if ($i == $history->maxsubmissionnum) {
                 $cell1->attributes['class'] = $lastsubmissionclass;
@@ -1997,16 +2067,30 @@ function block_fn_marking_render_assign_submission_history_summary(assign_submis
                                 $CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
                                 </a>
                                 </div>';
+
                 $cell2->attributes['class'] = $lastsubmissionclass;
                 $cell3->attributes['class'] = $lastsubmissionclass;
             }
 
+            if ($grade->grade == -1) {
+                $cell1->attributes['class'] = 'bg_grey';
+                $cell2->attributes['class'] = 'bg_grey';
+                $cell3->attributes['class'] = 'bg_grey';
+            }
             $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
 
-            $cell1 = new html_table_cell(((($gradeitem->gradepass > 0)
-                    && ($grade->grade >= $gradeitem->gradepass)) ? $markedicon : $markediconincomplete) . 'Marked');
+            if ($grade->grade == -1) {
+                $cell1 = new html_table_cell('<img width="16" height="16" border="0" alt="Assignment" src="'.
+                    $CFG->wwwroot.'/blocks/fn_marking/pix/graded.gif" valign="absmiddle"> Marked');
+            } else {
+                $cell1 = new html_table_cell(((($gradeitem->gradepass > 0)
+                        && ($grade->grade >= $gradeitem->gradepass)) ? $markedicon : $markediconincomplete) . 'Marked');
+            }
             $cell2 = new html_table_cell(userdate($grade->timemodified));
-            if ($i == $history->maxsubmissionnum) {
+            if ($grade->grade == -1) {
+                $cell1->attributes['class'] = 'bg_grey';
+                $cell2->attributes['class'] = 'bg_grey';
+            } elseif ($i == $history->maxsubmissionnum) {
                 $cell1->attributes['class'] = $lastsubmissionclass;
                 $cell2->attributes['class'] = $lastsubmissionclass;
             }
