@@ -866,3 +866,12 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     overflow: hidden;
     width: 100% !important;
 }
+.fn_plugin_wrapper_outer {
+    display: inline-block;
+    margin: 10px auto;
+    width: 50%;
+    vertical-align: top;
+}
+table.markingmanagercontainer div.fitemtitle {
+    display: none;
+}
