@@ -1488,6 +1488,7 @@ function block_fn_marking_view_submissions($mform, $offset=0, $showattemptnumber
     }
 
     $rownum = optional_param('rownum', 0, PARAM_INT) + $offset;
+    $participants = optional_param('participants', '0', PARAM_INT);
     $arruser = block_fn_marking_count_unmarked_students($course, $cm, $pageparams['show'], $pageparams['sort']);
 
     $useridlist = optional_param('useridlist', '', PARAM_TEXT);
@@ -1498,6 +1499,9 @@ function block_fn_marking_view_submissions($mform, $offset=0, $showattemptnumber
         $useridlist = block_fn_marking_get_grading_userid_list($assign);
     }
     $useridlist = $arruser;
+    if (in_array($participants, $useridlist)) {
+        $useridlist = array($participants);
+    }
     $last = false;
     $userid = (isset($useridlist[$rownum])) ? $useridlist[$rownum] : null;
     if ($rownum == count($useridlist) - 1) {
