@@ -872,6 +872,6 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     width: 50%;
     vertical-align: top;
 }
-table.markingmanagercontainer div.fitemtitle {
+#fitem_id_assignfeedbackcomments_editor div.fitemtitle {
     display: none;
 }

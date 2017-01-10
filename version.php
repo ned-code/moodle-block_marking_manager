@@ -23,7 +23,7 @@
  * @developer  Michael Gardener <mgardener@cissq.com>
  */
 
-$plugin->version  = 2017010800;
+$plugin->version  = 2017011000;
 $plugin->requires = 2014051200;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'block_fn_marking';
