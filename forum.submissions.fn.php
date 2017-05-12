@@ -132,7 +132,7 @@ if (($show == 'unmarked') || ($show == 'marked')) {
 
         $o .= '<div class="default-grade-view-nobtn">';
         $o .= '<a href="'.$CFG->wwwroot.'/mod/forum/view.php?id='.$cm->id.'"><img src="'.
-            $OUTPUT->pix_url('popup', 'scorm').'"> '.
+            $OUTPUT->image_url('popup', 'scorm').'"> '.
             get_string('moodledefaultview', 'block_fn_marking').'</a>';
         $o .= '</div>';
 
@@ -252,7 +252,7 @@ if (($show == 'unmarked') || ($show == 'marked')) {
     }
 }
 
-$vars = array('mid' => $mid, 'spinner' => $OUTPUT->pix_url('i/loading').'');
+$vars = array('mid' => $mid, 'spinner' => $OUTPUT->image_url('i/loading').'');
 
 $jsmodule1 = array(
     'name' => 'M.show_forum_panel',

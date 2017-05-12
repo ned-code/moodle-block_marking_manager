@@ -256,7 +256,7 @@ if (($show == 'unmarked') || ($show == 'saved') || ($expand)) {
 
             $o .= '<div class="'.$gradeviewclass.'">';
             $o .= '<a href="'.$CFG->wwwroot.'/mod/journal/report.php?id='.$cm->id.'"><img src="'.
-                $OUTPUT->pix_url('popup', 'scorm').'"> '.
+                $OUTPUT->image_url('popup', 'scorm').'"> '.
                 get_string('moodledefaultview', 'block_fn_marking').'</a>';
             $o .= '</div>';
 
@@ -286,7 +286,7 @@ if (($show == 'unmarked') || ($show == 'saved') || ($expand)) {
             $o .= '</td>';
             $o .= '<td width="35%" align="right" class="rightSide">';
             if ($overriden) {
-                $locked = '<img class="ned-locked-icon" width="16" height="16" alt="Locked" src="'.$OUTPUT->pix_url('t/locked', '').'">';
+                $locked = '<img class="ned-locked-icon" width="16" height="16" alt="Locked" src="'.$OUTPUT->image_url('t/locked', '').'">';
                 $o .= get_string('gradeoverridedetected', 'block_fn_marking').' '.$locked;
             } else {
                 $o .= "<input type=\"submit\" value=\"" . get_string('save', 'block_fn_marking') . "\" />";

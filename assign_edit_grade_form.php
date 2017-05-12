@@ -127,7 +127,7 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<div class="'.$gradeviewclass.'">');
         $cm = get_coursemodule_from_instance("assign", $assignment->get_instance()->id, $assignment->get_course()->id);
         $mform->addElement('html', '<a href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$cm->id.'"><img src="'.
-            $OUTPUT->pix_url('popup', 'scorm').'"> '.
+            $OUTPUT->image_url('popup', 'scorm').'"> '.
             get_string('moodledefaultview', 'block_fn_marking').'</a>');
         $mform->addElement('html', '</div>');
 
@@ -669,7 +669,7 @@ class mod_assign_grading_form_fn extends moodleform {
         $mform->addElement('html', '<td width="35%" align="right" class="rightSide">');
 
         if ($overriden) {
-            $locked = '<img class="ned-locked-icon" width="16" height="16" alt="Locked" src="'.$OUTPUT->pix_url('t/locked', '').'">';
+            $locked = '<img class="ned-locked-icon" width="16" height="16" alt="Locked" src="'.$OUTPUT->image_url('t/locked', '').'">';
             $mform->addElement('html', get_string('gradeoverridedetected', 'block_fn_marking').' '.$locked);
         } else {
             $buttonarray = array();
