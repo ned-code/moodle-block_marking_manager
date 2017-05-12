@@ -63,7 +63,6 @@ $settings->add(
         )
     )
 );
-
 $settings->add(
     new admin_setting_configselect(
         'block_fn_marking/showtopmessage',
@@ -90,8 +89,30 @@ $settings->add(
         array('0' => 'No', '1' => 'Yes')
     )
 );
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/includecourses',
+        get_string('includecourses', 'block_fn_marking'),
+        '',
+        'allcourseswithblock',
+        array(
+            'allcourseswithblock' => get_string('allcourseswithblock', 'block_fn_marking'),
+            'selectedcourses' => get_string('selectedcourses', 'block_fn_marking')
+        )
+    )
+);
 $coursecaturl = new moodle_url('/blocks/fn_marking/coursecategories.php');
-$settings->add( new admin_setting_configempty('block_fn_marking/teamsubmissiongroupingid',
+$settings->add( new admin_setting_configempty('block_fn_marking/courseselection',
     get_string('coursecategoriesincluded', 'block_fn_marking'),
     '<a class="btn" href="'.$coursecaturl->out().'">'.get_string('selectcategories', 'block_fn_marking').'</a>')
+);
+
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/editortoggle',
+        get_string('editortoggle', 'block_fn_marking'),
+        get_string('experimental', 'block_fn_marking'),
+        0,
+        array('0' => 'No', '1' => 'Yes')
+    )
 );

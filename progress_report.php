@@ -32,6 +32,9 @@ $courseid = optional_param('id', 0, PARAM_INT);
 $group = optional_param('group', 0, PARAM_INT);
 $unsubmitted = optional_param('unsubmitted', '0', PARAM_INT);
 
+$sort = optional_param('sort', 'name', PARAM_TEXT);
+$dir = optional_param('dir', 'ASC', PARAM_ALPHA);
+
 $blocksettings = block_fn_marking_get_block_config($courseid, 'fn_marking');
 
 $SESSION->currentgroup[$courseid] = $group;
@@ -47,12 +50,7 @@ if ($courseid) {
 require_course_login($course);
 
 // Array of functions to call for grading purposes for modules.
-$modgradesarray = array(
-    'assign' => 'assign.submissions.fn.php',
-    'quiz' => 'quiz.submissions.fn.php',
-    'assignment' => 'assignment.submissions.fn.php',
-    'forum' => 'forum.submissions.fn.php',
-);
+$modgradesarray = block_fn_marking_supported_mods();
 
 $context = context_course::instance($course->id);
 $isteacher = has_capability('moodle/grade:viewall', $context);
@@ -63,10 +61,14 @@ $cobject->course = $course;
 if (!$isteacher) {
     print_error("Only teachers can use this page!");
 }
-
-$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
+$PAGE->requires->jquery();
+$PAGE->requires->js('/blocks/fn_marking/js/tablesorter/jquery.tablesorter.js');
+$PAGE->requires->js('/blocks/fn_marking/js/tablesorter/jquery.metadata.js');
+$PAGE->requires->js('/blocks/fn_marking/js/sort.js');
 $PAGE->requires->js('/blocks/fn_marking/textrotate.js');
 $PAGE->requires->js_function_call('textrotate_init', null, true);
+$PAGE->requires->css('/blocks/fn_marking/css/styles.css');
+$PAGE->requires->css('/blocks/fn_marking/js/tablesorter/themes/blue/style.css');
 
 $PAGE->set_url(
     new moodle_url('/blocks/fn_marking/progress_report.php'),
@@ -88,7 +90,7 @@ $currentgroup = $SESSION->currentgroup[$course->id];
 if (($groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id)) && ($currentgroup === 0)) {
     $students = $groupstudents;
 } else {
-    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+    $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.firstname');
 }
 
 
@@ -168,8 +170,12 @@ for ($i = 0; $i < $upto; $i++) {
                     continue;
                 }
                 $instance = $DB->get_record($mod->modname, array("id" => $mod->instance));
-                $item = $DB->get_record('grade_items', array("itemtype" => 'mod', "itemmodule" => $mod->modname,
-                    "iteminstance" => $mod->instance));
+                if (!$item = $DB->get_record('grade_items', array("itemtype" => 'mod', "itemmodule" => $mod->modname,
+                    "iteminstance" => $mod->instance))) {
+                    $item = new stdClass();
+                    $item->gradepass = 0;
+                    $item->grademax = 0;
+                }
 
                 $libfile = $CFG->dirroot . '/mod/' . $mod->modname . '/lib.php';
                 if (file_exists($libfile)) {
@@ -181,21 +187,32 @@ for ($i = 0; $i < $upto; $i++) {
 
                         if (function_exists($gradefunction)) {
                             ++$numberofitem;
-                            if ($mod->modname == 'quiz') {
-                                $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"
-                                    TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle
-                                    SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\"
-                                    HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
-                            } else {
-                                $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"
-                                    TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle
-                                    SRC=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\"
-                                    HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
-                            }
+                            $mod->modname == 'quiz';
+
+                            $image = "<A target='_blank' HREF=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"
+                                TITLE=\"$instance->name\"><IMG BORDER=0 VALIGN=absmiddle
+                                SRC=\"".$OUTPUT->pix_url('icon', $mod->modname)."\"
+                                HEIGHT=16 WIDTH=16 ALT=\"$mod->modfullname\"></A>";
+
 
                             $weekactivitycount[$i]['mod'][] = $image;
                             $weekactivitycount[$i]['modname'][] = $instance->name;
                             foreach ($simplegradebook as $key => $value) {
+                                $fnurl = new moodle_url(
+                                    '/blocks/fn_marking/fn_gradebook.php',
+                                    array(
+                                        'courseid' => $mod->course,
+                                        'dir' =>' DESC',
+                                        'sort' => 'date',
+                                        'show' => 'unmarked',
+                                        'unsubmitted' => 0,
+                                        'activity_type' => 0,
+                                        'view' => 'less',
+                                        'group' => 0,
+                                        'participants' => $key
+                                    )
+                                );
+                                $simplegradebook[$key]['url'] = $fnurl;
 
                                 if (($mod->modname == 'quiz') || ($mod->modname == 'forum')) {
 
@@ -215,6 +232,38 @@ for ($i = 0; $i < $upto; $i++) {
                                             $simplegradebook[$key]['grade'][$i][$mod->id] = 'graded_.gif';
                                             $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
                                                 'grademax' => $item->grademax);
+                                        }
+                                    } else {
+                                        $simplegradebook[$key]['grade'][$i][$mod->id] = 'ungraded.gif';
+                                        if ($unsubmitted) {
+                                            $simplegradebook[$key]['avg'][] = array('grade' => 0, 'grademax' => $item->grademax);
+                                        }
+                                    }
+                                } elseif ($mod->modname == 'journal') {
+
+                                    if ($grade = $gradefunction($instance, $key)) {
+                                        if (is_numeric($grade[$key]->rawgrade)) {
+                                            if ($item->gradepass > 0) {
+                                                if ($grade[$key]->rawgrade >= $item->gradepass) {
+                                                    $simplegradebook[$key]['grade'][$i][$mod->id] = 'marked.gif'; // Passed.
+                                                    $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                        'grademax' => $item->grademax);
+                                                } else {
+                                                    $simplegradebook[$key]['grade'][$i][$mod->id] = 'incomplete.gif'; // Fail.
+                                                    $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                        'grademax' => $item->grademax);
+                                                }
+                                            } else {
+                                                // Graded (grade-to-pass is not set).
+                                                $simplegradebook[$key]['grade'][$i][$mod->id] = 'graded_.gif';
+                                                $simplegradebook[$key]['avg'][] = array('grade' => $grade[$key]->rawgrade,
+                                                    'grademax' => $item->grademax);
+                                            }
+                                        } else {
+                                            $simplegradebook[$key]['grade'][$i][$mod->id] = 'unmarked.gif';
+                                            if ($unsubmitted) {
+                                                $simplegradebook[$key]['avg'][] = array('grade' => 0, 'grademax' => $item->grademax);
+                                            }
                                         }
                                     } else {
                                         $simplegradebook[$key]['grade'][$i][$mod->id] = 'ungraded.gif';
@@ -265,7 +314,7 @@ for ($i = 0; $i < $upto; $i++) {
                         }
                     }
                 }
-            }
+            } // Each mods.
         }
     }
     $weekactivitycount[$i]['numofweek'] = $numberofitem;
@@ -286,38 +335,32 @@ $select->formid = 'fngroup';
 $select->label = 'Include unsubmitted activities in final grade';
 $viewform = '<div class="groupselector">'.$OUTPUT->render($select).'</div>';
 
+// No course average calculation.
+$nocorseaveragemsg = '';
+if ($gradeitem = $DB->get_record('grade_items', array('courseid' => $courseid, 'itemtype' => 'course'))) {
+    if ($gradeitem->gradetype == GRADE_TYPE_NONE) {
+        $nocorseaveragemsg = '<div class="course-average-warning"><img class="actionicon" width="16" height="16" alt="" src="'.
+            $OUTPUT->pix_url('i/risk_xss', '').'"> '.get_string('nocoursetotal', 'block_fn_mentor').'<div>';
+    }
+}
 
 echo '<div class="fn-menuwrapper">';
 block_fn_marking_groups_print_course_menu($course, $CFG->wwwroot.'/blocks/fn_marking/progress_report.php?id='.
     $course->id.'&unsubmitted='.$unsubmitted, false, true);
 echo $viewform;
-echo '</div>';
-echo '<div class="tablecontainer">';
 echo "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />" .
     '<a href="' . $CFG->wwwroot . '/grade/report/index.php?id=' . $course->id .
     '&navlevel=top">' . get_string('moodlegradebook', 'block_fn_marking') . '</a>';
+echo '</div>';
+echo '<div class="tablecontainer">';
+echo $nocorseaveragemsg;
 // TABLE.
-echo "<table class='simplegradebook'>";
-
-echo "<!--<tr>";
-echo "<th>Name</th>";
-echo "<th>%</th>";
-foreach ($weekactivitycount as $weeknum => $weekactivity) {
-    if ($weekactivity['numofweek']) {
-        if (isset($blocksettings->sectiontitles) && $blocksettings->sectiontitles <> '') {
-            echo '<th colspan="'.$weekactivity['numofweek'].'">'.$blocksettings->sectiontitles.'-'.$weeknum.'</th>';
-        } else if ($courseformat == 'topics') {
-            echo '<th colspan="'.$weekactivity['numofweek'].'">Topic-'.$weeknum.'</th>';
-        } else {
-            echo '<th colspan="'.$weekactivity['numofweek'].'">Week-'.$weeknum.'</th>';
-        }
-    }
-}
-echo "</tr>-->";
-
+echo "<table id='datatable' class='simplegradebook tablesorter'>";
+// First header row.
+echo "<thead>";
 echo "<tr>";
-echo '<th scope="col" align="center"></th>';
-echo '<th scope="col" align="center"></th>';
+echo '<th class="sorter-false {sorter: false} borderless-cell" scope="col" align="center"></th>';
+echo '<th class="sorter-false {sorter: false} borderless-cell" scope="col" align="center"></th>';
 
 foreach ($weekactivitycount as $key => $value) {
     if ($value['numofweek']) {
@@ -325,26 +368,29 @@ foreach ($weekactivitycount as $key => $value) {
             $longactivityname = $value['modname'][$index];
             $displayname= shorten_text($value['modname'][$index], 30);
             $formattedactivityname = format_string($displayname, true, array('context' => $context));
-            echo '<th scope="col" align="center">'.
+            echo '<th class="sorter-false {sorter: false}" scope="col" align="center">'.
                 '<span class="completion-activityname">'.
                 $formattedactivityname.'</span></th>';;
         }
     }
 }
 echo "</tr>";
-
+// Second header row(activity icons).
 echo "<tr>";
-echo "<td class='mod-icon'>".get_string('name', 'block_fn_marking')."</td>";
-echo "<td class='mod-icon'>%</td>";
+echo "<th class='mod-icon'>".get_string('name', 'block_fn_marking')."</th>";
+echo "<th class='mod-icon'}'>%</td>";
 foreach ($weekactivitycount as $key => $value) {
     if ($value['numofweek']) {
         foreach ($value['mod'] as $imagelink) {
-            echo '<td class="mod-icon">'.$imagelink.'</td>';
+            echo '<th class="mod-icon sorter-false {sorter: false}">'.$imagelink.'</th>';
         }
     }
 }
 echo "</tr>";
+echo "</thead>";
+echo "<tbody>";
 $counter = 0;
+
 foreach ($simplegradebook as $studentid => $studentreport) {
     $counter++;
     if ($counter % 2 == 0) {
@@ -383,14 +429,37 @@ foreach ($simplegradebook as $studentid => $studentreport) {
 
 
     foreach ($studentreport['grade'] as $sgrades) {
-        foreach ($sgrades as $sgrade) {
-            echo '<td class="'.$studentclass.' icon">'.'<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/'.
-                $sgrade.'" height="16" width="16" alt="">'.'</td>';
+        $userurl = $studentreport['url'];
+        foreach ($sgrades as $moduleid => $sgrade) {
+            $userurl->param('mid', $moduleid);
+
+            switch ($sgrade) {
+                case "marked.gif":
+                    $userurl->param('show', 'marked');
+                    break;
+                case "incomplete.gif":
+                    $userurl->param('show', 'marked');
+                    break;
+                case "graded_.gif":
+                    $userurl->param('show', 'marked');
+                    break;
+                case "ungraded.gif":
+                    $userurl->param('show', 'unsubmitted');
+                    break;
+                case "saved.gif":
+                    $userurl->param('show', 'saved');
+                    break;
+                default:
+                    $userurl->param('show', 'unmarked');
+            }
+
+
+            echo '<td class="'.$studentclass.' icon">'.'<a href="'.$userurl->out(false).'"><img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/'. $sgrade.'" height="16" width="16" alt=""></a></td>';
         }
     }
     echo '</tr>';
 }
-
+echo "</tbody>";
 echo "</table>";
 echo "</div>";
 echo '<div style="text-align:center;"><img src="'.$CFG->wwwroot.'/blocks/fn_marking/pix/gradebook_key.png"></div>';

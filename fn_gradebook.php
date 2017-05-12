@@ -41,6 +41,7 @@ if ($layout = get_config('block_fn_marking', 'pagelayout')) {
 }
 
 user_preference_allow_ajax_update('block_fn_marking_zoom', PARAM_TEXT);
+user_preference_allow_ajax_update('block_fn_marking_onlineeditor', PARAM_TEXT);
 $hideblocks = get_user_preferences('block_fn_marking_zoom',  'nozoom');
 $PAGE->add_body_class($hideblocks);
 
@@ -108,7 +109,8 @@ $PAGE->set_url(
     )
 );
 
-$pageparams = array('courseid' => $courseid,
+$pageparams = array(
+    'courseid' => $courseid,
     'userid' => $userid,
     'mid' => $mid,
     'dir' => $dir,
@@ -137,12 +139,7 @@ if (!$isteacher = has_capability('moodle/grade:viewall', $context)) {
 }
 
 // Array of functions to call for grading purposes for modules.
-$modgradesarray = array(
-    'assign' => 'assign.submissions.fn.php',
-    'assignment' => 'assignment.submissions.fn.php',
-    'quiz' => 'quiz.submissions.fn.php',
-    'forum' => 'forum.submissions.fn.php',
-);
+$modgradesarray = block_fn_marking_supported_mods();
 
 $gradingonly = false;
 if (($action == 'submitgrade') && ($id)
@@ -176,10 +173,7 @@ if ($activitytype) {
 }
 
 // Array of functions to call to display grades for modules.
-$modgradedisparray = array(
-    'assignment' => 'grades.fn.html',
-    'forum' => 'grades.fn.html'
-);
+$modgradedisparray = block_fn_marking_supported_mods();
 
 $strgrades = get_string("headertitle", 'block_fn_marking');
 $strgrade = get_string("grade");
@@ -232,9 +226,9 @@ $urlview = new moodle_url(
 );
 
 $select = new single_select($urlview, 'view', $viewopts, $selected = $view, '');
+$select->label =  html_writer::img($OUTPUT->pix_url('i/hide'), '');
 $select->formid = 'fnview';
-
-$viewform = 'View:' . $OUTPUT->render($select);
+$viewform = '<div class="groupselector">'.$OUTPUT->render($select).'</div>';
 
 // The show options.
 if (($view == 'less') || ($view == 'more')) {
@@ -243,26 +237,56 @@ if (($view == 'less') || ($view == 'more')) {
         $modulename = $DB->get_field('modules', 'name', array('id' => $cmmodule->module));
 
         if ($modulename == 'forum') {
-            $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
+            $showopts = array(
+                'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                'marked' => get_string('marked', 'block_fn_marking'),
+                'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+            );
         } else if ($modulename == 'assignment') {
-            $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
-                'unsubmitted' => 'Not submitted');
+            $showopts = array(
+                'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                'saved' => get_string('saved', 'block_fn_marking'),
+                'marked' => get_string('marked', 'block_fn_marking'),
+                'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+            );
+        } else if ($modulename == 'journal') {
+            $showopts = array(
+                'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                'marked' => get_string('marked', 'block_fn_marking'),
+                'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+            );
         } else if ($modulename == 'assign') {
             $assign = $DB->get_record('assign', array('id' => $cmmodule->instance));
             if ($assign->submissiondrafts) {
-                $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
-                    'unsubmitted' => 'Not submitted');
+                $showopts = array(
+                    'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                    'saved' => get_string('saved', 'block_fn_marking'),
+                    'marked' => get_string('marked', 'block_fn_marking'),
+                    'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+                );
             } else {
-                $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
+                $showopts = array(
+                    'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                    'marked' => get_string('marked', 'block_fn_marking'),
+                    'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+                );
             }
         } else if ($modulename == 'quiz') {
-            $showopts = array('unmarked' => 'Requires Grading', 'marked' => 'Graded', 'unsubmitted' => 'Not submitted');
+            $showopts = array(
+                'unmarked' => get_string('unmarked', 'block_fn_marking'),
+                'marked' => get_string('marked', 'block_fn_marking'),
+                'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+            );
         } else {
             $showopts = array();
         }
     } else {
-        $showopts = array('unmarked' => 'Requires Grading',  'saved' => 'Draft', 'marked' => 'Graded',
-            'unsubmitted' => 'Not submitted');
+        $showopts = array(
+            'unmarked' => get_string('unmarked', 'block_fn_marking'),
+            'saved' => get_string('saved', 'block_fn_marking'),
+            'marked' => get_string('marked', 'block_fn_marking'),
+            'unsubmitted' => get_string('unsubmitted', 'block_fn_marking')
+        );
     }
 
     if (!$keepseparate) {
@@ -409,7 +433,6 @@ foreach ($selectedsection as $sectionnum) {
                 if (!$mod->visible && !has_capability('moodle/course:viewhiddenactivities', $mcontext)) {
                     continue;
                 }
-
                 $instance = $DB->get_record($mod->modname, array("id" => $mod->instance));
                 $libfile = $CFG->dirroot . '/mod/' . $mod->modname . '/lib.php';
                 if (file_exists($libfile)) {
@@ -421,7 +444,6 @@ foreach ($selectedsection as $sectionnum) {
                         if (!function_exists($gradefunction) || !($modgrades->grades = $gradefunction($instance))) {
                             $modgrades->grades = array();
                         }
-
                         if (!empty($modgrades)) {
                             // Store the number of ungraded entries for this group.
                             if (is_array($modgrades->grades)) {
@@ -499,9 +521,11 @@ foreach ($selectedsection as $sectionnum) {
                             }
 
                             $image = "<a href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\"" .
-                                    "   title=\"$mod->name\">" .
-                                    "<IMG border=0 VALIGN=absmiddle src=\"$CFG->wwwroot/mod/$mod->modname/pix/icon.png\" " .
-                                    "height=16 width=16 alt=\"$mod->name\"></a>";
+                                "   title=\"$mod->name\">" .
+                                '<img class="actionicon" width="16" height="16" alt="'.$mod->name.'" src="'.$OUTPUT->pix_url('icon', $mod->modname).'">'.
+                                "</a>";
+
+
                             if (($view == 'less') && (strlen($instance->name) > 16)) {
                                 $name = substr($instance->name, 0, 30) . '&hellip;';
                             } else {
@@ -568,9 +592,10 @@ echo $OUTPUT->header();
 
 // ACTIVITY TYPES.
 $activitytypeopts = array(
-    '0' => 'All types',
+    '0' => get_string('allactivitytypes', 'block_fn_marking'),
     'assign' => 'Assignments',
     'forum' => 'Forums',
+    'journal' => 'Journal',
     'quiz' => 'Quizzes',
 );
 $activitytypeurl = new moodle_url(
@@ -589,11 +614,11 @@ $activitytypeurl = new moodle_url(
 );
 $activitytypeselect = new single_select($activitytypeurl, 'activity_type', $activitytypeopts, $activitytype, '');
 $activitytypeselect->formid = 'fn_activity_type';
-$activitytypeselect->label = 'Activity Type';
+$activitytypeselect->label =  html_writer::img($OUTPUT->pix_url('i/preview'), '');
 $activitytypeform = '<div class="groupselector">'.$OUTPUT->render($activitytypeselect).'</div>';
 
 // PARTICIPANTS.
-$participantsopts = array('0' => 'All participants');
+$participantsopts = array('0' => get_string('allparticipants', 'block_fn_marking'),);
 if ($groupmembers) {
     foreach ($groupmembers[5]->users as $groupmember) {
         $participantsopts[$groupmember->id] = fullname($groupmember);
@@ -619,7 +644,7 @@ $participantsurl = new moodle_url(
 );
 $participantsselect = new single_select($participantsurl, 'participants', $participantsopts, $participants, '');
 $participantsselect->formid = 'fn_participants';
-$participantsselect->label = 'Participants';
+$participantsselect->label = html_writer::img($OUTPUT->pix_url('i/user'), '');
 $participantsform = '<div class="groupselector">'.$OUTPUT->render($participantsselect).'</div>';
 
 echo '<div class="fn-menuwrapper">';
@@ -674,6 +699,16 @@ if (isset($blockconfig->showtopmessage) && isset($blockconfig->topmessage['text'
 } else if ($showtopmessage && $topmessage) {
     echo '<div id="marking-topmessage">'.$topmessage.'</div>';
 }
+
+// No course average calculation.
+$nocorseaveragemsg = '';
+if ($gradeitem = $DB->get_record('grade_items', array('courseid' => $courseid, 'itemtype' => 'course'))) {
+    if ($gradeitem->gradetype == GRADE_TYPE_NONE) {
+        $nocorseaveragemsg = '<div class="course-average-warning"><img class="actionicon" width="16" height="16" alt="" src="'.
+            $OUTPUT->pix_url('i/risk_xss', '').'"> '.get_string('nocoursetotal', 'block_fn_mentor').'<div>';
+    }
+}
+
 echo '
 <div id="marking-interface">
     <table width="100%" class="markingmanagercontainer" border="0" cellpadding="0" cellspacing="0">
@@ -725,6 +760,7 @@ foreach ($columnhtml as $index => $column) {
                     </tr>
                     </tbody>
                 </table>
+                '. $nocorseaveragemsg .'
             </td>
             <td align="left" valign="top" class="right-sec">';
 

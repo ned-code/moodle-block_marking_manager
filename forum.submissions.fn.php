@@ -130,6 +130,12 @@ if (($show == 'unmarked') || ($show == 'marked')) {
         $rm = new rating_manager();
         $aggregationstring    = $rm->get_aggregation_method($forum->assessed);
 
+        $o .= '<div class="default-grade-view-nobtn">';
+        $o .= '<a href="'.$CFG->wwwroot.'/mod/forum/view.php?id='.$cm->id.'"><img src="'.
+            $OUTPUT->pix_url('popup', 'scorm').'"> '.
+            get_string('moodledefaultview', 'block_fn_marking').'</a>';
+        $o .= '</div>';
+
         $o .= '<div class="fn_forum_header">';
 
         $o .= '<table id="forum-header-tbl">

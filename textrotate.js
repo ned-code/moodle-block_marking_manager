@@ -9,7 +9,7 @@ function textrotate_make_svg(el)
   abs.appendChild(document.createTextNode(string));
   abs.style.position='absolute';
   document.body.appendChild(abs);
-  var textWidth=abs.offsetWidth * 1.2,textHeight=abs.offsetHeight;
+  var textWidth=abs.offsetWidth * 1.1,textHeight=abs.offsetHeight;
   document.body.removeChild(abs);
 
   // Create SVG

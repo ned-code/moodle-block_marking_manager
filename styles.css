@@ -2,7 +2,7 @@
     background-color: yellow !important;
 }
 table.fnmarkingblock td {
-    border: 1px solid #555555;
+    border: 1px solid #7092be;
 }
 table.fnmarkingblock tr.normal {
     background-color: #FFFFFF;
@@ -11,7 +11,7 @@ table.fnmarkingblock tr.normal {
     background-color: #FFFFFF;
 }
 table.fnmarkingblock tr.marking-total {
-    background-color: #787878;
+    background-color: #7092be;
     color: white;
     font-size: 14px;
 }
@@ -22,17 +22,17 @@ table.fnmarkingblock th.header {
     text-align: center;
 }
 table.fnmarkingblock th.topline {
-    background-color: #787878;
+    background-color: #7092be;
     color: #FFFFFF;
-    border-left: 1px solid #555555;
-    border-right: 1px solid #555555;
-    border-top: 1px solid #555555;
+    border-left: 1px solid #7092be;
+    border-right: 1px solid #7092be;
+    border-top: 1px solid #7092be;
     padding: 7px 0;
 }
 table.fnmarkingblock th.bottomline {
-    border-left: 1px solid #555555;
-    border-right: 1px solid #555555;
-    border-bottom: 1px solid #555555;
+    border-left: 1px solid #7092be;
+    border-right: 1px solid #7092be;
+    border-bottom: 1px solid #7092be;
     padding: 5px 0;
     font-weight: normal;
 }
@@ -60,13 +60,13 @@ span.fn_summaries {
 }
 @media (min-width: 900px) and (max-width: 1200px) {
     #marking-interface {
-        width: 850px;
+        width: 1000px;
         margin: 0 auto;
     }
 }
 @media (max-width: 767px) {
     #marking-interface {
-        width: 850px;
+        width: 1000px;
         margin: 0 auto;
     }
 }
@@ -80,8 +80,7 @@ span.fn_summaries {
 }
 #marking-interface table.markingmanagercontainer td.right-sec {
     padding: 10px 15px 0 0;
-    max-width: 900px;
-    min-width: 605px
+    width: 650px;
 }
 table.markingmanagercontainer td.right-sec .paging {
     margin: 0 0 10px 0;
@@ -105,20 +104,34 @@ table.markingmanagercontainer td.right-sec .saprate-table {
 table.saprate-table td.markingmanager-head {
     background: #7092be;
 }
+table.saprate-table td.markingmanager-head-red {
+    background: red;
+}
+table.saprate-table td.markingmanager-head-orange {
+    background: orange;
+}
 table.saprate-table td.marking_rightBRD {
 
 }
-td.markingmanager-head .name-date {
+td.markingmanager-head .name-date,
+td.markingmanager-head-red .name-date,
+td.markingmanager-head-orange .name-date {
     margin: 0;
 }
-td.markingmanager-head .name-date td {
+td.markingmanager-head .name-date td,
+td.markingmanager-head-red .name-date td,
+td.markingmanager-head-orange .name-date td {
     padding: 0;
     color: #FFF;
 }
-td.markingmanager-head .name-date td.leftSide {
+td.markingmanager-head .name-date td.leftSide,
+td.markingmanager-head-red .name-date td.leftSide,
+td.markingmanager-head-orange .name-date td.leftSide {
     font-size: 14px;
 }
-td.markingmanager-head .name-date td.rightSide {
+td.markingmanager-head .name-date td.rightSide,
+td.markingmanager-head-red .name-date td.rightSide,
+td.markingmanager-head-orange .name-date td.rightSide {
     font-size: 11px;
 }
 table.saprate-table td.markingmanager-headB {
@@ -159,8 +172,8 @@ table.saprate-table .teacher-comments .comment-boxs textarea {
 .singleselect {
     display: inline-block;
 }
-.fnmarkingblock thead, .fnmarkingblock tbody td {
-    border: 1px solid #555555 !important;
+#page-blocks-fn_marking-fn_gradebook .fnmarkingblock thead, .fnmarkingblock tbody td {
+    border: 1px solid #7092be !important;
     padding: 5px;
 }
 .fnmarkingblock .marking-total > td:first-child,
@@ -464,19 +477,25 @@ p.unsubmitted_msg {
 span.teacher_feedback_info{
     font-size: 12px;
 }
-div#marking-interface td.markingmanager-head fieldset.hidden{
+div#marking-interface td.markingmanager-head fieldset.hidden,
+div#marking-interface td.markingmanager-head-red fieldset.hidden,
+div#marking-interface td.markingmanager-head-orange fieldset.hidden {
     background: transparent !important;
     border: 0 solid #DADADA !important;
     margin: 0 !important;
 }
-div#marking-interface td.markingmanager-head fieldset.hidden div{
+div#marking-interface td.markingmanager-head fieldset.hidden div,
+div#marking-interface td.markingmanager-head-red fieldset.hidden div,
+div#marking-interface td.markingmanager-head-orange fieldset.hidden div {
     margin: 0 !important;
 }
 .markingmanager-head input#id_savegrade {
     font-size: 15px;
     padding: 2px 10px;
 }
-td.markingmanager-head {
+td.markingmanager-head,
+td.markingmanager-head-red,
+td.markingmanager-head-orange {
     line-height: 14px;
     padding: 3px 3px 0 3px;
 }
@@ -505,7 +524,6 @@ table.simplegradebook {
     color: #fff;;
     background-color: #666;
     border-collapse: collapse;
-    border: 1px black solid;
     margin-top: 10px;
 
 }
@@ -514,7 +532,7 @@ table.simplegradebook td {
     color: #000;
     padding: 4px;
     text-align: left;
-    border: 1px black solid;
+    border: 1px #aaaaaa solid;
     font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
     font-weight: normal;
     font-size: 11px;
@@ -540,19 +558,19 @@ table.simplegradebook td.icon {
 }
 table.simplegradebook th {
     background-color: white;
-    border: 1px solid #000000;
+    border: 1px solid #aaaaaa;
     color: #555555;
     font-size: 12px;
     font-weight: normal;
     padding: 4px;
     text-align: center;
 }
-table.simplegradebook td.mod-icon {
+table.simplegradebook th.mod-icon {
     background-color: #F2F2F2;
     color: #666;
     padding: 4px;
     text-align: center;
-    border: 1px black solid;
+    border: 1px #aaaaaa solid;
     font-size: 12px;
     font-weight: bold;
 }
@@ -561,7 +579,7 @@ table.simplegradebook td.empty-week {
     color: #fff;
     padding: 4px;
     text-align: center;
-    border: 1px black solid;
+    border: 1px #aaaaaa solid;
     font-size: 12px;
     font-weight: bold;
 }
@@ -596,6 +614,7 @@ div.tablecontainer {
      font-size: 16px;
      overflow: hidden;
      padding: 5px 1px;
+    clear: right;
  }
 .fn_quiz_header > img {
     margin: 0 5px 0 0;
@@ -817,8 +836,34 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     font-weight: bold;
     color: rgb(205,0,0);
 }
+/* Large desktop */
+@media (min-width: 1200px) {
+    .block_fn_marking li .column.c1 {
+        clear: right;
+        max-width: 90%;
+    }
+}
+@media (min-width: 900px) and (max-width: 1200px) {
+    .block_fn_marking li .column.c1 {
+        clear: right;
+        max-width: 83%;
+    }
+}
+@media (min-width: 767px) and (max-width: 900px) {
+    .block_fn_marking li .column.c1 {
+        clear: right;
+        max-width: 80%;
+    }
+}
+
+.block_fn_marking li .icon.column {
+    float: left;
+}
 .fn-expand-btn {
     text-align: right;
+}
+.block_fn_marking.card.m-b-1 ul {
+    margin-left: 0 !important;
 }
 .block_fn_marking ul {
     margin-left: 30px;
@@ -874,4 +919,83 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 #fitem_id_assignfeedbackcomments_editor div.fitemtitle {
     display: none;
+}
+#page-blocks-fn_marking-fn_gradebook .fnmarkingblock .highlight {
+    background: #ff9 !important;
+}
+#page-blocks-fn_marking-fn_gradebook table.journaluserentry {
+    width: 100%;
+}
+#page-blocks-fn_marking-fn_gradebook table.journaluserentry textarea {
+    width: 98%;
+}
+#page-blocks-fn_marking-fn_gradebook .lastedit {
+    margin-bottom: 12px;
+}
+#page-blocks-fn_marking-fn_gradebook .default-grade-view {
+    float: right;
+    margin-bottom: 10px;
+    margin-top: -30px;
+}
+#page-blocks-fn_marking-fn_gradebook .default-grade-view-nobtn {
+    float: right;
+    margin-bottom: 10px;
+}
+#page-blocks-fn_marking-fn_gradebook #fitem_id_assignfeedbackcomments_editor textarea {
+    width: 98%;
+    height: 160px;
+}
+#page-blocks-fn_marking-fn_gradebook textarea#id_assignfeedbackcomments_editor {
+    height: 160px;
+}
+#page-blocks-fn_marking-fn_gradebook .ned-change-html-editor-wrapper {
+    margin: 0;
+}
+#page-blocks-fn_marking-fn_gradebook td.overriden-grade-menu {
+    background-color: #ffd3b7;
+    font-size: 12px;
+    padding: 5px;
+    text-align: center;
+    position: relative;
+}
+#page-blocks-fn_marking-fn_gradebook .ned-locked-icon {
+    background-color: white;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    margin-top: 10px;
+    padding: 5px;
+}
+#page-blocks-fn_marking-fn_gradebook #fitem_id_editpdf {
+    text-align: right;
+}
+#page-blocks-fn_marking-fn_gradebook #fitem_id_editpdf .fstaticlabel,
+#page-blocks-fn_marking-fn_gradebook #fitem_id_editpdf .fitemtitle {
+    display: none;
+}
+#page-blocks-fn_marking-fn_gradebook .online-submission-wrapper {
+    margin: 10px 0;
+}
+#page-blocks-fn_marking-fn_gradebook .right-align {
+    position: absolute;
+    right: 10px;
+    top: 6px;
+}
+#page-blocks-fn_marking-fn_gradebook .nograde-wrapper {
+    margin: 10px 0;
+}
+#page-blocks-fn_marking-progress_report .borderless-cell {
+    border-left: 0 none !important;
+    border-right: 0 none !important;
+    border-top: 0 none !important;
+}
+#page-blocks-fn_marking-fn_gradebook .course-average-warning {
+    margin-top: 15px;
+    text-align: center;
+}
+#page-blocks-fn_marking-progress_report .course-average-warning {
+    margin-top: 15px;
+    text-align: center;
+}
+#page-blocks-fn_marking-progress_report .course-average-warning {
+    color: red;
 }

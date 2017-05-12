@@ -191,7 +191,7 @@ class block_fn_marking extends block_list {
             $refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse');
             $isingroup = block_fn_marking_isinagroup($this->page->course->id, $USER->id);
 
-            $supportedmodules = array('assign', 'forum', 'quiz');
+            $supportedmodules = array_keys(block_fn_marking_supported_mods());
             list($insql, $params) = $DB->get_in_or_equal($supportedmodules);
             $params = array_merge(array($this->page->course->id), $params);
             if ($isingroup) {
@@ -306,35 +306,38 @@ class block_fn_marking extends block_list {
             $strstudents = get_string('students');
 
             if (isset($this->config->shownotloggedinuser) && $this->config->shownotloggedinuser) {
-                $numnotloggedin = block_fn_marking_count_notloggedin($this->page->course, $days);
-                $this->content->items[] = '<span class="fn_summaries"><a href="'.
-                    $CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notloggedin'.
-                    '&navlevel=top&days=' .$days. '">' . $numnotloggedin . ' '.$strstudents.' </a>'.
-                    get_string('notloggedin', 'block_fn_marking').' ' . $days . ' days</span>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
-                    class="icon" alt=""><br><br>';
+                if ($numnotloggedin = block_fn_marking_count_notloggedin($this->page->course, $days)) {
+                    $this->content->items[] = '<span class="fn_summaries"><a href="' .
+                        $CFG->wwwroot . '/blocks/fn_marking/fn_summaries.php?id=' . $this->page->course->id . '&show=notloggedin' .
+                        '&navlevel=top&days=' . $days . '">' . $numnotloggedin . ' ' . $strstudents . ' </a>' .
+                        get_string('notloggedin', 'block_fn_marking') . ' ' . $days . ' days</span>';
+                    $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
+                    class="icon" alt="">';
+                }
             }
 
             if ($this->config->showstudentnotsubmittedassignment) {
                 $now = time();
                 $lastweek = $now - (60 * 60 * 24 * $days);
-                $numnotsubmittedany = block_fn_marking_get_notsubmittedany($this->page->course, $lastweek, true, $sections, null);
-                $this->content->items[] = '<span class="fn_summaries"><a href="'.
-                    $CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=notsubmittedany'.
-                    '&navlevel=top&days=' .$days. '">' . $numnotsubmittedany . ' '.$strstudents.' </a>'.
-                    get_string('notsubmittedany', 'block_fn_marking').''.$days.' days</span>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
-                    class="icon" alt=""><br><br>';
+                if ($numnotsubmittedany = block_fn_marking_get_notsubmittedany($this->page->course, $lastweek, true, $sections, null)) {
+                    $this->content->items[] = '<span class="fn_summaries"><a href="' .
+                        $CFG->wwwroot . '/blocks/fn_marking/fn_summaries.php?id=' . $this->page->course->id . '&show=notsubmittedany' .
+                        '&navlevel=top&days=' . $days . '">' . $numnotsubmittedany . ' ' . $strstudents . ' </a>' .
+                        get_string('notsubmittedany', 'block_fn_marking') . '' . $days . ' days</span>';
+                    $this->content->icons[] = '<img src="' . $CFG->wwwroot . '/blocks/fn_marking/pix/exclamation.png"
+                    class="icon" alt="">';
+                }
             }
 
             if ($this->config->showstudentmarkslessthanfiftypercent) {
-                $numfailing = block_fn_marking_count_failing($this->page->course, $percent);
-                $this->content->items[] = '<span class="fn_summaries">
-                    <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_summaries.php?id='.$this->page->course->id.'&show=failing'.
-                    '&navlevel=top&days=' .$days. '&percent=' .$percent. '">' . $numfailing . ' '.$strstudents.'</a>'.
-                    get_string('overallfailinggrade', 'block_fn_marking').''.$percent. '% </span>';
-                $this->content->icons[] = '<img src="' . $CFG->wwwroot .
-                    '/blocks/fn_marking/pix/exclamation.png" class="icon" alt=""><br><br>';
+                if ($numfailing = block_fn_marking_count_failing($this->page->course, $percent)) {
+                    $this->content->items[] = '<span class="fn_summaries">
+                    <a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_summaries.php?id=' . $this->page->course->id . '&show=failing' .
+                        '&navlevel=top&days=' . $days . '&percent=' . $percent . '">' . $numfailing . ' ' . $strstudents . '</a>' .
+                        get_string('overallfailinggrade', 'block_fn_marking') . '' . $percent . '% </span>';
+                    $this->content->icons[] = '<img src="' . $CFG->wwwroot .
+                        '/blocks/fn_marking/pix/exclamation.png" class="icon" alt="">';
+                }
             }
 
             if ($refreshmodecourse == 'cron') {
@@ -375,14 +378,14 @@ class block_fn_marking extends block_list {
         $modnames = get_module_types_names();
         $modnamesplural = get_module_types_names(true);
 
-        $supportedmodules = array('assign', 'forum', 'quiz');
+        $supportedmodules = array_keys(block_fn_marking_supported_mods());
 
         $isadmin   = is_siteadmin($USER->id);
         $text = '';
 
         $showzeroungraded = isset($this->config->listcourseszeroungraded) ? $this->config->listcourseszeroungraded : 0;
 
-        $filtercourses = block_fn_marking_get_setting_courses ();
+        $filtercourses = block_fn_marking_get_setting_courses();
 
         if ($filtercourses) {
             $filter = ' AND c.id IN ('.implode(',' , $filtercourses).')';

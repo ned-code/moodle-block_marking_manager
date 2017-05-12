@@ -35,7 +35,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
     function definition() {
 
-        global $OUTPUT, $CFG, $DB, $PAGE, $USER;
+        global $OUTPUT, $CFG, $DB, $PAGE, $USER, $ME;
 
         $mform = & $this->_form;
         if (isset($this->_customdata->advancedgradinginstance)) {
@@ -43,6 +43,9 @@ class mod_assign_grading_form_fn extends moodleform {
         }
 
         list($assignment, $data, $params) = $this->_customdata;
+
+        $editortoggle = get_config('block_fn_marking', 'editortoggle');
+        $onlineeditor = get_user_preferences('block_fn_marking_onlineeditor',  'hide');
 
         $rownum = $params['rownum'];
         $last = $params['last'];
@@ -53,6 +56,22 @@ class mod_assign_grading_form_fn extends moodleform {
         $maxattemptnumber = isset($params['maxattemptnumber']) ? $params['maxattemptnumber'] : $params['attemptnumber'];
 
         $user = $DB->get_record('user', array('id' => $userid));
+
+        // Overriden grade check.
+        $sql = "SELECT gg.*
+                  FROM {grade_items} gi 
+            INNER JOIN {grade_grades} gg 
+                    ON gi.id = gg.itemid 
+                 WHERE gi.itemtype = 'mod' 
+                   AND gi.itemmodule = 'assign' 
+                   AND gi.iteminstance = ? 
+                   AND gg.userid = ?";
+        $overriden = false;
+        if ($gradegrade = $DB->get_record_sql($sql, array($assignment->get_instance()->id, $userid))) {
+            if ($gradegrade->overridden > 0) {
+                $overriden = $gradegrade;
+            }
+        }
 
         $submission = block_fn_marking_get_user_submission($assignment, $userid, false);
         $submissiongroup = null;
@@ -77,29 +96,39 @@ class mod_assign_grading_form_fn extends moodleform {
         }
 
         // Start the table.
-        $mform->addElement('html', '<div style="text-align:center; font-size:11px; margin-bottom:3px;">');
+        $gradeviewclass = 'default-grade-view-nobtn';
+        if (count($useridlist) > 1) {
+            $gradeviewclass = 'default-grade-view';
+            $mform->addElement('html', '<div style="text-align:center; font-size:11px; margin-bottom:3px;">');
 
-        $strprevious = get_string('previous');
-        $strnext = get_string('next');
+            $strprevious = get_string('previous');
+            $strnext = get_string('next');
 
-        if ($rownum > 0) {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="'.
-                $strprevious.'" name="nosaveandprevious"> ');
-        } else {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="'.
-                $strprevious.'" name="nosaveandprevious" disabled="disabled"> ');
+            if ($rownum > 0) {
+                $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="' .
+                    $strprevious . '" name="nosaveandprevious"> ');
+            } else {
+                $mform->addElement('html', ' <input type="submit" id="id_nosaveandprevious" value="' .
+                    $strprevious . '" name="nosaveandprevious" disabled="disabled"> ');
+            }
+            $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking',
+                array('index' => $rownum + 1, 'count' => count($useridlist))));
+
+            if (!$last) {
+                $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="' .
+                    $strnext . '" name="nosaveandnext"> ');
+            } else {
+                $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="' .
+                    $strnext . '" name="nosaveandnext" disabled="disabled"> ');
+            }
+
+            $mform->addElement('html', '</div>');
         }
-        $mform->addElement('html', get_string('gradingstudentprogress', 'block_fn_marking',
-            array('index' => $rownum + 1, 'count' => count($useridlist))));
-
-        if (!$last) {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="'.
-                $strnext.'" name="nosaveandnext"> ');
-        } else {
-            $mform->addElement('html', ' <input type="submit" id="id_nosaveandnext" value="'.
-                $strnext.'" name="nosaveandnext" disabled="disabled"> ');
-        }
-
+        $mform->addElement('html', '<div class="'.$gradeviewclass.'">');
+        $cm = get_coursemodule_from_instance("assign", $assignment->get_instance()->id, $assignment->get_course()->id);
+        $mform->addElement('html', '<a href="'.$CFG->wwwroot.'/mod/assign/view.php?id='.$cm->id.'"><img src="'.
+            $OUTPUT->pix_url('popup', 'scorm').'"> '.
+            get_string('moodledefaultview', 'block_fn_marking').'</a>');
         $mform->addElement('html', '</div>');
 
         $mform->addElement('html', '<table border="0" cellpadding="0" cellspacing="0" border="1" width="100%"
@@ -118,9 +147,50 @@ class mod_assign_grading_form_fn extends moodleform {
             $last,
             $groupname,
             $assignment->get_course_module(),
-            $params);
+            $params,
+            $overriden
+        );
 
         $mform->addElement('html', '</tr>');
+
+        // Override menu.
+        $urlparams = $params;
+        if ($urlparams['useridlist']) {
+            unset($urlparams['useridlist']);
+        }
+        if ($overriden) {
+            $removeoverride = html_writer::link('#', get_string('removeoverride', 'block_fn_marking'),
+                array(
+                    'id' => 'ned-override-remover',
+                    'userid' => $userid,
+                    'mod' => 'assign',
+                    'instance' => $assignment->get_instance()->id,
+                    'action' => 'remove',
+                    'sesskey' => sesskey(),
+                )
+            );
+
+            $gradebookurl = new moodle_url('/grade/report/singleview/index.php',
+                array(
+                    'id' => $assignment->get_instance()->course,
+                    'item' => 'grade',
+                    'group' => '',
+                    'itemid' => $gradegrade->itemid
+                )
+            );
+            $opengradereport = html_writer::link($gradebookurl, get_string('opengradereport', 'block_fn_marking'), array('id' => 'open-grade-report-link'));
+            $checkagain = html_writer::link('#', get_string('checkagain', 'block_fn_marking'), array('id' => 'open-grade-report-link-check'));
+            $help = html_writer::link($ME, get_string('help', 'block_fn_marking'));
+            $mform->addElement('html', '<tr>');
+            $mform->addElement('html', '<td class="overriden-grade-menu" colspan="2">');
+            //$mform->addElement('html', $acceptoverride.'&nbsp;&nbsp;&nbsp;');
+            $mform->addElement('html', $removeoverride.'&nbsp;&nbsp;&nbsp;');
+            $mform->addElement('html', $opengradereport.'&nbsp;&nbsp;&nbsp;');
+            $mform->addElement('html', $help);
+            $mform->addElement('html', '<div class="right-align">'.$checkagain.'</div>');
+            $mform->addElement('html', '</td>');
+            $mform->addElement('html', '</tr>');
+        }
 
         // Grading.
         $mform->addElement('html', '<tr>');
@@ -241,15 +311,37 @@ class mod_assign_grading_form_fn extends moodleform {
                         $gradingelement->freeze();
                     }
                 } else {
-                    $mform->addElement('html', get_string('nograde', 'block_fn_marking'));
+                    $mform->addElement('html', html_writer::div(get_string('nograde', 'block_fn_marking'), 'nograde-wrapper'));
                 }
             }
+            if ($editortoggle) {
+                if ($onlineeditor == 'hide') {
+                    $editordisablebuttontxt = 'showonlineeditor';
+                } else {
+                    $editordisablebuttontxt = 'hideonlineeditor';
+                }
+                $editordisablebutton = html_writer::div(
+                    html_writer::link('#',
+                        get_string($editordisablebuttontxt, 'block_fn_marking'),
+                        array(
+                            'class' => 'ned-change-html-editor',
+                            'data-status' => $editordisablebuttontxt
+                        )
+                    ), 'ned-change-html-editor-wrapper'
+                );
+                $mform->addElement('html', $editordisablebutton);
+            }
+
             $mform->addElement('html', '</td>');
             $mform->addElement('html', '</tr>');
         }
 
         $mform->addElement('html', '</table>');
-
+        if ($editortoggle) {
+            if ($onlineeditor == 'hide') {
+                $USER->preference['htmleditor'] = 'textarea';
+            }
+        }
         // Let feedback plugins add elements to the grading form.
         $feedbackplugins = block_fn_marking_load_plugins('assignfeedback', $assignment);
 
@@ -427,7 +519,7 @@ class mod_assign_grading_form_fn extends moodleform {
         $tsubmission = $status->teamsubmission ? $status->teamsubmission : $status->submission;
 
         if ($tsubmission) {
-            $submissiontime = userdate($tsubmission->timemodified);
+            $submissiontime = userdate($tsubmission->timemodified, "%d %B %Y, %I:%M %p");
         } else {
             $submissiontime = '-';
         }
@@ -467,10 +559,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
                         $options = array('cols' => '82');
 
-                        $mform->addElement('editor', 'onlinetext');
-                        $mform->setType('onlinetext', PARAM_RAW);
-                        $mform->setDefault('onlinetext', array('text' => $onlinetext->onlinetext, 'format' => FORMAT_HTML));
-
+                        $mform->addElement('html', '<div class="online-submission-wrapper">'.$onlinetext->onlinetext.'</div>');
                     } else {
                         if ((! isset($params['savegrade'])) && ((! $params['readonly'])
                                 || ($plugin->get_name() != 'Submission comments'))) {
@@ -538,12 +627,21 @@ class mod_assign_grading_form_fn extends moodleform {
      *
      */
     public function add_marking_header($user, $name, $blindmarking, $uniqueidforuser, $courseid, $viewfullnames,
-                                       $rownum , $last, $groupname, $cm, $params) {
+                                       $rownum , $last, $groupname, $cm, $params, $overriden=false) {
         global $CFG, $DB, $OUTPUT;
 
         $mform = & $this->_form;
+        if ($overriden) {
+            if ($overriden->finalgrade) {
+                $headlass = 'markingmanager-head-orange';
+            } else {
+                $headlass = 'markingmanager-head-red';
+            }
+        } else {
+            $headlass = 'markingmanager-head';
+        }
         $mform->addElement('html', '<td width="40" valign="top" align="center"
-            class="markingmanager-head marking_rightBRD">' . "\n");
+            class="'.$headlass.' marking_rightBRD">' . "\n");
 
         $o = '';
         if ($blindmarking) {
@@ -555,7 +653,7 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '</td>');
 
-        $mform->addElement('html', '<td width="100%" valign="top" align="left" class="markingmanager-head">');
+        $mform->addElement('html', '<td width="100%" valign="top" align="left" class="'.$headlass.'">');
 
         $mform->addElement('html', '<table cellpadding="0" cellspacing="0" border="0" width="100%" class="name-date">');
         $mform->addElement('html', '<tr>');
@@ -570,18 +668,23 @@ class mod_assign_grading_form_fn extends moodleform {
 
         $mform->addElement('html', '<td width="35%" align="right" class="rightSide">');
 
-        $buttonarray = array();
-        if (isset( $params['readonly'])) {
-            if (! $params['readonly']) {
-                $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
-            }
+        if ($overriden) {
+            $locked = '<img class="ned-locked-icon" width="16" height="16" alt="Locked" src="'.$OUTPUT->pix_url('t/locked', '').'">';
+            $mform->addElement('html', get_string('gradeoverridedetected', 'block_fn_marking').' '.$locked);
         } else {
-            $buttonarray[] = $mform->createElement('submit', 'savegrade', 'Save');
-        }
+            $buttonarray = array();
+            if (isset($params['readonly'])) {
+                if (!$params['readonly']) {
+                    $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('save', 'block_fn_marking'));
+                }
+            } else {
+                $buttonarray[] = $mform->createElement('submit', 'savegrade', get_string('save', 'block_fn_marking'));
+            }
 
-        if (!empty($buttonarray)) {
-            $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
-            $mform->disabledIf('navar', 'grade', 'eq', -1);
+            if (!empty($buttonarray)) {
+                $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
+                $mform->disabledIf('navar', 'grade', 'eq', -1);
+            }
         }
         $mform->addElement('html', '&nbsp;</td>');
 

@@ -294,6 +294,76 @@ function block_fn_marking_quiz_count_ungraded($quizid, $graded, $students, $show
 
 }
 
+function block_fn_marking_journal_count_ungraded($journalid, $graded, $students, $show='unmarked',
+                                               $extra=false, $instance, $keepseparate=1) {
+    global $DB;
+
+    $studentlist = implode(',', array_keys($students));
+
+    if (empty($studentlist)) {
+        return 0;
+    }
+
+    if (($show == 'unmarked') || ($show == 'all')) {
+        if ($instance->grade == 0) {
+            $sql = "SELECT COUNT(1) 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.entrycomment IS NULL 
+                       AND j.userid IN ($studentlist)";
+        } else {
+            $sql = "SELECT COUNT(1) 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.rating IS NULL 
+                       AND j.userid IN ($studentlist)";
+        }
+        return $DB->count_records_sql($sql, array($journalid));
+
+    } else if ($show == 'marked') {
+        if ($instance->grade == 0) {
+            $sql = "SELECT COUNT(1) 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.entrycomment IS NOT NULL 
+                       AND j.userid IN ($studentlist)";
+        } else {
+            $sql = "SELECT COUNT(1) 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.rating IS NOT NULL
+                       AND j.userid IN ($studentlist)";
+        }
+        return $DB->count_records_sql($sql, array($journalid));
+
+    } else if ($show == 'unsubmitted') {
+        if ($instance->grade == 0) {
+            $sql = "SELECT j.userid 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.entrycomment IS NOT NULL 
+                       AND j.userid IN ($studentlist)";
+        } else {
+            $sql = "SELECT j.userid
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.rating IS NOT NULL
+                       AND j.userid IN ($studentlist)";
+        }
+
+        if ($attempts = $DB->get_records_sql($sql, array($journalid))) {
+            $unsubmitted = array_diff(array_keys($students), array_keys($attempts));
+            return count($unsubmitted);
+        } else {
+            return count($students);
+        }
+
+    } else {
+        return 0;
+    }
+
+}
+
 function block_fn_marking_assign_students_ungraded($assign, $graded, $students, $show='unmarked',
                                                     $extra=false, $instance, $sort=false, $keepseparate=1) {
     global $DB, $CFG;
@@ -624,11 +694,8 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
     $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
 
     // Array of functions to call for grading purposes for modules.
-    $modgradesarray = array(
-        'assign' => '/mod/assign/submissions.g8.html',
-        'assignment' => '/mod/assignment/submissions.g8.html',
-        'forum' => '/mod/forum/submissions.g8.html'
-    );
+    $modgradesarray = block_fn_marking_supported_mods();
+    unset($modgradesarray['quiz']);
 
     // Don't count it if you can't see it.
     $mcontext = context_module::instance($mod->id);
@@ -712,12 +779,7 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
     $totungraded = 0;
 
     // Array of functions to call for grading purposes for modules.
-    $modgradesarray = array(
-        'assign' => '/mod/assign/submissions.g8.html',
-        'assignment' => '/mod/assignment/submissions.g8.html',
-        'quiz' => '/mod/quiz/submissions.g8.html',
-        'forum' => '/mod/forum/submissions.g8.html'
-    );
+    $modgradesarray = block_fn_marking_supported_mods();
 
     $sections = $DB->get_records('course_sections', array('course' => $course->id), 'section ASC', 'section, sequence');
 
@@ -875,13 +937,33 @@ function block_fn_marking_get_notloggedin($course, $days) {
 }
 
 function block_fn_marking_get_failing($course, $percent) {
-    // Grab context.
-    $context = context_course::instance($course->id);
+    global $DB;
+    $blockconfig = block_fn_marking_get_block_config($course->id);
 
+    $context = context_course::instance($course->id);
     $studentids = array();
-    // Grab  current group.
     $currentgroup = groups_get_course_group($course, true);;
     $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+
+    if (!empty($blockconfig->days)) {
+        $lastweek = time() - (60 * 60 * 24 * $blockconfig->days);
+
+        $sql = "SELECT ue.id, 
+                       ue.userid 
+                  FROM {user_enrolments} ue 
+                  JOIN {enrol} e 
+                    ON ue.enrolid = e.id 
+                 WHERE e.courseid = ? 
+                   AND ue.status = ? 
+                   AND ue.timestart > ?";
+        if ($newenrollments = $DB->get_records_sql($sql, array($course->id, 0, $lastweek))) {
+            foreach ($newenrollments as $newenrollment) {
+                if (isset($students[$newenrollment->userid])) {
+                    unset($students[$newenrollment->userid]);
+                }
+            }
+        }
+    }
 
     // Students array is keyed on id.
     if ($students) {
@@ -913,6 +995,7 @@ function block_fn_marking_count_failing($course, $percent) {
 }
 
 function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = false, $sections, $students) {
+    global $DB;
 
     // Grab context.
     $context = context_course::instance($course->id);
@@ -921,10 +1004,28 @@ function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = fals
     $currentgroup = groups_get_course_group($course, true);
 
     // Grab modgradesarry.
-    $modgradesarray = block_fn_marking_get_active_mods();
+    $modgradesarray = block_fn_marking_supported_mods();
 
     if (!isset($students)) {
         $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.id');
+    }
+
+    if ($since) {
+        $sql = "SELECT ue.id, 
+                       ue.userid 
+                  FROM {user_enrolments} ue 
+                  JOIN {enrol} e 
+                    ON ue.enrolid = e.id 
+                 WHERE e.courseid = ? 
+                   AND ue.status = ? 
+                   AND ue.timestart > ?";
+        if ($newenrollments = $DB->get_records_sql($sql, array($course->id, 0, $since))) {
+            foreach ($newenrollments as $newenrollment) {
+                if (isset($students[$newenrollment->userid])) {
+                    unset($students[$newenrollment->userid]);
+                }
+            }
+        }
     }
 
     for ($i = 0; $i < count($sections); $i++) {
@@ -971,37 +1072,6 @@ function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = fals
         return count($students);
     } else {
         return $students;
-    }
-}
-
-function block_fn_marking_get_active_mods($which = 'grades') {
-
-    // Array of functions to call for grading purposes for modules.
-    $modgradesarray = array(
-        'assignment' => 'assignment.submissions.fn.html',
-        'forum' => 'forum.submissions.fn.html'
-    );
-
-    // Array of functions to call to display grades for modules.
-    $modgradedisparray = array(
-        'assignment' => 'grades.fn.html',
-        'forum' => 'grades.fn.html'
-    );
-
-    $modarray = array(
-        'assignment',
-        'forum'
-    );
-
-    switch ($which) {
-        case 'grades':
-            return $modgradesarray;
-        case 'display':
-            return $modgradedisparray;
-        case 'activities':
-            return $modarray;
-        default:
-            return $modarray;
     }
 }
 
@@ -1212,7 +1282,7 @@ function block_fn_marking_process_save_grade(&$mform, $assign, $context, $course
 
     $formparams = array($assign, $data, $pageparams);
 
-    $mform = new mod_assign_grading_form_fn(null, $formparams, 'post', '', array('class' => 'gradeform'));
+    $mform = new mod_assign_grading_form_fn(null, $formparams, 'post', '', array('class' => 'gradeform unresponsive'));
 
     if ($formdata = $mform->get_data()) {
         $submission = null;
@@ -1432,7 +1502,7 @@ function block_fn_marking_view_single_grade_page($mform, $offset=0, $assign, $co
             $formparams,
             'post',
             '',
-            array('class' => 'gradeform'));
+            array('class' => 'gradeform unresponsive'));
     }
     $o .= $assign->get_renderer()->render(new assign_form('gradingform', $mform));
     $version = explode('.', $CFG->version);
@@ -2853,7 +2923,7 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
                 $totalungraded += $numunmarked;
                 $gradelink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $course->id . '&show=unmarked' . '&navlevel=top&mid=0&activity_type=' . $supportedmodule;
-                $moduleicon = '<img src="' . $CFG->wwwroot . '/mod/' . $supportedmodule . '/pix/icon.png" class="icon" alt="">';
+                $moduleicon = '<img src="' . $OUTPUT->pix_url('icon', $supportedmodule) . '" class="icon" alt="">';
 
                 if ($numunmarked) {
                     $moduletext .= '<dd id="cmid' . $supportedmodule . '" class="module ' . $classforhide . '">' . "\n";
@@ -3192,52 +3262,67 @@ function block_fn_marking_get_setting_courses () {
     global $DB;
 
     $filtercourses = array();
+    $includecourses = get_config('block_fn_marking', 'includecourses');
 
-    $configcategory = get_config('block_fn_marking', 'category');
-    $configcourse = get_config('block_fn_marking', 'course');
-
-    if (empty($configcategory) && empty($configcategory)) {
-
-        $sql = "SELECT c.id FROM {course} c WHERE c.id <> ?";
-        if ($courses = $DB->get_records_sql($sql, array(SITEID))) {
+    if ($includecourses = 'allcourseswithblock') {
+        $sql = "SELECT ctx.instanceid  
+                  FROM {context} ctx 
+                 WHERE ctx.id IN (SELECT bi.parentcontextid 
+                                    FROM {block_instances} bi 
+                                   WHERE bi.blockname = 'fn_marking') 
+                   AND ctx.contextlevel = ?
+                   AND ctx.instanceid > ?";
+        if ($courses = $DB->get_records_sql($sql, array(CONTEXT_COURSE, 1))) {
             foreach ($courses as $subcatcourse) {
-                $filtercourses[] = $subcatcourse->id;
+                $filtercourses[] = $subcatcourse->instanceid;
             }
         }
-    }
+    } else {
+        $configcategory = get_config('block_fn_marking', 'category');
+        $configcourse = get_config('block_fn_marking', 'course');
 
-    if ($configcategory) {
-        $selectedcategories = explode(',', $configcategory);
-        foreach ($selectedcategories as $categoryid) {
+        if (empty($configcategory) && empty($configcategory)) {
 
-            if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
-                foreach ($parentcatcourses as $catcourse) {
-                    $filtercourses[] = $catcourse->id;
-                }
-            }
-            if ($categorystructure = block_fn_marking_get_course_category_tree($categoryid)) {
-                foreach ($categorystructure as $category) {
-
-                    if ($category->courses) {
-                        foreach ($category->courses as $subcatcourse) {
-                            $filtercourses[] = $subcatcourse->id;
-                        }
-                    }
-                    if ($category->categories) {
-                        foreach ($category->categories as $subcategory) {
-                            block_fn_marking_get_selected_courses($subcategory, $filtercourses);
-                        }
-                    }
+            $sql = "SELECT c.id FROM {course} c WHERE c.id <> ?";
+            if ($courses = $DB->get_records_sql($sql, array(SITEID))) {
+                foreach ($courses as $subcatcourse) {
+                    $filtercourses[] = $subcatcourse->id;
                 }
             }
         }
-    }
 
-    if ($configcourse) {
-        $selectedcourses = explode(',', $configcourse);
-        $filtercourses = array_merge($filtercourses, $selectedcourses);
-    }
+        if ($configcategory) {
+            $selectedcategories = explode(',', $configcategory);
+            foreach ($selectedcategories as $categoryid) {
 
+                if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
+                    foreach ($parentcatcourses as $catcourse) {
+                        $filtercourses[] = $catcourse->id;
+                    }
+                }
+                if ($categorystructure = block_fn_marking_get_course_category_tree($categoryid)) {
+                    foreach ($categorystructure as $category) {
+
+                        if ($category->courses) {
+                            foreach ($category->courses as $subcatcourse) {
+                                $filtercourses[] = $subcatcourse->id;
+                            }
+                        }
+                        if ($category->categories) {
+                            foreach ($category->categories as $subcategory) {
+                                block_fn_marking_get_selected_courses($subcategory, $filtercourses);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($configcourse) {
+            $selectedcourses = explode(',', $configcourse);
+            $filtercourses = array_merge($filtercourses, $selectedcourses);
+        }
+    }
     return $filtercourses;
 }
 
@@ -3247,7 +3332,7 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
     require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
     require_once($CFG->dirroot . '/course/lib.php');
 
-    $supportedmodules = array('assign', 'forum', 'quiz');
+    $supportedmodules = block_fn_marking_supported_mods();
 
     $filtercourses = block_fn_marking_get_setting_courses ();
     set_config('cachedatalast', 0, 'block_fn_marking');
@@ -3262,7 +3347,7 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
             $context = context_course::instance($course->id);
             $teachers = get_users_by_capability($context, 'moodle/grade:viewall');
 
-            foreach ($supportedmodules as $supportedmodule) {
+            foreach ($supportedmodules as $supportedmodule => $file) {
                 $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
                 $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
                 $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
@@ -3432,8 +3517,10 @@ function block_fn_marking_groups_print_course_menu($course, $urlroot, $return=fa
     }
 
     $groupsmenu = array();
-    if (!$allowedgroups or $groupmode == VISIBLEGROUPS or $groupmode == SEPARATEGROUPS or $aag) {
-        $groupsmenu[0] = get_string('allparticipants');
+    $groupsmenuoptions = groups_sort_menu_options($allowedgroups, $usergroups);
+
+    if ((!$allowedgroups or $groupmode == VISIBLEGROUPS or $groupmode == SEPARATEGROUPS or $aag) && (count($groupsmenuoptions) > 1)) {
+        $groupsmenu[0] = get_string('allgroups', 'block_fn_marking');
     }
 
     $groupsmenu += groups_sort_menu_options($allowedgroups, $usergroups);
@@ -3452,10 +3539,10 @@ function block_fn_marking_groups_print_course_menu($course, $urlroot, $return=fa
 
     if (count($groupsmenu) == 1) {
         $groupname = reset($groupsmenu);
-        $output = $grouplabel.': '.$groupname;
+        $output = html_writer::img($OUTPUT->pix_url('i/users'), '').' '.$groupname;
     } else {
         $select = new single_select(new moodle_url($urlroot), 'group', $groupsmenu, $activegroup, null, 'selectgroup');
-        $select->label = $grouplabel;
+        $select->label = html_writer::img($OUTPUT->pix_url('i/users'), '');
         $output = $OUTPUT->render($select);
     }
 
@@ -3466,4 +3553,220 @@ function block_fn_marking_groups_print_course_menu($course, $urlroot, $return=fa
     } else {
         echo $output;
     }
+}
+
+function block_fn_marking_supported_mods() {
+    return array(
+        'assign' => 'assign.submissions.fn.php',
+        'assignment' => 'assignment.submissions.fn.php',
+        'quiz' => 'quiz.submissions.fn.php',
+        'forum' => 'forum.submissions.fn.php',
+        'journal' => 'journal.submissions.fn.php'
+    );
+}
+function block_fn_marking_view_journal_submissions($journal, $students, $cm, $course, $pageparams, $show = 'marked') {
+    global $DB, $CFG, $OUTPUT;
+
+    $o = '';
+
+    $studentlist = implode(',', array_keys($students));
+
+    if ($journal->grade == 0) {
+        $sql = "SELECT j.userid 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.entrycomment IS NOT NULL 
+                       AND j.userid IN ($studentlist)";
+    } else {
+        $sql = "SELECT j.userid 
+                      FROM {journal_entries} j 
+                     WHERE j.journal = ? 
+                       AND j.rating IS NOT NULL 
+                       AND j.userid IN ($studentlist)";
+    }
+
+    if ($attempts = $DB->get_records_sql($sql, array($journal->id))) {
+        $attempts = array_keys($attempts);
+    }
+
+    if ($show == 'unsubmitted') {
+        $attempts = array_diff(array_keys($students), array_keys($attempts));
+    }
+
+
+    $context = context_module::instance($cm->id);
+    require_capability('mod/journal:manageentries', $context);
+    // make some easy ways to access the entries.
+    if ($eee = $DB->get_records("journal_entries", array("journal" => $journal->id))) {
+        foreach ($eee as $ee) {
+            $entrybyuser[$ee->userid] = $ee;
+            $entrybyentry[$ee->id] = $ee;
+        }
+    } else {
+        $entrybyuser = array();
+        $entrybyentry = array();
+    }
+
+    if ($show == 'unsubmitted') {
+
+        $unsubmitted = array();
+
+        if (count($attempts) > 0) {
+            $url = new moodle_url('/mod/'.$cm->modname.'/view.php', array('id' => $cm->id));
+            $image = '<a href="'.$url->out().'"><img width="16" height="16" alt="'.
+                $cm->modname.'" src="'.$OUTPUT->pix_url('icon', $cm->modname).'"></a>';
+
+            $o .= '<div class="unsubmitted_header">' . $image .
+                " Journal: <A HREF=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">" .
+                $journal->name . '</a></div>';
+
+            $o .= '<p class="unsubmitted_msg">The following students have not submitted this journal:</p>';
+
+            foreach ($attempts as $studentid) {
+                $o .= "\n".'<table border="0" cellspacing="0" valign="top" cellpadding="0" class="not-submitted">';
+                $o .= "\n<tr>";
+                $o .= "\n<td width=\"40\" valign=\"top\" class=\"marking_rightBRD\">";
+                $user = $DB->get_record('user', array('id' => $studentid));
+                $o .= $OUTPUT->user_picture($user, array('courseid' => $cm->course, 'size' => 20));
+                $o .= "</td>";
+                $o .= "<td width=\"100%\" class=\"rightName\"><strong>".fullname($user, true)."</strong></td>\n";
+                $o .= "</tr></table>\n";
+
+            }
+        } else if (count($attempts) == 0) {
+            $o .= '<center><p>The are currently no <b>users</b>  to display.</p></center>';
+        }
+    } else {
+        foreach ($attempts as $studentid) {
+            $historyout = '';
+
+            $item = $entrybyuser[$studentid];
+            $student = $DB->get_record('user', array('id' => $item->userid));
+            $item->modified;
+            $item->text;
+            $item->rating;
+            $item->entrycomment;
+            $item->teacher;
+            $item->timemarked;
+
+            $groupname = '';
+
+            if (!$gradeitem = $DB->get_record('grade_items', array('itemtype' => 'mod', 'itemmodule' => 'journal',
+                'iteminstance' => $journal->id))) {
+                $gradeitem = new stdClass();
+                $gradeitem->gradepass = 0;
+            }
+
+            $header = '<table class="headertable"><tr>';
+
+            $header .= '<td width="35px">'.$OUTPUT->user_picture($student).'</td>';
+            $urlparams = array('id' => $item->userid, 'course' => $cm->course);
+            $url = new moodle_url('/user/view.php', $urlparams);
+
+            $header .= '<td><div style="color:white;">'.$OUTPUT->action_link($url, fullname($student),
+                    null, array('target' => '_blank', 'class' => 'userlink')). $groupname. '</div>';
+            $header .= '<div style="margin-top:5px; color:white;">Journal: <a target="_blank" class="marking_header_link"
+            title="Journal" href="'.
+                $CFG->wwwroot.'/mod/journal/view.php?id='.$journal->id.'">' .
+                $journal->name.'</a></div></td>';
+            $header .= '<td align="right" style="color:white;"></td>';
+
+            $header .= '</tr></table>';
+
+
+            $t = new html_table();
+            $t->attributes['class'] = 'generaltable historytable';
+            $cell = new html_table_cell($header);
+            $cell->attributes['class'] = 'historyheader';
+            $cell->colspan = 3;
+            $t->data[] = new html_table_row(array($cell));
+
+            $submittedicon = '<img width="16" height="16" border="0" alt="Journal" src="'.
+                $OUTPUT->pix_url('text', 'block_fn_marking').'" valign="absmiddle"> ';
+            $markedicon = '<img width="16" height="16" border="0" alt="Journal" src="'.
+                $OUTPUT->pix_url('completed', 'block_fn_marking').'" valign="absmiddle"> ';
+            $savedicon = '<img width="16" height="16" border="0" alt="Journal" src="'.
+                $OUTPUT->pix_url('saved', 'block_fn_marking').'" valign="absmiddle"> ';
+            if ($gradeitem->gradepass > 0) {
+                $markediconincomplete = '<img width="16" height="16" border="0" alt="Journal" src="'.
+                    $OUTPUT->pix_url('incomplete', 'block_fn_marking').'" valign="absmiddle"> ';
+            } else {
+                $markediconincomplete = '<img width="16" height="16" border="0" alt="Journal" src="'.
+                    $OUTPUT->pix_url('graded', 'block_fn_marking').'" valign="absmiddle"> ';
+            }
+
+            $lastsubmissionclass = '';
+
+
+            if ($journal->grade == 0) {
+                $cell1 = new html_table_cell(get_string('nograde', 'block_fn_marking'));
+            } else {
+                if ($gradeitem->gradepass > 0) {
+                    $background = 'bg_white';
+                    $background = ($item->rating  >= $gradeitem->gradepass) ? 'bg_green' : 'bg_orange';
+                } else {
+                    $background = 'bg_white';
+                }
+                $cell1 = new html_table_cell($item->rating . '/' . $journal->grade);
+            }
+
+            $cell1->rowspan = 2;
+            $cell1->attributes['class'] = $lastsubmissionclass;
+            $cell2 = new html_table_cell($submittedicon . get_string('submitted', 'assign'));
+
+            $cell3 = new html_table_cell(userdate($item->modified));
+
+            $cell3->text = '<div style="float:left;">'.$cell3->text.'</div>
+                                <div style="float:right;">
+                                <a href="'.$CFG->wwwroot.'/blocks/fn_marking/fn_gradebook.php?courseid='.
+                $pageparams['courseid'].'&mid='.$pageparams['mid'].'&dir='.$pageparams['dir'].'&sort='.
+                $pageparams['sort'].'&view='.$pageparams['view'].'&show='.$pageparams['show'].
+                '&expand=1&userid='.$studentid.'">
+                                <img width="16" height="16" border="0" alt="Assignment" src="'.
+                $CFG->wwwroot.'/blocks/fn_marking/pix/fullscreen_maximize.gif" valign="absmiddle">
+                                </a>
+                                </div>';
+
+            if ($journal->grade == 0) {
+                $cell1->attributes['class'] = 'bg_grey';
+                $cell2->attributes['class'] = 'bg_grey';
+                $cell3->attributes['class'] = 'bg_grey';
+            } else {
+                $cell1->attributes['class'] = $background;
+                $cell2->attributes['class'] = $background;
+                $cell3->attributes['class'] = $background;
+            }
+            $t->data[] = new html_table_row(array($cell1, $cell2, $cell3));
+
+            if ($journal->grade == 0) {
+                $cell1 = new html_table_cell('<img width="16" height="16" border="0" alt="Journal" src="'.
+                    $OUTPUT->pix_url('graded', 'block_fn_marking').'" valign="absmiddle"> Marked');
+            } else {
+                $cell1 = new html_table_cell(((($gradeitem->gradepass > 0)
+                        && ($item->rating >= $gradeitem->gradepass)) ? $markedicon : $markediconincomplete) . 'Marked');
+            }
+
+
+            $cell2 = new html_table_cell(userdate($item->timemarked));
+            if ($journal->grade == 0) {
+                $cell1->attributes['class'] = 'bg_grey';
+                $cell2->attributes['class'] = 'bg_grey';
+            } else {
+                $cell1->attributes['class'] = $background;
+                $cell2->attributes['class'] = $background;
+            }
+            $t->data[] = new html_table_row(array($cell1, $cell2));
+
+
+            $historyout .= html_writer::table($t);
+
+            if ($historyout) {
+                $o .= $OUTPUT->box_start('generalbox submissionhistory_summary');
+                $o .= $historyout;
+                $o .= $OUTPUT->box_end();
+            }
+        }
+    }
+
+    return $o;
 }
