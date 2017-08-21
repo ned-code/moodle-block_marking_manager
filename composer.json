@@ -1,0 +1,10 @@
+{
+    "name": "fernandooliveira/moodle-block_marking_manager",
+    "type": "moodle-block",
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "installer-name": "fn_marking"
+    }
+}
