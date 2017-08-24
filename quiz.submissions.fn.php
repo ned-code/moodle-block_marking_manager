@@ -147,7 +147,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             } else {
                 $columnicon = ($qdir == "ASC") ? "sort_asc" : "sort_desc";
             }
-            $columnicon = "<img class='iconsort' src=\"" . $OUTPUT->pix_url('t/' . $columnicon) . "\" alt=\"\" />";
+            $columnicon = "<img class='iconsort' src=\"" . $OUTPUT->image_url('t/' . $columnicon) . "\" alt=\"\" />";
 
         }
         if (($column == 'userpicture') || ($column == 'edit')) {
@@ -250,7 +250,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                     $tablerow->attempt . '&amp;slot=' .
                     $quizslot->slot . '" title="Review response">
                                 <span class="que">
-                                    <img src="' . $OUTPUT->pix_url('i/grade_incorrect', 'core') .
+                                    <img src="' . $OUTPUT->image_url('i/grade_incorrect', 'core') .
                                     '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
                                     <span class="incorrect">' . $questionstepgrade . '</span>
                                 </span>
@@ -260,7 +260,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                     $tablerow->attempt . '&amp;slot=' .
                     $quizslot->slot . '" title="Review response">
                                 <span class="que">
-                                    <img src="' . $OUTPUT->pix_url('i/grade_correct', 'core') .
+                                    <img src="' . $OUTPUT->image_url('i/grade_correct', 'core') .
                                     '" title="Incorrect" alt="Incorrect" class="icon fn-icon">
                                     <span class="correct">' . $questionstepgrade . '</span>
                                 </span>
@@ -269,7 +269,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                 $cell = new html_table_cell('<a target="_blank" href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
                     $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
                                     <span class="que">
-                                        <img src="' . $OUTPUT->pix_url('i/edit', 'core') .
+                                        <img src="' . $OUTPUT->image_url('i/edit', 'core') .
                                         '" title="Edit" alt="Editt" class="icon fn-icon">
                                     </span></a>');
                 $cell->attributes = array('class' => 'fn-highlighted');
@@ -278,7 +278,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                 $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
                     $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
                                     <span class="que">
-                                        <img src="' . $OUTPUT->pix_url('i/grade_partiallycorrect', 'core') .
+                                        <img src="' . $OUTPUT->image_url('i/grade_partiallycorrect', 'core') .
                                         '" title="Partially correct" alt="Partially correct" class="icon fn-icon">
                                         <span class="partiallycorrect">' . $questionstepgrade . '</span>
                                     </span></a>';
@@ -315,11 +315,11 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     $o .= '<div class="quiz-top-menu"><div class="qdefault-view">';
 
     $o .= '<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
-        '&mode=overview"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> '.
+        '&mode=overview"><img src="' . $OUTPUT->image_url('popup', 'scorm') . '"> '.
         get_string('moodledefaultview', 'block_fn_marking').'</a>';
 
     $o .= '&nbsp;&nbsp;&nbsp;<a href="' . $CFG->wwwroot . '/mod/quiz/report.php?id=' . $cm->id .
-        '&mode=grading"><img src="' . $OUTPUT->pix_url('popup', 'scorm') . '"> '.
+        '&mode=grading"><img src="' . $OUTPUT->image_url('popup', 'scorm') . '"> '.
         get_string('manualgrading', 'block_fn_marking').'</a>';
 
     $o .= '</div><div class="qall-participants">';
@@ -332,7 +332,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     }
     $o .= '</div></div>';
 
-    $o .= '<div class="fn_quiz_header"><img src="' . $OUTPUT->pix_url('icon', 'quiz') . '">' . $quiz->name . '</div>';
+    $o .= '<div class="fn_quiz_header"><img src="' . $OUTPUT->image_url('icon', 'quiz') . '">' . $quiz->name . '</div>';
 
     $qpagingparams = array(
         'courseid' => $courseid,
@@ -399,7 +399,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
     if (count($students) > 0) {
 
         $image = "<a href=\"$CFG->wwwroot/mod/$cm->modname/view.php?id=$cm->id\"  TITLE=\"$cm->modname\">
-            <img border=0 valign=absmiddle src=\"".$OUTPUT->pix_url('icon', 'quiz')."\" " .
+            <img border=0 valign=absmiddle src=\"".$OUTPUT->image_url('icon', 'quiz')."\" " .
             "height=16 width=16 ALT=\"$cm->modname\"></a>";
 
         $o .= '<div class="unsubmitted_header">' . $image .
