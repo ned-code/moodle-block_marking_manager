@@ -25,7 +25,6 @@ require_once($CFG->dirroot . '/lib/gradelib.php');
 require_once($CFG->dirroot . '/lib/grade/constants.php');
 require_once($CFG->dirroot . '/lib/grade/grade_grade.php');
 require_once($CFG->dirroot . '/lib/grade/grade_item.php');
-require_once($CFG->dirroot . '/blocks/fn_marking/locallib.php');
 require_once($CFG->dirroot . '/mod/assignment/lib.php');
 
 function block_fn_marking_assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
@@ -1011,13 +1010,13 @@ function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = fals
     }
 
     if ($since) {
-        $sql = "SELECT ue.id, 
-                       ue.userid 
-                  FROM {user_enrolments} ue 
-                  JOIN {enrol} e 
-                    ON ue.enrolid = e.id 
-                 WHERE e.courseid = ? 
-                   AND ue.status = ? 
+        $sql = "SELECT ue.id,
+                       ue.userid
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e
+                    ON ue.enrolid = e.id
+                 WHERE e.courseid = ?
+                   AND ue.status = ?
                    AND ue.timestart > ?";
         if ($newenrollments = $DB->get_records_sql($sql, array($course->id, 0, $since))) {
             foreach ($newenrollments as $newenrollment) {
@@ -1036,7 +1035,6 @@ function block_fn_marking_get_notsubmittedany($course, $since = 0, $count = fals
                 foreach ($sectionmods as $sectionmod) {
                     $mod = get_coursemodule_from_id('', $sectionmod, $course->id);
                     if (isset($modgradesarray[$mod->modname])) {
-                        require_once('locallib.php');
                         // Build mod method.
                         $f = 'block_fn_marking_' . $mod->modname . '_get_notsubmittedany';
                         // Make sure function exists.
@@ -3769,4 +3767,82 @@ function block_fn_marking_view_journal_submissions($journal, $students, $cm, $co
     }
 
     return $o;
+}
+
+function block_fn_marking_assignment_get_notsubmittedany($courseid, $id = "0", $users = null, $timestart) {
+    global $DB;
+    // Split out users array.
+    if ($users) {
+        $userids = array_keys($users);
+        $userselect = ' AND u.id IN (' . implode(',', $userids) . ')';
+        $studentswithsubmissions = $DB->get_records_sql("SELECT DISTINCT u.id as userid,
+                                                                  u.firstname,
+                                                                  u.lastname,
+                                                                  u.email,
+                                                                  u.picture,
+                                                                  u.imagealt
+                                                             FROM {assignment_submissions} asb
+                                                             JOIN {assignment} a
+                                                               ON a.id = asb.assignment
+                                                            JOIN {user} u ON u.id = asb.userid
+                                          WHERE asb.timemodified > $timestart AND a.id = $id
+                                                $userselect");
+        return $studentswithsubmissions;
+    }
+}
+
+function block_fn_marking_assign_get_notsubmittedany($courseid, $instanceid, $users, $timestart) {
+    global $DB;
+
+    list($insql, $params) = $DB->get_in_or_equal(array_keys($users));
+    $params[] = $instanceid;
+    $params[] = $timestart;
+
+    $sql = "SELECT DISTINCT asub.userid
+              FROM {assign_submission} asub
+             WHERE asub.userid {$insql}
+               AND asub.assignment = ?
+               AND asub.timemodified > ?";
+    return $DB->get_records_sql($sql, $params);
+}
+
+function block_fn_marking_forum_get_notsubmittedany($courseid, $instanceid, $users, $timestart) {
+    global $DB;
+
+    list($insql, $params) = $DB->get_in_or_equal(array_keys($users));
+    $params[] = $timestart;
+    $params[] = $instanceid;
+
+    $sql = "SELECT DISTINCT u.id userid,
+                   u.firstname,
+                   u.lastname,
+                   u.email,
+                   u.picture,
+                   u.imagealt
+              FROM {forum_posts} p
+              JOIN {forum_discussions} d
+                ON d.id = p.discussion
+              JOIN {forum} f
+                ON f.id = d.forum
+              JOIN {user} u
+                ON u.id = p.userid
+             WHERE u.id {$insql}
+               AND p.created > ?
+               AND f.id = ?";
+    return $DB->get_records_sql($sql, $params);
+}
+
+function block_fn_marking_quiz_get_notsubmittedany($courseid, $instanceid, $users, $timestart) {
+    global $DB;
+
+    list($insql, $params) = $DB->get_in_or_equal(array_keys($users));
+    $params[] = $instanceid;
+    $params[] = $timestart;
+
+    $sql = "SELECT DISTINCT qa.userid 
+              FROM {quiz_attempts} qa
+             WHERE qa.userid {$insql}
+               AND qa.quiz = ?
+               AND qa.timemodified > ?";
+    return $DB->get_records_sql($sql, $params);
 }
