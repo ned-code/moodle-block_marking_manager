@@ -27,4 +27,4 @@ $plugin->version  = 2017082500;
 $plugin->requires = 2014051200;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'block_fn_marking';
-$plugin->release = '3.1.9';
+$plugin->release = '3.2.0';
