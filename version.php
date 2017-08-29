@@ -24,7 +24,7 @@
  */
 
 $plugin->version  = 2017082500;
-$plugin->requires = 2014051200;
+$plugin->requires = 2015111600; // Moodle 3.0.x, 3.1.x or 3.2.x is required.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'block_fn_marking';
 $plugin->release = '3.2.0';
