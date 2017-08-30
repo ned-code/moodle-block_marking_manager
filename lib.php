@@ -3794,6 +3794,9 @@ function block_fn_marking_assignment_get_notsubmittedany($courseid, $id = "0", $
 function block_fn_marking_assign_get_notsubmittedany($courseid, $instanceid, $users, $timestart) {
     global $DB;
 
+    if (empty($users)) {
+        return array();
+    }
     list($insql, $params) = $DB->get_in_or_equal(array_keys($users));
     $params[] = $instanceid;
     $params[] = $timestart;
@@ -3838,6 +3841,9 @@ function block_fn_marking_forum_get_notsubmittedany($courseid, $instanceid, $use
 function block_fn_marking_quiz_get_notsubmittedany($courseid, $instanceid, $users, $timestart) {
     global $DB;
 
+    if (empty($users)) {
+        return array();
+    }
     list($insql, $params) = $DB->get_in_or_equal(array_keys($users));
     $params[] = $instanceid;
     $params[] = $timestart;
