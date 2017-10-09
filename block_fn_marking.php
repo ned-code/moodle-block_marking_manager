@@ -187,8 +187,9 @@ class block_fn_marking extends block_list {
         if (($this->page->course->id != SITEID)) {
 
             // CACHE.
-            $cachedatalast = get_config('block_fn_marking', 'cachedatalast');
+            $cachedatalast = get_config('block_fn_marking', 'cachedatalast_'.$this->page->course->id);
             $refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse');
+            $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
             $isingroup = block_fn_marking_isinagroup($this->page->course->id, $USER->id);
 
             $supportedmodules = array_keys(block_fn_marking_supported_mods());
@@ -200,10 +201,16 @@ class block_fn_marking extends block_list {
                 $params[] = 0;
             }
 
+            if ($refreshmodecourse == 'pageload') {
+                $summary =  block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked', '', $USER->id);
+                $numunmarked = $summary['unmarked'];
+                $nummarked = $summary['marked'];
+                $numunsubmitted = $summary['unsubmitted'];
+                $numsaved = $summary['saved'];
+            }
+
             if (isset($this->config->showunmarked) && $this->config->showunmarked) {
-                if ($refreshmodecourse == 'pageload') {
-                    $numunmarked = block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked', '', $USER->id);
-                } else if ($refreshmodecourse == 'cron') {
+                if ($refreshmodecourse == 'manual') {
                     $sql = "SELECT SUM(m.unmarked) unmarked
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
@@ -221,9 +228,7 @@ class block_fn_marking extends block_list {
             }
 
             if (isset($this->config->showmarked) && $this->config->showmarked) {
-                if ($refreshmodecourse == 'pageload') {
-                    $nummarked = block_fn_marking_count_unmarked_activities($this->page->course, 'marked', '', $USER->id);
-                } else if ($refreshmodecourse == 'cron') {
+                if ($refreshmodecourse == 'manual') {
                     $sql = "SELECT SUM(m.marked) marked
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
@@ -241,9 +246,7 @@ class block_fn_marking extends block_list {
             }
 
             if (isset($this->config->showunsubmitted) && $this->config->showunsubmitted) {
-                if ($refreshmodecourse == 'pageload') {
-                    $numunsubmitted = block_fn_marking_count_unmarked_activities($this->page->course, 'unsubmitted', '', $USER->id);
-                } else if ($refreshmodecourse == 'cron') {
+                if ($refreshmodecourse == 'manual') {
                     $sql = "SELECT SUM(m.unsubmitted) unsubmitted
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
@@ -261,9 +264,7 @@ class block_fn_marking extends block_list {
             }
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
-                if ($refreshmodecourse == 'pageload') {
-                    $numsaved = block_fn_marking_count_unmarked_activities($this->page->course, 'saved', '', $USER->id);
-                } else if ($refreshmodecourse == 'cron') {
+                if ($refreshmodecourse == 'manual') {
                     $sql = "SELECT SUM(m.saved) saved
                               FROM {block_fn_marking_mod_cache} m
                              WHERE m.courseid = ?
@@ -340,28 +341,37 @@ class block_fn_marking extends block_list {
                 }
             }
 
-            if ($refreshmodecourse == 'cron') {
-                if ($cachedatalast > 0) {
+            $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+            $this->content->icons[] = '';
+
+            if ($refreshmodecourse == 'manual') {
+                if ($cachedatalast === false) {
+                    $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                    $showrefreshbutton = true;
+                    $this->content->items = array();
+                    $this->content->icons = array();
+                } else if ($cachedatalast > 0) {
                     $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
+                    $showrefreshbutton = true;
                 } else {
                     $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
+                    $showrefreshbutton = false;
                 }
 
-                $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
-                $refreshbutton = html_writer::link(
-                    new moodle_url('/blocks/fn_marking/update_cache.php'),
-                    $refreshicon,
-                    array('class' => 'fn_refresh_btn')
-                );
-                $refresh = html_writer::div(
-                    $humantime . $refreshbutton,
-                    'fn_refresh_wrapper_footer'
-                );
+                if ($showrefreshbutton) {
+                    $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
+                    $refreshbutton = $refreshicon . ' ' . html_writer::link(
+                            new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
+                            get_string('refreshnow', 'block_fn_marking'),
+                            array('class' => 'btn btn-secondary fn_refresh_btn')
+                        );
+                    $refresh = html_writer::div(
+                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                        'fn_refresh_wrapper_footer'
+                    );
 
-                $this->content->items[] = "<div style='width:156px;'><hr /></div>";
-                $this->content->icons[] = '';
-
-                $this->content->footer = $refresh;
+                    $this->content->footer = $refresh;
+                }
             }
         }
         return $this->content;
@@ -394,28 +404,8 @@ class block_fn_marking extends block_list {
         }
 
         // CACHE.
-        $cachedatalast = get_config('block_fn_marking', 'cachedatalast');
         $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
         $refresh = '';
-
-        if ($refreshmodefrontpage == 'cron') {
-            if ($cachedatalast > 0) {
-                $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
-            } else {
-                $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
-            }
-
-            $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
-            $refreshbutton = html_writer::link(
-                new moodle_url('/blocks/fn_marking/update_cache.php'),
-                $refreshicon,
-                array('class' => 'fn_refresh_btn')
-            );
-            $refresh = html_writer::div(
-                $humantime . $refreshbutton,
-                'fn_refresh_wrapper'
-            );
-        }
 
         // Courses - admin.
         if ($isadmin) {
@@ -443,27 +433,44 @@ class block_fn_marking extends block_list {
 
                 $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide, $showzeroungraded, 10);
 
+                if ($refreshmodefrontpage == 'manual') {
+                    $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
+                    if ($cachedatalast === false) {
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $showrefreshbutton = true;
+                        $text = '';
+                    } else if ($cachedatalast > 0) {
+                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
+                        $showrefreshbutton = true;
+                    } else {
+                        $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
+                        $showrefreshbutton = false;
+                    }
+
+                    if ($showrefreshbutton) {
+                        $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
+                        $refreshbutton = $refreshicon . ' ' . html_writer::link(
+                                new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
+                                get_string('refreshnow', 'block_fn_marking'),
+                                array('class' => 'btn btn-secondary fn_refresh_btn')
+                            );
+                        $refresh = html_writer::div(
+                            $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                            'fn_refresh_wrapper_footer'
+                        );
+
+                        $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
+                    }
+                }
+
+
                 if ($text) {
-                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $refresh . $text . '</dl></div>';
+                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $text . '</dl></div>';
                     $this->content->icons[] = '';
                 }
             }
         } else {
-            $teacherroles = get_roles_with_capability('moodle/grade:edit', CAP_ALLOW);
-
-            list($sqlin, $params) = $DB->get_in_or_equal(array_keys($teacherroles));
-            $params[] = $USER->id;
-
-            $sql = "SELECT ctx.id,
-                           ctx.instanceid courseid
-                      FROM {context} ctx
-                INNER JOIN {role_assignments} ra
-                        ON ctx.id = ra.contextid
-                     WHERE ctx.contextlevel = 50
-                       AND ra.roleid {$sqlin}
-                       AND ra.userid = ?";
-
-            if ($teachercourses = $DB->get_records_sql($sql, $params)) {
+            if ($teachercourses = block_fn_marking_teacher_courses($USER->id)) {
                 $courses = array();
                 foreach ($teachercourses as $teachercourse) {
                     if ($filtercourses) {
@@ -478,8 +485,38 @@ class block_fn_marking extends block_list {
                 }
                 $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules);
 
+                if ($refreshmodefrontpage == 'manual') {
+                    $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
+                    if ($cachedatalast === false) {
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $showrefreshbutton = true;
+                        $text = '';
+                    } else if ($cachedatalast > 0) {
+                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
+                        $showrefreshbutton = true;
+                    } else {
+                        $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
+                        $showrefreshbutton = false;
+                    }
+
+                    if ($showrefreshbutton) {
+                        $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
+                        $refreshbutton = $refreshicon . ' ' . html_writer::link(
+                                new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
+                                get_string('refreshnow', 'block_fn_marking'),
+                                array('class' => 'btn btn-secondary fn_refresh_btn')
+                            );
+                        $refresh = html_writer::div(
+                            $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                            'fn_refresh_wrapper_footer'
+                        );
+
+                        $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
+                    }
+                }
+
                 if ($text) {
-                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $refresh . $text . '</dl></div>';
+                    $this->content->items[] = '<div class="fn-collapse-wrapper"><dl class="expanded">' . $text . '</dl></div>';
                     $this->content->icons[] = '';
                 }
             }

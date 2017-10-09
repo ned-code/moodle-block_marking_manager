@@ -27,6 +27,7 @@ require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
 
 set_time_limit(0);
 
+$id = required_param('id', PARAM_INT);
 $process = optional_param('process', 0, PARAM_INT);
 
 require_login(null, false);
@@ -55,8 +56,12 @@ if ($process) {
     $progressbar->create();
     core_php_time_limit::raise(HOURSECS);
     raise_memory_limit(MEMORY_EXTRA);
-    block_fn_marking_cache_course_data($progressbar);
-    echo $OUTPUT->continue_button(new moodle_url('/my'), 'get');
+    block_fn_marking_cache_course_data($id, $progressbar);
+    if ($id) {
+        echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id' => $id)), 'get');
+    } else {
+        echo $OUTPUT->continue_button(new moodle_url('/my'), 'get');
+    }
     echo $OUTPUT->footer();
     die;
 } else {
@@ -64,7 +69,7 @@ if ($process) {
     echo html_writer::tag('h1', $title, array('class' => 'page-title'));
     echo $OUTPUT->confirm(
         html_writer::div(get_string('updatecachewarning', 'block_fn_marking'), 'alert alert-block alert-danger'),
-        new moodle_url('/blocks/fn_marking/update_cache.php', array('process' => 1)),
+        new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $id, 'process' => 1)),
         new moodle_url('/my')
     );
     echo $OUTPUT->footer();

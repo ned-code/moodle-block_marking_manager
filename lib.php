@@ -84,12 +84,19 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                                                  $show='unmarked', $extra=false, $instance, $keepseparate=1) {
     global $DB;
 
+    $var = array(
+        'unmarked' => 0,
+        'marked' => 0,
+        'unsubmitted' => 0,
+        'saved' => 0
+    );
+
     $studentlist = implode(',', array_keys($students));
 
     $instance = $DB->get_record('assign', array('id' => $assign));
 
     if (empty($studentlist)) {
-        return 0;
+        return $var;
     }
 
     if (!$keepseparate) {
@@ -108,41 +115,44 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
         $comentwhereunmarked = " AND (f.commenttext = '' OR f.commenttext IS NULL)";
         $comentwhernmarked = " AND f.commenttext <> ''";
     }
-    if (($show == 'unmarked') || ($show == 'all')) {
-        if ($showdraft) {
-            $sql = "SELECT COUNT(DISTINCT s.id)
-                      FROM {assign_submission} s
-                 LEFT JOIN {assign_grades} g
-                        ON (s.assignment=g.assignment 
-                       AND s.userid=g.userid 
-                       AND s.attemptnumber = g.attemptnumber)
-                           $comentjoin
-                     WHERE s.assignment=$assign
-                       AND (s.userid in ($studentlist))
-                       AND s.status='submitted'
-                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                       AND s.latest = 1
-                           $comentwhereunmarked";
-        } else {
-            $sql = "SELECT COUNT(DISTINCT s.id)
-                      FROM {assign_submission} s
-                 LEFT JOIN {assign_grades} g
-                        ON (s.assignment=g.assignment 
-                       AND s.userid=g.userid 
-                       AND s.attemptnumber = g.attemptnumber)
-                           $comentjoin
-                     WHERE s.assignment=$assign
-                       AND (s.userid IN ($studentlist))
-                       AND s.status IN ('submitted', 'draft')
-                       AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
-                       AND s.latest = 1
-                           $comentwhereunmarked";
-        }
-        return $DB->count_records_sql($sql);
+    //if (($show == 'unmarked') || ($show == 'all')) {
 
-    } else if ($show == 'marked') {
-        if ($instance->grade != 0) {
-            $sqlunmarked = "SELECT DISTINCT s.userid
+    // Unmarked or all.
+    if ($showdraft) {
+        $sql = "SELECT COUNT(DISTINCT s.id)
+                  FROM {assign_submission} s
+             LEFT JOIN {assign_grades} g
+                    ON (s.assignment=g.assignment 
+                   AND s.userid=g.userid 
+                   AND s.attemptnumber = g.attemptnumber)
+                       $comentjoin
+                 WHERE s.assignment=$assign
+                   AND (s.userid in ($studentlist))
+                   AND s.status='submitted'
+                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                   AND s.latest = 1
+                       $comentwhereunmarked";
+    } else {
+        $sql = "SELECT COUNT(DISTINCT s.id)
+                  FROM {assign_submission} s
+             LEFT JOIN {assign_grades} g
+                    ON (s.assignment=g.assignment 
+                   AND s.userid=g.userid 
+                   AND s.attemptnumber = g.attemptnumber)
+                       $comentjoin
+                 WHERE s.assignment=$assign
+                   AND (s.userid IN ($studentlist))
+                   AND s.status IN ('submitted', 'draft')
+                   AND ((g.grade is null OR g.grade = -1) OR g.timemodified < s.timemodified)
+                   AND s.latest = 1
+                       $comentwhereunmarked";
+    }
+
+    $var['unmarked'] = $DB->count_records_sql($sql);
+
+    // Marked.
+    if ($instance->grade != 0) {
+        $sqlunmarked = "SELECT DISTINCT s.userid
                           FROM {assign_submission} s
                      LEFT JOIN {assign_grades} g 
                             ON (s.assignment=g.assignment
@@ -153,214 +163,214 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                            AND s.status='submitted'
                            AND g.grade IS NULL";
 
-            if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
-                $students = explode(',', $studentlist);
+        if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
+            $students = explode(',', $studentlist);
 
-                foreach ($unmarkedstus as $unmarkedstu) {
-                    $students = array_diff($students, array($unmarkedstu->userid));
-                }
-                $studentlist = implode(',', $students);
+            foreach ($unmarkedstus as $unmarkedstu) {
+                $students = array_diff($students, array($unmarkedstu->userid));
             }
+            $studentlist = implode(',', $students);
         }
-        if (empty($studentlist)) {
-            return 0;
-        }
-        if ($instance->grade == 0) {
-            $sql = "SELECT COUNT(DISTINCT s.userid)
-                  FROM {assign_submission} s
-             LEFT JOIN {assign_grades} g 
-                    ON (s.assignment=g.assignment and s.userid=g.userid
-                   AND s.attemptnumber = g.attemptnumber)
-                       $comentjoin
-                 WHERE s.assignment=$assign
-                   AND s.userid in ($studentlist)
-                   AND s.status IN ('submitted', 'resub', 'new')                    
-                       $comentwhernmarked";
-        } else {
-            $sql = "SELECT COUNT(DISTINCT s.userid)
-                  FROM {assign_submission} s
-             LEFT JOIN {assign_grades} g 
-                    ON (s.assignment=g.assignment and s.userid=g.userid
-                   AND s.attemptnumber = g.attemptnumber)
-                 WHERE ((s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND s.status IN ('submitted', 'resub')
-                   AND g.grade is not null  AND g.grade <> -1)
-                    OR (s.assignment=$assign
-                   AND (s.userid in ($studentlist))
-                   AND s.status='draft'
-                   AND g.grade is not null
-                   AND g.grade <> -1
-                   AND g.timemodified > s.timemodified))";
-        }
-
-        return $DB->count_records_sql($sql);
-
-    } else if ($show == 'unsubmitted') {
-        $sql = "SELECT COUNT(DISTINCT userid)
-                  FROM {assign_submission}
-                 WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
-        $subbed = $DB->count_records_sql($sql);
-        $unsubbed = abs(count($students) - $subbed);
-        return ($unsubbed);
-
-    } else if ($show == 'saved') {
-
-        if ($showdraft) {
-            $sql = "SELECT COUNT(DISTINCT s.id)
-                  FROM {assign_submission} s
-             LEFT JOIN {assign_grades} g
-                    ON s.assignment = g.assignment
-                   AND s.userid = g.userid
-                   AND s.attemptnumber = g.attemptnumber
-                 WHERE s.assignment = $assign
-                   AND s.userid IN ($studentlist)
-                   AND s.status = 'draft'
-                   AND (s.timemodified >= g.timemodified OR g.grade IS NULL)";
-
-            return $DB->count_records_sql($sql);
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
     }
+    if (empty($studentlist)) {
+        $var['marked'] = 0;
+    } else if ($instance->grade == 0) {
+        $sql = "SELECT COUNT(DISTINCT s.userid)
+              FROM {assign_submission} s
+         LEFT JOIN {assign_grades} g 
+                ON (s.assignment=g.assignment and s.userid=g.userid
+               AND s.attemptnumber = g.attemptnumber)
+                   $comentjoin
+             WHERE s.assignment=$assign
+               AND s.userid in ($studentlist)
+               AND s.status IN ('submitted', 'resub', 'new')                    
+                   $comentwhernmarked";
+    } else {
+        $sql = "SELECT COUNT(DISTINCT s.userid)
+              FROM {assign_submission} s
+         LEFT JOIN {assign_grades} g 
+                ON (s.assignment=g.assignment and s.userid=g.userid
+               AND s.attemptnumber = g.attemptnumber)
+             WHERE ((s.assignment=$assign
+               AND (s.userid in ($studentlist))
+               AND s.status IN ('submitted', 'resub')
+               AND g.grade is not null  AND g.grade <> -1)
+                OR (s.assignment=$assign
+               AND (s.userid in ($studentlist))
+               AND s.status='draft'
+               AND g.grade is not null
+               AND g.grade <> -1
+               AND g.timemodified > s.timemodified))";
+    }
+
+    $var['marked'] = $DB->count_records_sql($sql);
+
+
+
+    // Unsubmitted.
+    $sql = "SELECT COUNT(DISTINCT userid)
+              FROM {assign_submission}
+             WHERE assignment=$assign AND (userid in ($studentlist)) AND status='submitted'";
+    $subbed = $DB->count_records_sql($sql);
+    $unsubbed = abs(count($students) - $subbed);
+    $var['unsubmitted'] = $unsubbed;
+
+    // Saved.
+    if ($showdraft) {
+        $sql = "SELECT COUNT(DISTINCT s.id)
+              FROM {assign_submission} s
+         LEFT JOIN {assign_grades} g
+                ON s.assignment = g.assignment
+               AND s.userid = g.userid
+               AND s.attemptnumber = g.attemptnumber
+             WHERE s.assignment = $assign
+               AND s.userid IN ($studentlist)
+               AND s.status = 'draft'
+               AND (s.timemodified >= g.timemodified OR g.grade IS NULL)";
+
+        $var['saved'] = $DB->count_records_sql($sql);
+    }
+
+    return $var;
+
 }
 
 function block_fn_marking_quiz_count_ungraded($quizid, $graded, $students, $show='unmarked',
                                                $extra=false, $instance, $keepseparate=1) {
     global $DB;
 
+    $var = array(
+        'unmarked' => 0,
+        'marked' => 0,
+        'unsubmitted' => 0,
+        'saved' => 0
+    );
+
     $studentlist = implode(',', array_keys($students));
 
     if (empty($studentlist)) {
-        return 0;
+        return $var;
     }
 
-    if (($show == 'unmarked') || ($show == 'all')) {
+    // Unmarked.
+    $sqlgradablequiz = "SELECT qs.id,
+                               q.qtype
+                          FROM {quiz_slots} qs
+                          JOIN {question} q
+                            ON qs.questionid = q.id
+                         WHERE qs.quizid = ?
+                           AND q.qtype = 'essay'";
 
-        $sqlgradablequiz = "SELECT qs.id,
-                             q.qtype
-                        FROM {quiz_slots} qs
-                        JOIN {question} q
-                          ON qs.questionid = q.id
-                       WHERE qs.quizid = ?
-                         AND q.qtype = 'essay'";
-
-        if ($DB->record_exists_sql($sqlgradablequiz, array($instance->id))) {
-            $sql = "SELECT COUNT(DISTINCT qa.userid)
+    if ($DB->record_exists_sql($sqlgradablequiz, array($instance->id))) {
+        $sql = "SELECT COUNT(DISTINCT qa.userid)
                   FROM {quiz_attempts} qa
                  WHERE qa.quiz = ?
                    AND qa.state = 'finished'
                    AND qa.userid IN ($studentlist)
                    AND qa.sumgrades IS NULL";
 
-            return $DB->count_records_sql($sql, array($quizid));
-        } else {
-            return 0;
-        }
-
-    } else if ($show == 'marked') {
-
-        $sql = "SELECT COUNT(DISTINCT qa.userid)
-                  FROM {quiz_attempts} qa
-                 WHERE qa.quiz = ?
-                   AND qa.state = 'finished'
-                   AND qa.userid IN ($studentlist)
-                   AND qa.sumgrades >= 0";
-
-        return $DB->count_records_sql($sql, array($quizid));
-
-    } else if ($show == 'unsubmitted') {
-
-        $sql = "SELECT DISTINCT qa.userid
-                  FROM {quiz_attempts} qa
-                 WHERE qa.quiz = ?
-                   AND qa.state = 'finished'
-                   AND qa.userid IN ($studentlist)
-                   AND qa.sumgrades >= 0";
-
-        if ($attempts = $DB->get_records_sql($sql, array($quizid))) {
-            $unsubmitted = array_diff(array_keys($students), array_keys($attempts));
-            return count($unsubmitted);
-        } else {
-            return count($students);
-        }
-
-    } else {
-        return 0;
+        $var['unmarked'] = $DB->count_records_sql($sql, array($quizid));
     }
 
+    // Marked.
+    $sql = "SELECT COUNT(DISTINCT qa.userid)
+              FROM {quiz_attempts} qa
+             WHERE qa.quiz = ?
+               AND qa.state = 'finished'
+               AND qa.userid IN ($studentlist)
+               AND qa.sumgrades >= 0";
+
+    $var['marked'] = $DB->count_records_sql($sql, array($quizid));
+
+    // Unsubmitted.
+    $sql = "SELECT DISTINCT qa.userid
+              FROM {quiz_attempts} qa
+             WHERE qa.quiz = ?
+               AND qa.state = 'finished'
+               AND qa.userid IN ($studentlist)
+               AND qa.sumgrades >= 0";
+
+    if ($attempts = $DB->get_records_sql($sql, array($quizid))) {
+        $unsubmitted = array_diff(array_keys($students), array_keys($attempts));
+        $var['unsubmitted'] = count($unsubmitted);
+    } else {
+        $var['unsubmitted'] = count($students);
+    }
+    return $var;
 }
 
 function block_fn_marking_journal_count_ungraded($journalid, $graded, $students, $show='unmarked',
                                                $extra=false, $instance, $keepseparate=1) {
     global $DB;
 
+    $var = array(
+        'unmarked' => 0,
+        'marked' => 0,
+        'unsubmitted' => 0,
+        'saved' => 0
+    );
+
     $studentlist = implode(',', array_keys($students));
 
     if (empty($studentlist)) {
-        return 0;
+        return $var;
     }
 
-    if (($show == 'unmarked') || ($show == 'all')) {
-        if ($instance->grade == 0) {
-            $sql = "SELECT COUNT(1) 
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.entrycomment IS NULL 
-                       AND j.userid IN ($studentlist)";
-        } else {
-            $sql = "SELECT COUNT(1) 
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.rating IS NULL 
-                       AND j.userid IN ($studentlist)";
-        }
-        return $DB->count_records_sql($sql, array($journalid));
-
-    } else if ($show == 'marked') {
-        if ($instance->grade == 0) {
-            $sql = "SELECT COUNT(1) 
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.entrycomment IS NOT NULL 
-                       AND j.userid IN ($studentlist)";
-        } else {
-            $sql = "SELECT COUNT(1) 
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.rating IS NOT NULL
-                       AND j.userid IN ($studentlist)";
-        }
-        return $DB->count_records_sql($sql, array($journalid));
-
-    } else if ($show == 'unsubmitted') {
-        if ($instance->grade == 0) {
-            $sql = "SELECT j.userid 
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.entrycomment IS NOT NULL 
-                       AND j.userid IN ($studentlist)";
-        } else {
-            $sql = "SELECT j.userid
-                      FROM {journal_entries} j 
-                     WHERE j.journal = ? 
-                       AND j.rating IS NOT NULL
-                       AND j.userid IN ($studentlist)";
-        }
-
-        if ($attempts = $DB->get_records_sql($sql, array($journalid))) {
-            $unsubmitted = array_diff(array_keys($students), array_keys($attempts));
-            return count($unsubmitted);
-        } else {
-            return count($students);
-        }
-
+    // Unmarked.
+    if ($instance->grade == 0) {
+        $sql = "SELECT COUNT(1) 
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.entrycomment IS NULL 
+                   AND j.userid IN ($studentlist)";
     } else {
-        return 0;
+        $sql = "SELECT COUNT(1) 
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.rating IS NULL 
+                   AND j.userid IN ($studentlist)";
+    }
+    $var['unmarked'] = $DB->count_records_sql($sql, array($journalid));
+
+    // Marked.
+    if ($instance->grade == 0) {
+        $sql = "SELECT COUNT(1) 
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.entrycomment IS NOT NULL 
+                   AND j.userid IN ($studentlist)";
+    } else {
+        $sql = "SELECT COUNT(1) 
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.rating IS NOT NULL
+                   AND j.userid IN ($studentlist)";
+    }
+    $var['marked'] = $DB->count_records_sql($sql, array($journalid));
+
+    // Unsubmitted.
+    if ($instance->grade == 0) {
+        $sql = "SELECT j.userid 
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.entrycomment IS NOT NULL 
+                   AND j.userid IN ($studentlist)";
+    } else {
+        $sql = "SELECT j.userid
+                  FROM {journal_entries} j 
+                 WHERE j.journal = ? 
+                   AND j.rating IS NOT NULL
+                   AND j.userid IN ($studentlist)";
     }
 
+    if ($attempts = $DB->get_records_sql($sql, array($journalid))) {
+        $unsubmitted = array_diff(array_keys($students), array_keys($attempts));
+        $var['unsubmitted'] = count($unsubmitted);
+    } else {
+        $var['unsubmitted'] = count($students);
+    }
+
+    return $var;
 }
 
 function block_fn_marking_assign_students_ungraded($assign, $graded, $students, $show='unmarked',
@@ -645,6 +655,13 @@ function block_fn_marking_assign_oldest_ungraded($assign) {
 function block_fn_marking_forum_count_ungraded($forumid, $graded, $students, $show='unmarked') {
     global $CFG, $DB;
 
+    $var = array(
+        'unmarked' => 0,
+        'marked' => 0,
+        'unsubmitted' => 0,
+        'saved' => 0
+    );
+
     // Get students from forum_posts.
     $fusers = $DB->get_records_sql("SELECT DISTINCT u.id
                                FROM {forum_discussions} d
@@ -660,20 +677,23 @@ function block_fn_marking_forum_count_ungraded($forumid, $graded, $students, $sh
         }
     }
 
-    if (($show == 'unmarked') || ($show == 'all')) {
-        if (empty($graded) && !empty($fusers)) {
-            return count($fusers);
-        } else if (empty($fusers)) {
-            return 0;
-        } else {
-            return (count($fusers) - count($graded));
-        }
-    } else if ($show == 'marked') {
-        return count($graded);
-    } else if ($show == 'unsubmitted') {
-        $numuns = count($students) - count($fusers);
-        return max(0, $numuns);
+    // Unmarked.
+    if (empty($graded) && !empty($fusers)) {
+        $var['unmarked'] = count($fusers);
+    } else if (empty($fusers)) {
+        $var['unmarked'] = 0;
+    } else {
+        $var['unmarked'] = (count($fusers) - count($graded));
     }
+
+    // Marked.
+    $var['marked'] = count($graded);
+
+    // Unsubmitted
+    $numuns = count($students) - count($fusers);
+    $var['marked'] = max(0, $numuns);
+
+    return $var;
 }
 
 function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarked', $sort=false) {
@@ -736,12 +756,18 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
             }
         }
     }
-
 }
 
 function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', $module='', $userid=0) {
 
     global $CFG, $DB, $sections;
+
+    $var = array(
+        'unmarked' => 0,
+        'marked' => 0,
+        'unsubmitted' => 0,
+        'saved' => 0
+    );
 
     $context = context_course::instance($course->id);
     $isteacheredit = has_capability('moodle/course:update', $context);
@@ -752,10 +778,12 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
     // FIND CURRENT WEEK.
     $courseformatoptions = course_get_format($course)->get_format_options();
     $courseformat = course_get_format($course)->get_format();
-    if ( isset($courseformatoptions['numsections'])) {
+    if (isset($courseformatoptions['numsections'])) {
         $coursenumsections = $courseformatoptions['numsections'];
     } else {
-        $coursenumsections = 10; // Default section number.
+        if (!$coursenumsections = $DB->count_records('course_sections', array('course' => $course->id))) {
+            $coursenumsections = 10; // Default section number.
+        }
     }
 
     if ($courseformat == 'weeks') {
@@ -774,8 +802,6 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
     } else {
         $upto = $coursenumsections;
     }
-
-    $totungraded = 0;
 
     // Array of functions to call for grading purposes for modules.
     $modgradesarray = block_fn_marking_supported_mods();
@@ -876,11 +902,12 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
                                     if (function_exists($ungradedfunction)) {
                                         $extra = false;
                                         $ung = $ungradedfunction($instance->id, $gradedarray, $students, $info, $extra, $instance);
-                                    } else {
-                                        $ung = $numstudents - $numgraded;
                                     }
                                     if ($marker) {
-                                        $totungraded += $ung;
+                                        $var['unmarked'] += $ung['unmarked'];
+                                        $var['marked'] += $ung['marked'];
+                                        $var['unsubmitted'] += $ung['unsubmitted'];
+                                        $var['saved'] += $ung['saved'];
                                     }
                                 }
                             }
@@ -891,7 +918,7 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
         }
     }
 
-    return $totungraded;
+    return $var;
 }
 
 function block_fn_marking_count_notloggedin($course, $days) {
@@ -2906,10 +2933,15 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
 
             $totalungraded = 0;
             $moduletext = '';
+
             foreach ($supportedmodules as $supportedmodule) {
                 if ($refreshmodefrontpage == 'pageload') {
-                    $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $USER->id);
-                } else if ($refreshmodefrontpage == 'cron') {
+                    $summary = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $USER->id);
+                    $numunmarked = $summary['unmarked'];
+                    $nummarked = $summary['marked'];
+                    $numunsubmitted = $summary['unsubmitted'];
+                    $numsaved = $summary['saved'];
+                } else if ($refreshmodefrontpage == 'manual') {
                     if ($modcache = $DB->get_record('block_fn_marking_mod_cache',
                         array('courseid' => $course->id, 'modname' => $supportedmodule, 'userid' => $userid, 'expired' => 0)
                     )) {
@@ -3256,13 +3288,13 @@ function block_fn_marking_get_selected_courses($category, &$filtercourses) {
     }
 };
 
-function block_fn_marking_get_setting_courses () {
+function block_fn_marking_get_setting_courses() {
     global $DB;
 
     $filtercourses = array();
-    $includecourses = get_config('block_fn_marking', 'includecourses');
+    $allcourseswithblock = get_config('block_fn_marking', 'allcourseswithblock');
 
-    if ($includecourses = 'allcourseswithblock') {
+    if ($allcourseswithblock) {
         $sql = "SELECT ctx.instanceid  
                   FROM {context} ctx 
                  WHERE ctx.id IN (SELECT bi.parentcontextid 
@@ -3324,7 +3356,7 @@ function block_fn_marking_get_setting_courses () {
     return $filtercourses;
 }
 
-function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
+function block_fn_marking_cache_course_data ($courseid, progress_bar $progressbar = null) {
     global $DB, $USER, $CFG;
 
     require_once($CFG->dirroot . '/blocks/fn_marking/lib.php');
@@ -3332,24 +3364,46 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
 
     $supportedmodules = block_fn_marking_supported_mods();
 
-    $filtercourses = block_fn_marking_get_setting_courses ();
-    set_config('cachedatalast', 0, 'block_fn_marking');
+    $filtercourses = block_fn_marking_get_setting_courses();
+    $cachecourses = array();
 
-    $numberofitems = count($filtercourses) * count($supportedmodules);
+    if (in_array($courseid, $filtercourses)) {
+        $cachecourses[] = $courseid;
+    } else if ($courseid == SITEID) {
+        if ($teachercourses = block_fn_marking_teacher_courses($USER->id)) {
+            foreach ($teachercourses as $teachercourse) {
+                if (in_array($teachercourse->courseid, $filtercourses)) {
+                    $cachecourses[] = $teachercourse->courseid;
+                }
+            }
+        } else if (is_siteadmin()) {
+            $cachecourses = $filtercourses;
+        }
+    }
+
+    $numberofitems = count($cachecourses) * count($supportedmodules);
     $counter = 0;
-    $DB->execute("UPDATE {block_fn_marking_mod_cache} SET expired = ?", array(time()));
-    foreach ($filtercourses as $filtercourse) {
+
+    foreach ($cachecourses as $filtercourse) {
 
         if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
+            if (get_config('block_fn_marking', 'cachedatalast_'.$course->id) === 0) {
+                continue;
+            }
+            set_config('cachedatalast_'.$course->id, 0, 'block_fn_marking');
+            $DB->execute("UPDATE {block_fn_marking_mod_cache} SET expired = ? WHERE courseid = ?",
+                array(time(), $course->id)
+            );
 
             $context = context_course::instance($course->id);
             $teachers = get_users_by_capability($context, 'moodle/grade:viewall');
 
             foreach ($supportedmodules as $supportedmodule => $file) {
-                $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
-                $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule);
-                $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule);
-                $numsaved = block_fn_marking_count_unmarked_activities($course, 'saved', $supportedmodule);
+                $summary = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
+                $numunmarked = $summary['unmarked'];
+                $nummarked = $summary['marked'];
+                $numunsubmitted = $summary['unsubmitted'];
+                $numsaved = $summary['saved'];
 
                 $rec = new stdClass();
                 $rec->courseid = $course->id;
@@ -3373,10 +3427,11 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
                 if ($teachers) {
                     foreach ($teachers as $teacher) {
                         if ($groupstudents = block_fn_marking_mygroup_members($course->id, $teacher->id)) {
-                            $numunmarked = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $teacher->id);
-                            $nummarked = block_fn_marking_count_unmarked_activities($course, 'marked', $supportedmodule, $teacher->id);
-                            $numunsubmitted = block_fn_marking_count_unmarked_activities($course, 'unsubmitted', $supportedmodule, $teacher->id);
-                            $numsaved = block_fn_marking_count_unmarked_activities($course, 'saved', $supportedmodule, $teacher->id);
+                            $summary = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule, $teacher->id);
+                            $numunmarked = $summary['unmarked'];
+                            $nummarked = $summary['marked'];
+                            $numunsubmitted = $summary['unsubmitted'];
+                            $numsaved = $summary['saved'];
 
                             $rec = new stdClass();
                             $rec->courseid = $course->id;
@@ -3406,9 +3461,10 @@ function block_fn_marking_cache_course_data (progress_bar $progressbar = null) {
                     $progressbar->update_full($donepercent, "$counter of $numberofitems");
                 }
             }
+
+            set_config('cachedatalast_'.$course->id, time(), 'block_fn_marking');
         }
     }
-    set_config('cachedatalast', time(), 'block_fn_marking');
 
     return true;
 }
@@ -3854,4 +3910,54 @@ function block_fn_marking_quiz_get_notsubmittedany($courseid, $instanceid, $user
                AND qa.quiz = ?
                AND qa.timemodified > ?";
     return $DB->get_records_sql($sql, $params);
+}
+
+function block_fn_marking_teacher_courses($userid) {
+    global $DB;
+    if (is_siteadmin($userid)) {
+        return $DB->get_records_select('course', 'id > ? AND visible = ?', array(SITEID, 1), '', 'id courseid');
+    } else {
+        $teacherroles = get_roles_with_capability('moodle/grade:edit', CAP_ALLOW);
+
+        list($sqlin, $params) = $DB->get_in_or_equal(array_keys($teacherroles));
+        $params[] = $userid;
+
+        $sql = "SELECT DISTINCT ctx.id,
+                   ctx.instanceid courseid
+              FROM {context} ctx
+        INNER JOIN {role_assignments} ra
+                ON ctx.id = ra.contextid
+             WHERE ctx.contextlevel = 50
+               AND ra.roleid {$sqlin}
+               AND ra.userid = ?";
+
+        return $DB->get_records_sql($sql, $params);
+    }
+}
+
+function block_fn_marking_frontapage_cache_update_time($userid) {
+    $time = false;
+
+    $filtercourses = block_fn_marking_get_setting_courses();
+
+    if ($teachercourses = block_fn_marking_teacher_courses($userid)) {
+        $counter = 0;
+        foreach ($teachercourses as $teachercourse) {
+            if (in_array($teachercourse->courseid, $filtercourses)) {
+                $counter++;
+                $coursecache = get_config('block_fn_marking', 'cachedatalast_'.$teachercourse->courseid);
+
+                if ($counter == 1) {
+                    $time = $coursecache;
+                }
+                if ($coursecache === false) {
+                    return false;
+                } else if ($time > $coursecache) {
+                    $time = $coursecache;
+                }
+            }
+        }
+
+    }
+    return $time;
 }

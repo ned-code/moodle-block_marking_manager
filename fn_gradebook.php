@@ -360,11 +360,13 @@ $modnamesplural = get_module_types_names(true);
 // FIND CURRENT WEEK.
 $courseformatoptions = course_get_format($course)->get_format_options();
 $courseformat = course_get_format($course)->get_format();
-$coursenumsections = $courseformatoptions['numsections'];
-if ( isset($courseformatoptions['numsections'])) {
+
+if (isset($courseformatoptions['numsections'])) {
     $coursenumsections = $courseformatoptions['numsections'];
 } else {
-    $coursenumsections = 10; // Default section number.
+    if (!$coursenumsections = $DB->count_records('course_sections', array('course' => $course->id))) {
+        $coursenumsections = 10; // Default section number.
+    }
 }
 
 if ($courseformat == 'weeks') {
@@ -453,8 +455,9 @@ foreach ($selectedsection as $sectionnum) {
                                 $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_count_ungraded';
                                 if (function_exists($ungradedfunction)) {
                                     $extra = false;
-                                    $ung = $ungradedfunction($instance->id, $gradedarray, $students, $show,
+                                    $summary = $ungradedfunction($instance->id, $gradedarray, $students, $show,
                                         $extra, $instance, $keepseparate);
+                                    $ung = $summary[$show];
                                 } else if ($show == 'unmarked') {
                                     $ung = $numstudents - $numgraded;
                                     if (($action == 'submitgrade') && ($mid == $mod->id)) {
