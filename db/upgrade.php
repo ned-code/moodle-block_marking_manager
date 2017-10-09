@@ -74,5 +74,18 @@ function xmldb_block_fn_marking_upgrade($oldversion) {
 
         upgrade_block_savepoint(true, 2016111700, 'fn_marking');
     }
+
+    if ($oldversion < 2017092900) {
+        if ($refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage')) {
+            if ($refreshmodefrontpage == 'cron') {
+                set_config('refreshmodefrontpage', 'manual', 'block_fn_marking');
+            }
+        }
+        if ($refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse')) {
+            if ($refreshmodecourse == 'cron') {
+                set_config('refreshmodecourse', 'manual', 'block_fn_marking');
+            }
+        }
+    }
     return true;
 }

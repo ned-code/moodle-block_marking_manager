@@ -46,7 +46,7 @@ $settings->add(
         'pageload',
         array(
             'pageload' => get_string('pageload', 'block_fn_marking'),
-            'cron' => get_string('cron', 'block_fn_marking')
+            'manual' => get_string('manual', 'block_fn_marking')
         )
     )
 );
@@ -59,7 +59,7 @@ $settings->add(
         'pageload',
         array(
             'pageload' => get_string('pageload', 'block_fn_marking'),
-            'cron' => get_string('cron', 'block_fn_marking')
+            'manual' => get_string('manual', 'block_fn_marking')
         )
     )
 );
@@ -69,7 +69,7 @@ $settings->add(
         get_string('showtopmessage', 'block_fn_marking'),
         '',
         0,
-        array('0' => 'No', '1' => 'Yes')
+        array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
 $settings->add(
@@ -86,19 +86,16 @@ $settings->add(
         get_string('include_orphaned', 'block_fn_marking'),
         '',
         0,
-        array('0' => 'No', '1' => 'Yes')
+        array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
 $settings->add(
     new admin_setting_configselect(
-        'block_fn_marking/includecourses',
-        get_string('includecourses', 'block_fn_marking'),
+        'block_fn_marking/allcourseswithblock',
+        get_string('allcourseswithblock', 'block_fn_marking'),
         '',
-        'allcourseswithblock',
-        array(
-            'allcourseswithblock' => get_string('allcourseswithblock', 'block_fn_marking'),
-            'selectedcourses' => get_string('selectedcourses', 'block_fn_marking')
-        )
+        1,
+        array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
 $coursecaturl = new moodle_url('/blocks/fn_marking/coursecategories.php');
@@ -113,6 +110,6 @@ $settings->add(
         get_string('editortoggle', 'block_fn_marking'),
         get_string('experimental', 'block_fn_marking'),
         0,
-        array('0' => 'No', '1' => 'Yes')
+        array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
