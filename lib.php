@@ -169,10 +169,10 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
             foreach ($unmarkedstus as $unmarkedstu) {
                 $students = array_diff($students, array($unmarkedstu->userid));
             }
-            $studentlist = implode(',', $students);
+            $studentlistmarked = implode(',', $students);
         }
     }
-    if (empty($studentlist)) {
+    if (empty($studentlistmarked)) {
         $var['marked'] = 0;
     } else if ($instance->grade == 0) {
         $sql = "SELECT COUNT(DISTINCT s.userid)
@@ -182,7 +182,7 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                AND s.attemptnumber = g.attemptnumber)
                    $comentjoin
              WHERE s.assignment=$assign
-               AND s.userid in ($studentlist)
+               AND s.userid in ($studentlistmarked)
                AND s.status IN ('submitted', 'resub', 'new')                    
                    $comentwhernmarked";
     } else {
@@ -192,11 +192,11 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                 ON (s.assignment=g.assignment and s.userid=g.userid
                AND s.attemptnumber = g.attemptnumber)
              WHERE ((s.assignment=$assign
-               AND (s.userid in ($studentlist))
+               AND (s.userid in ($studentlistmarked))
                AND s.status IN ('submitted', 'resub')
                AND g.grade is not null  AND g.grade <> -1)
                 OR (s.assignment=$assign
-               AND (s.userid in ($studentlist))
+               AND (s.userid in ($studentlistmarked))
                AND s.status='draft'
                AND g.grade is not null
                AND g.grade <> -1
@@ -232,7 +232,6 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
     }
 
     return $var;
-
 }
 
 function block_fn_marking_quiz_count_ungraded($quizid, $graded, $students, $show='unmarked',
@@ -2912,13 +2911,13 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
 
     $text = '';
     $counter = 0;
-
+    $courseitems = array();
     if (is_array($courses) && !empty($courses)) {
 
         $modnamesplural = get_module_types_names(true);
 
         foreach ($courses as $course) {
-            if ($counter >= $maxcourse) {
+            if (($counter >= $maxcourse) && ($refreshmodefrontpage != 'manual')) {
                 continue;
             }
             $isingroup = block_fn_marking_isinagroup($course->id, $USER->id);
@@ -2986,12 +2985,23 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
                             </dt>';
                 }
                 $counter++;
-                $text .= '<div>'.$coursetext.$moduletext.'</div>';
+                $courseitems[] = array(
+                    'ungraded' => $totalungraded,
+                    'item' => '<div>'.$coursetext.$moduletext.'</div>'
+                );
+            }
+        }
+        if ($courseitems) {
+            usort($courseitems, function ($b, $a) {
+                return $a['ungraded'] - $b['ungraded'];
+            });
+            foreach ($courseitems as $index => $courseitem) {
+                $text .= $courseitem['item'];
             }
         }
     }
 
-    if ($counter >= $maxcourse) {
+    if (($counter >= $maxcourse) && ($refreshmodefrontpage != 'manual')) {
         $text .= "<div class='fn-admin-warning' >".get_string('morethan10', 'block_fn_marking')."</div>";
     }
 
@@ -3292,7 +3302,9 @@ function block_fn_marking_get_setting_courses() {
     global $DB;
 
     $filtercourses = array();
+    $coursewithblockinstances = array();
     $allcourseswithblock = get_config('block_fn_marking', 'allcourseswithblock');
+    $includehiddencourses = get_config('block_fn_marking', 'includehiddencourses');
 
     if ($allcourseswithblock) {
         $sql = "SELECT ctx.instanceid  
@@ -3302,57 +3314,66 @@ function block_fn_marking_get_setting_courses() {
                                    WHERE bi.blockname = 'fn_marking') 
                    AND ctx.contextlevel = ?
                    AND ctx.instanceid > ?";
-        if ($courses = $DB->get_records_sql($sql, array(CONTEXT_COURSE, 1))) {
+        if ($courses = $DB->get_records_sql($sql, array(CONTEXT_COURSE, SITEID))) {
             foreach ($courses as $subcatcourse) {
-                $filtercourses[] = $subcatcourse->instanceid;
+                $coursewithblockinstances[] = $subcatcourse->instanceid;
             }
-        }
-    } else {
-        $configcategory = get_config('block_fn_marking', 'category');
-        $configcourse = get_config('block_fn_marking', 'course');
-
-        if (empty($configcategory) && empty($configcategory)) {
-
-            $sql = "SELECT c.id FROM {course} c WHERE c.id <> ?";
-            if ($courses = $DB->get_records_sql($sql, array(SITEID))) {
-                foreach ($courses as $subcatcourse) {
-                    $filtercourses[] = $subcatcourse->id;
-                }
-            }
-        }
-
-        if ($configcategory) {
-            $selectedcategories = explode(',', $configcategory);
-            foreach ($selectedcategories as $categoryid) {
-
-                if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
-                    foreach ($parentcatcourses as $catcourse) {
-                        $filtercourses[] = $catcourse->id;
-                    }
-                }
-                if ($categorystructure = block_fn_marking_get_course_category_tree($categoryid)) {
-                    foreach ($categorystructure as $category) {
-
-                        if ($category->courses) {
-                            foreach ($category->courses as $subcatcourse) {
-                                $filtercourses[] = $subcatcourse->id;
-                            }
-                        }
-                        if ($category->categories) {
-                            foreach ($category->categories as $subcategory) {
-                                block_fn_marking_get_selected_courses($subcategory, $filtercourses);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($configcourse) {
-            $selectedcourses = explode(',', $configcourse);
-            $filtercourses = array_merge($filtercourses, $selectedcourses);
         }
     }
+
+    $configcategory = get_config('block_fn_marking', 'category');
+    $configcourse = get_config('block_fn_marking', 'course');
+
+
+    if (empty($configcategory) && empty($configcourse)) {
+        $sql = "SELECT c.id FROM {course} c WHERE c.id <> ?";
+        if ($courses = $DB->get_records_sql($sql, array(SITEID))) {
+            foreach ($courses as $subcatcourse) {
+                $filtercourses[] = $subcatcourse->id;
+            }
+        }
+    } else if ($configcategory) {
+        $selectedcategories = explode(',', $configcategory);
+        foreach ($selectedcategories as $categoryid) {
+
+            if ($parentcatcourses = $DB->get_records('course', array('category' => $categoryid))) {
+                foreach ($parentcatcourses as $catcourse) {
+                    if (!$includehiddencourses && !$catcourse->visible) {
+                        continue;
+                    }
+                    $filtercourses[] = $catcourse->id;
+                }
+            }
+            if ($categorystructure = block_fn_marking_get_course_category_tree($categoryid)) {
+                foreach ($categorystructure as $category) {
+
+                    if ($category->courses) {
+                        foreach ($category->courses as $subcatcourse) {
+                            if (!$includehiddencourses && !$subcatcourse->visible) {
+                                continue;
+                            }
+                            $filtercourses[] = $subcatcourse->id;
+                        }
+                    }
+                    if ($category->categories) {
+                        foreach ($category->categories as $subcategory) {
+                            block_fn_marking_get_selected_courses($subcategory, $filtercourses);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ($configcourse) {
+        $selectedcourses = explode(',', $configcourse);
+        $filtercourses = array_merge($filtercourses, $selectedcourses);
+    }
+
+    if ($coursewithblockinstances) {
+        $filtercourses = array_intersect($filtercourses, $coursewithblockinstances);
+    }
+
     return $filtercourses;
 }
 
@@ -3381,11 +3402,16 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
         }
     }
 
-    $numberofitems = count($cachecourses) * count($supportedmodules);
+    if (!$numberofitems = count($cachecourses)) {
+       return true;
+    }
+    $numberomodules = count($supportedmodules);
     $counter = 0;
-
+    if (!is_null($progressbar)) {
+        $donepercent = floor($counter / $numberofitems * 100);
+        $progressbar->update_full($donepercent, "$counter of $numberofitems");
+    }
     foreach ($cachecourses as $filtercourse) {
-
         if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
             if (get_config('block_fn_marking', 'cachedatalast_'.$course->id) === 0) {
                 continue;
@@ -3397,7 +3423,7 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
 
             $context = context_course::instance($course->id);
             $teachers = get_users_by_capability($context, 'moodle/grade:viewall');
-
+            $countermodule = 0;
             foreach ($supportedmodules as $supportedmodule => $file) {
                 $summary = block_fn_marking_count_unmarked_activities($course, 'unmarked', $supportedmodule);
                 $numunmarked = $summary['unmarked'];
@@ -3455,14 +3481,19 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
                     }
                 }
 
-                $counter++;
+                $countermodule++;
                 if (!is_null($progressbar)) {
-                    $donepercent = floor($counter / $numberofitems * 100);
+                    $donepercent = floor(($counter + ($countermodule / $numberomodules)) / $numberofitems * 100);
                     $progressbar->update_full($donepercent, "$counter of $numberofitems");
                 }
             }
 
             set_config('cachedatalast_'.$course->id, time(), 'block_fn_marking');
+        }
+        $counter++;
+        if (!is_null($progressbar)) {
+            $donepercent = floor($counter / $numberofitems * 100);
+            $progressbar->update_full($donepercent, "$counter of $numberofitems");
         }
     }
 
@@ -3914,7 +3945,8 @@ function block_fn_marking_quiz_get_notsubmittedany($courseid, $instanceid, $user
 
 function block_fn_marking_teacher_courses($userid) {
     global $DB;
-    if (is_siteadmin($userid)) {
+    $adminfrontpage = get_config('block_fn_marking', 'adminfrontpage');
+    if (is_siteadmin($userid) && $adminfrontpage == 'all') {
         return $DB->get_records_select('course', 'id > ? AND visible = ?', array(SITEID, 1), '', 'id courseid');
     } else {
         $teacherroles = get_roles_with_capability('moodle/grade:edit', CAP_ALLOW);

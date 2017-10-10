@@ -237,10 +237,6 @@ h4.head-title {
     font-size: 15px;
     padding: 10px;
 }
-
-.block_fn_marking .content {
-    padding: 10px !important;
-}
 .block_fn_marking.block.list_block .content ul.unlist li {
     margin-bottom: 0;
 }
@@ -727,7 +723,6 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 .block_fn_marking .content {
     font-size: 1em !important;
-    padding: 0 4px 4px 4px;
 }
 
 .block_fn_marking dl,
@@ -864,9 +859,6 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 .block_fn_marking.card.m-b-1 ul {
     margin-left: 0 !important;
-}
-.block_fn_marking ul {
-    margin-left: 30px;
 }
 .block_fn_marking .fn-full-width {
     width: 100%;

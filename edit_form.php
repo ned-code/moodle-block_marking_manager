@@ -50,11 +50,18 @@ class block_fn_marking_edit_form extends block_edit_form {
         $mform->addElement('static', 'blockinfo', get_string('blockinfo', 'block_fn_marking'),
             '<a target="_blank" href="http://ned.ca/marking-manager">http://ned.ca/marking-manager</a>');
 
+        $settingurl = new moodle_url('/admin/settings.php', array('section' => 'blocksettingfn_marking'));
+        $mform->addElement('static', 'blocksettings', get_string('blocksitesettings', 'block_fn_marking'),
+            html_writer::link($settingurl, get_string('opensitesettingspage', 'block_fn_marking'),
+                array('target' => '_blank')
+            )
+        );
+
         // Config title for the block.
         $mform->addElement('text', 'config_title',
                             get_string('setblocktitle', 'block_fn_marking'));
         $mform->setType('config_title', PARAM_TEXT);
-        $mform->setDefault('config_title', get_string('plugintitle', 'block_fn_marking'));
+        $mform->setDefault('config_title', get_string('blocktitle', 'block_fn_marking'));
         $mform->addHelpButton('config_title', 'config_title', 'block_fn_marking');
 
         // Section Titles.

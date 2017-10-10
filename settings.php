@@ -63,6 +63,20 @@ $settings->add(
         )
     )
 );
+
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/adminfrontpage',
+        get_string('adminfrontpage', 'block_fn_marking'),
+        '',
+        'enrolled',
+        array(
+            'enrolled' => get_string('enrolledcourses', 'block_fn_marking'),
+            'all' => get_string('allcourses', 'block_fn_marking')
+        )
+    )
+);
+
 $settings->add(
     new admin_setting_configselect(
         'block_fn_marking/showtopmessage',
@@ -72,6 +86,7 @@ $settings->add(
         array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
+
 $settings->add(
     new admin_setting_confightmleditor(
         'block_fn_marking/topmessage',
@@ -80,6 +95,7 @@ $settings->add(
         ''
     )
 );
+
 $settings->add(
     new admin_setting_configselect(
         'block_fn_marking/include_orphaned',
@@ -89,6 +105,7 @@ $settings->add(
         array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
+
 $settings->add(
     new admin_setting_configselect(
         'block_fn_marking/allcourseswithblock',
@@ -98,6 +115,17 @@ $settings->add(
         array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
     )
 );
+
+$settings->add(
+    new admin_setting_configselect(
+        'block_fn_marking/includehiddencourses',
+        get_string('includehiddencourses', 'block_fn_marking'),
+        '',
+        0,
+        array('0' => get_string('no', 'block_fn_marking'), '1' => get_string('yes', 'block_fn_marking'))
+    )
+);
+
 $coursecaturl = new moodle_url('/blocks/fn_marking/coursecategories.php');
 $settings->add( new admin_setting_configempty('block_fn_marking/courseselection',
     get_string('coursecategoriesincluded', 'block_fn_marking'),
