@@ -49,7 +49,7 @@ class block_fn_marking extends block_list {
         }
 
         if (empty($this->config->title)) {
-            $this->title = get_string('pluginname', 'block_fn_marking');
+            $this->title = get_string('blocktitle', 'block_fn_marking');
         } else {
             $this->title = $this->config->title;
         }
@@ -405,10 +405,11 @@ class block_fn_marking extends block_list {
 
         // CACHE.
         $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
+        $adminfrontpage = get_config('block_fn_marking', 'adminfrontpage');
         $refresh = '';
 
         // Courses - admin.
-        if ($isadmin) {
+        if ($isadmin && $adminfrontpage == 'all') {
 
             $sqlcourse = "SELECT c.*
                             FROM {course} c
@@ -437,30 +438,25 @@ class block_fn_marking extends block_list {
                     $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
                     if ($cachedatalast === false) {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
-                        $showrefreshbutton = true;
                         $text = '';
                     } else if ($cachedatalast > 0) {
                         $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
-                        $showrefreshbutton = true;
                     } else {
-                        $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
-                        $showrefreshbutton = false;
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
                     }
 
-                    if ($showrefreshbutton) {
-                        $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
-                        $refreshbutton = $refreshicon . ' ' . html_writer::link(
-                                new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
-                                get_string('refreshnow', 'block_fn_marking'),
-                                array('class' => 'btn btn-secondary fn_refresh_btn')
-                            );
-                        $refresh = html_writer::div(
-                            $humantime . html_writer::empty_tag('br') . $refreshbutton,
-                            'fn_refresh_wrapper_footer'
+                    $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
+                    $refreshbutton = $refreshicon . ' ' . html_writer::link(
+                            new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
+                            get_string('refreshnow', 'block_fn_marking'),
+                            array('class' => 'btn btn-secondary fn_refresh_btn')
                         );
+                    $refresh = html_writer::div(
+                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                        'fn_refresh_wrapper_footer'
+                    );
 
-                        $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
-                    }
+                    $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
                 }
 
 
@@ -489,30 +485,26 @@ class block_fn_marking extends block_list {
                     $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
                     if ($cachedatalast === false) {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
-                        $showrefreshbutton = true;
                         $text = '';
                     } else if ($cachedatalast > 0) {
                         $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
-                        $showrefreshbutton = true;
                     } else {
-                        $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
-                        $showrefreshbutton = false;
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
                     }
 
-                    if ($showrefreshbutton) {
-                        $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
-                        $refreshbutton = $refreshicon . ' ' . html_writer::link(
-                                new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
-                                get_string('refreshnow', 'block_fn_marking'),
-                                array('class' => 'btn btn-secondary fn_refresh_btn')
-                            );
-                        $refresh = html_writer::div(
-                            $humantime . html_writer::empty_tag('br') . $refreshbutton,
-                            'fn_refresh_wrapper_footer'
+                    $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
+                    $refreshbutton = $refreshicon . ' ' . html_writer::link(
+                            new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
+                            get_string('refreshnow', 'block_fn_marking'),
+                            array('class' => 'btn btn-secondary fn_refresh_btn')
                         );
+                    $refresh = html_writer::div(
+                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                        'fn_refresh_wrapper_footer'
+                    );
 
-                        $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
-                    }
+                    $text .= "<div style='width:156px;'><hr /></div>" . $refresh;
+
                 }
 
                 if ($text) {
