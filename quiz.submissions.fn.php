@@ -235,7 +235,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                                ON qas.questionattemptid = qa.id
                         LEFT JOIN {question_attempt_step_data} qasd
                                ON qasd.attemptstepid = qas.id
-                            WHERE qa.slot=?
+                            WHERE qa.slot = ?
                               AND quiza.id = ?
                          ORDER BY qas.id DESC";
 
@@ -274,7 +274,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                                     </span></a>');
                 $cell->attributes = array('class' => 'fn-highlighted');
                 $cellarray[] = $cell;
-            } else if ($questionstep->state == 'mangrpartial') {
+            } else if (($questionstep->state == 'mangrpartial') || ($questionstep->state == 'gradedpartial')) {
                 $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
                     $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
                                     <span class="que">

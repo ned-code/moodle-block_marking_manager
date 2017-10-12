@@ -54,25 +54,33 @@ span.fn_summaries {
 /* Large desktop */
 @media (min-width: 1200px) {
     #marking-interface {
-        width: 1000px;
         margin: 0 auto;
+        width: 1000px;
+        overflow: hidden;
+        display: table-cell;
     }
 }
 @media (min-width: 900px) and (max-width: 1200px) {
     #marking-interface {
         width: 1000px;
         margin: 0 auto;
+        overflow: hidden;
+        display: table-cell;
     }
 }
 @media (max-width: 767px) {
     #marking-interface {
         width: 1000px;
         margin: 0 auto;
+        overflow: hidden;
+        display: table-cell;
     }
 }
 
 
-
+#page-blocks-fn_marking-fn_gradebook #marking-interface table.fnmarkingblock {
+    white-space: nowrap;
+}
 #marking-interface table.markingmanagercontainer td.left-sec {
     padding: 15px;
     max-width: 300px;
@@ -518,43 +526,57 @@ table.simplegradebook {
     font-weight: normal;
     font-size: 11px;
     color: #fff;;
-    background-color: #666;
     border-collapse: collapse;
     margin-top: 10px;
 
 }
 table.simplegradebook td {
-    background-color: #CCC;
     color: #000;
     padding: 4px;
     text-align: left;
-    border: 1px #aaaaaa solid;
+    border: 1px #dddddd solid;
     font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
     font-weight: normal;
     font-size: 11px;
 }
-
-table.simplegradebook td.name {
-
-}
-table.simplegradebook td.odd {
-    background-color: #FFEDC9;
-}
-table.simplegradebook td.even {
-    background-color: #FFFFD9;
-}
 table.simplegradebook td.green {
-    background-color: #C2D69B;
+    background-color: #C2D69B !important;
 }
 table.simplegradebook td.red {
-    background-color: #E5B8B7;
+    background-color: #E5B8B7 !important;
+}
+table.simplegradebook tr.highlight td.green {
+    background-color: #C2D69B !important;
+}
+table.simplegradebook tr.highlight td.red {
+    background-color: #E5B8B7 !important;
+}
+table.simplegradebook tr.highlight td {
+    background-color: #FFFF99 !important;
+}
+table.simplegradebook tr:hover td {
+    background-color: #ffeba4 !important;
 }
 table.simplegradebook td.icon {
     text-align: center;
 }
+table.simplegradebook td div.row-toggle {
+    margin-left: -30px;
+    margin-right: 6px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    position: relative;
+    float: left;
+    display: block;
+    background: transparent url('[[pix:block_fn_marking|highlightoff]]') no-repeat 50% 50%;
+}
+table.simplegradebook td div.row-toggle.highlighted {
+    background: transparent url('[[pix:block_fn_marking|highlighton]]') no-repeat 50% 50%;
+}
 table.simplegradebook th {
     background-color: white;
-    border: 1px solid #aaaaaa;
+    border: 1px solid #dddddd !important;
     color: #555555;
     font-size: 12px;
     font-weight: normal;
@@ -566,7 +588,7 @@ table.simplegradebook th.mod-icon {
     color: #666;
     padding: 4px;
     text-align: center;
-    border: 1px #aaaaaa solid;
+    border: 1px #dddddd solid;
     font-size: 12px;
     font-weight: bold;
 }
@@ -575,7 +597,7 @@ table.simplegradebook td.empty-week {
     color: #fff;
     padding: 4px;
     text-align: center;
-    border: 1px #aaaaaa solid;
+    border: 1px #dddddd solid;
     font-size: 12px;
     font-weight: bold;
 }
@@ -761,7 +783,8 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     height: 16px;
     float: left;
     cursor: pointer;
-    background: transparent url('[[pix:block_fn_marking|closed]]') no-repeat 50% 50%;
+    margin-right: 5px;
+    background: transparent url('[[pix:core|t/expanded]]') no-repeat 50% 50%;
 }
 
 .block_fn_marking .togglezero {
@@ -787,7 +810,11 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 
 .block_fn_marking .toggle.open {
-    background: transparent url('[[pix:block_fn_marking|open]]') no-repeat 50% 50% !important;
+    background: transparent url('[[pix:core|t/collapsed]]') no-repeat 50% 50% !important;
+}
+
+.block_fn_marking .toggle.open + a {
+    font-weight: normal !important;
 }
 
 .jsenabled .block_fn_marking_hide {

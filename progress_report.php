@@ -132,7 +132,14 @@ $cobject->sections = &$sections;
 $courseformatoptions = course_get_format($course)->get_format_options();
 $courseformat = course_get_format($course)->get_format();
 
-$coursenumsections = $courseformatoptions['numsections'];
+if (isset($courseformatoptions['numsections'])) {
+    $coursenumsections = $courseformatoptions['numsections'];
+} else {
+    if (!$coursenumsections = $DB->count_records('course_sections', array('course' => $course->id))) {
+        $coursenumsections = 10; // Default section number.
+    }
+}
+
 
 $timenow = time();
 $weekdate = $course->startdate;    // This should be 0:00 Monday of that week.
@@ -355,7 +362,7 @@ echo '</div>';
 echo '<div class="tablecontainer">';
 echo $nocorseaveragemsg;
 // TABLE.
-echo "<table id='datatable' class='simplegradebook tablesorter'>";
+echo "<table id='datatable' class='generaltable simplegradebook tablesorter'>";
 // First header row.
 echo "<thead>";
 echo "<tr>";
@@ -391,6 +398,9 @@ echo "</thead>";
 echo "<tbody>";
 $counter = 0;
 
+$toggleicon = html_writer::img($OUTPUT->pix_url('hightlightoff', 'block_fn_marking'), '', array('class' => 'row-toggle icon'));
+$toggleicon = html_writer::div('', 'row-toggle');
+
 foreach ($simplegradebook as $studentid => $studentreport) {
     $counter++;
     if ($counter % 2 == 0) {
@@ -399,8 +409,8 @@ foreach ($simplegradebook as $studentid => $studentreport) {
         $studentclass = "odd";
     }
     echo '<tr>';
-    echo '<td nowrap="nowrap" class="'.$studentclass.' name">
-        <a target="_blank" href='.$CFG->wwwroot.'/grade/report/user/index.php?userid='.
+    echo '<td nowrap="nowrap" class="'.$studentclass.' name">'. $toggleicon.
+        '<a target="_blank" href='.$CFG->wwwroot.'/grade/report/user/index.php?userid='.
         $studentid.'&id='.$course->id.'">'.$studentreport['name'].'</a></td>';
 
     $gradetot = 0;

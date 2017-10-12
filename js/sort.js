@@ -9,9 +9,10 @@ $(document).ready(function() {
                 sorter: false
             }
         }
-        //debug: true,
-        //headers: {
-        //    7: {sorter: 'text'}
-        //}
+    });
+    $("table.simplegradebook tr div.row-toggle").click(function() {
+        $(this).toggleClass('highlighted');
+        var selected = $(this).parent().parent();
+        selected.toggleClass("highlight");
     });
 });

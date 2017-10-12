@@ -2926,7 +2926,7 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
             } else {
                 $userid = 0;
             }
-            $courseicon = $OUTPUT->pix_icon('i/course', '', null, array('class' => 'gm_icon'));
+
             $courselink = $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                 $course->id . '&show=unmarked' . '&navlevel=top&mid=0';
 
@@ -2971,16 +2971,14 @@ function block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $cla
             } else {
                 if ($totalungraded == 0) {
                     $coursetext = '<dt id="courseid' . $course->id . '" class="cmod">
-                                 <div class="togglezero"></div>
-                                 ' . $courseicon . '
+                                 <div class="togglezero"></div> 
                                  <a href="' . $courselink . '">' . $course->shortname . '</a> (' . $totalungraded . ')
                             </dt>';
                 } else {
                     $coursetext = '<dt id="courseid' . $course->id . '" class="cmod">
                                  <div class="toggle open" onclick="$(\'dt#courseid' . $course->id .
                         ' > div.toggle\').toggleClass(\'open\');$(\'dt#courseid' .
-                        $course->id . ' ~ dd\').toggleClass(\'block_fn_marking_hide\');"></div>
-                                 ' . $courseicon . '
+                        $course->id . ' ~ dd\').toggleClass(\'block_fn_marking_hide\');"></div> 
                                  <a href="' . $courselink . '">' . $course->shortname . '</a> (' . $totalungraded . ')
                             </dt>';
                 }
