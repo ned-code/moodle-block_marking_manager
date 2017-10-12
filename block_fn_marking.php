@@ -70,12 +70,18 @@ class block_fn_marking extends block_list {
             $this->config->keepseparate = 1;
         }
 
+        if (!isset($this->config->showcourselink)) {
+            $this->config->showcourselink = 0;
+        }
         if (!isset($this->config->showreportslink)) {
             $this->config->showreportslink = 1;
         }
 
         if (!isset($this->config->showgradeslink)) {
             $this->config->showgradeslink = 1;
+        }
+        if (!isset($this->config->showgradebook)) {
+            $this->config->showgradebook = 1;
         }
 
         if (!isset($this->config->shownotloggedinuser)) {
@@ -185,6 +191,15 @@ class block_fn_marking extends block_list {
 
         // Course Teacher Menu.
         if (($this->page->course->id != SITEID)) {
+            if (isset($this->config->showcourselink) && $this->config->showcourselink) {
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/course/view.php?id=' .
+                    $this->page->course->id .
+                    '">' . $this->page->course->shortname . '</a>';
+                $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/course') . "\" class=\"icon\" alt=\"\" />";
+
+                $this->content->items[] = "<div style='width:156px;'><hr /></div>";
+                $this->content->icons[] = '';
+            }
 
             // CACHE.
             $cachedatalast = get_config('block_fn_marking', 'cachedatalast_'.$this->page->course->id);
@@ -291,6 +306,13 @@ class block_fn_marking extends block_list {
                 $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/grades') . "\" class=\"icon\" alt=\"\" />";
             }
 
+            if (isset($this->config->showgradebook) && $this->config->showgradebook) {
+                $this->content->items[] = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' .
+                    $this->page->course->id .
+                    '">' . get_string('gradebook', 'block_fn_marking') . '</a>';
+                $this->content->icons[] = "<img src=\"" . $OUTPUT->pix_url('i/report') . "\" class=\"icon\" alt=\"\" />";
+            }
+
             if (isset($this->config->showreportslink) && $this->config->showreportslink) {
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/user/index.php?contextid='.$context->id.
                     '&sifirst=&silast=&roleid=5">' .
@@ -341,8 +363,6 @@ class block_fn_marking extends block_list {
                 }
             }
 
-            $this->content->items[] = "<div style='width:156px;'><hr /></div>";
-            $this->content->icons[] = '';
 
             if ($refreshmodecourse == 'manual') {
                 if ($cachedatalast === false) {

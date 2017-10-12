@@ -72,6 +72,10 @@ class block_fn_marking_edit_form extends block_edit_form {
         $hideshow = array(0 => get_string('hide'), 1 => get_string('show'));
         $yesno = array(0 => get_string('no'), 1 => get_string('yes'));
 
+        $mform->addElement('select', 'config_showcourselink',
+                            get_string('showcourselink', 'block_fn_marking'), $hideshow);
+        $mform->setDefault('config_showcourselink', 0);
+
         // Control the visibility of the unmarked activities.
         $mform->addElement('select', 'config_showunmarked',
                             get_string('showunmarked', 'block_fn_marking'), $hideshow);
@@ -81,13 +85,13 @@ class block_fn_marking_edit_form extends block_edit_form {
         // Control the visibility of the marked activities.
         $mform->addElement('select', 'config_showmarked',
                             get_string('showmarked', 'block_fn_marking'), $hideshow);
-        $mform->setDefault('config_showunmarked', 1);
+        $mform->setDefault('config_showmarked', 1);
         $mform->addHelpButton('config_showmarked', 'config_showmarked', 'block_fn_marking');
 
         // Control the visibility of the notsubmitted activities.
         $mform->addElement('select', 'config_showunsubmitted',
                             get_string('showunsubmitted', 'block_fn_marking'), $hideshow);
-        $mform->setDefault('config_showunmarked', 1);
+        $mform->setDefault('config_showunsubmitted', 1);
         $mform->addHelpButton('config_showunsubmitted', 'config_unsubmitted', 'block_fn_marking');
 
         // Control the visibility of the saved activities.
@@ -98,8 +102,12 @@ class block_fn_marking_edit_form extends block_edit_form {
         // Control the visibility of the grade link activities.
         $mform->addElement('select', 'config_showgradeslink',
                             get_string('showgradeslink', 'block_fn_marking'), $hideshow);
-        $mform->setDefault('config_showunmarked', 0);
+        $mform->setDefault('config_showgradeslink', 0);
         $mform->addHelpButton('config_showgradeslink', 'config_showgradeslink', 'block_fn_marking');
+
+        $mform->addElement('select', 'config_showgradebook',
+                            get_string('showgradebook', 'block_fn_marking'), $hideshow);
+        $mform->setDefault('config_showgradebook', 1);
 
         // Control the visibility of the report link activities.
         $mform->addElement('select', 'config_showreportslink',
