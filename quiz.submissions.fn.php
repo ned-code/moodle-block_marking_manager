@@ -245,7 +245,7 @@ if (($show == 'marked') || ($show == 'unmarked')) {
             $quiz->grade;
             $questionstepgrade = round(($questionstep->fraction * $questionstep->maxmark) * ($quiz->grade / $quiz->sumgrades), 2);
 
-            if ($questionstep->state == 'gradedwrong') {
+            if (($questionstep->state == 'gradedwrong') || ($questionstep->state == 'mangrwrong')) {
                 $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
                     $tablerow->attempt . '&amp;slot=' .
                     $quizslot->slot . '" title="Review response">
@@ -280,6 +280,12 @@ if (($show == 'marked') || ($show == 'unmarked')) {
                                     <span class="que">
                                         <img src="' . $OUTPUT->pix_url('i/grade_partiallycorrect', 'core') .
                                         '" title="Partially correct" alt="Partially correct" class="icon fn-icon">
+                                        <span class="partiallycorrect">' . $questionstepgrade . '</span>
+                                    </span></a>';
+            } else {
+                $cellarray[] = '<a href="' . $CFG->wwwroot . '/mod/quiz/reviewquestion.php?attempt=' .
+                    $tablerow->attempt . '&amp;slot=' . $quizslot->slot . '" title="Review response">
+                                    <span class="que">
                                         <span class="partiallycorrect">' . $questionstepgrade . '</span>
                                     </span></a>';
             }
