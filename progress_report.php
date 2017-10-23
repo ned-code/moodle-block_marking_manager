@@ -401,6 +401,15 @@ $counter = 0;
 $toggleicon = html_writer::img($OUTPUT->pix_url('hightlightoff', 'block_fn_marking'), '', array('class' => 'row-toggle icon'));
 $toggleicon = html_writer::div('', 'row-toggle');
 
+$sql = "SELECT gg.finalgrade,
+               gg.rawgrademax 
+          FROM {grade_grades} gg
+          JOIN {grade_items} gi 
+            ON gi.id = gg.itemid
+         WHERE gi.courseid = ?
+           AND gg.userid = ?
+           AND gi.itemtype = ?";
+
 foreach ($simplegradebook as $studentid => $studentreport) {
     $counter++;
     if ($counter % 2 == 0) {
@@ -418,13 +427,8 @@ foreach ($simplegradebook as $studentid => $studentreport) {
     $avg = 0;
 
     if (isset($studentreport['avg'])) {
-        foreach ($studentreport['avg'] as $sgrades) {
-            $gradetot += $sgrades['grade'];
-            $grademaxtot += $sgrades['grademax'];
-        }
-
-        if ($grademaxtot) {
-            $avg = ($gradetot / $grademaxtot) * 100;
+        if ($cousegrade = $DB->get_record_sql($sql, array($course->id, $studentid, 'course'))) {
+            $avg = ($cousegrade->finalgrade / $cousegrade->rawgrademax) * 100;
             if ( $avg >= 50) {
                 echo '<td class="green">'.round($avg, 0).'</td>';
             } else {
