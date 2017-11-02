@@ -23,14 +23,12 @@
 $string['showsaved'] = 'Show draft activities';
 $string['keepseparate'] = 'Keep draft assignments separate';
 $string['setnumberofdays'] = 'Set number of days';
-$string['setpercentmarks'] = 'Set percent of marks';
+$string['setpercentmarks'] = 'Set percent';
 $string['shownotloggedinuser'] = 'Show not logged in user';
 $string['setblocktitle'] = 'Set block title';
-$string['shownotloggedinuser'] = 'Show not logged in user';
-$string['shownotloggedinuser'] = 'Show not logged in user';
 $string['showstudentnotsubmittedassignment'] = 'Show no of student not submitted assignment';
 $string['showstudentmarkslessthanfiftypercent'] = 'Show no of student marks less than 50 percent';
-$string['blocksettings'] = 'Configuring a FN Marking block';
+$string['blocksettings'] = 'Configuring a {$a}';
 $string['pluginname'] = 'NED Marking Manager';
 $string['plugintitle'] = 'Marking Manager';
 $string['headertitle'] = 'Marking Manager';
@@ -39,12 +37,14 @@ $string['cfgdisplaytitle'] = 'Display title';
 $string['displaytitle'] = 'Activities Submitted';
 $string['gradeslink'] = 'Grades';
 $string['show'] = 'Show';
+$string['hide'] = 'Hide';
 $string['sort'] = 'Sort';
 $string['view'] = 'View';
 $string['marked'] = ' Marked Activities';
 $string['reportslink'] = 'Reports';
-$string['showcourselink'] = 'Course link';
+$string['showcourselink'] = 'Course home link';
 $string['showgradeslink'] = 'Progress Report';
+$string['showgradeslink_desc'] = 'This setting allows whether to show or hide the grade link in block.';
 $string['showgradebook'] = 'Gradebook';
 $string['gradebook'] = 'Gradebook';
 $string['showmarked'] = 'Marked Activities';
@@ -64,60 +64,39 @@ $string['title:markslessthanxpercent'] = 'The Following Students Have Not Submit
 $string['title:saved'] = 'The Following Students Have Draft Activities';
 $string['notsubmittedany'] = ' - no submission for ';
 $string['overallfailinggrade'] = ' - grade less than ';
-
 $string['gradingstudentprogress'] = 'Showing {$a->index} of {$a->count}';
 $string['grade'] = '<b>Grade: </b>';
-
 $string['config_title'] = 'Instance title';
 $string['config_title_help'] = '<p>This setting allows the block title to be changed.</p>
 <p>If the block header is hidden, the title will not appear.</p>';
-
 $string['config_showunmarked'] = 'Show unmarked activities';
 $string['config_showunmarked_help'] = '<p>This setting allows whether to show .</p>
 <p> or hide the unmarked activities in block.</p>';
-
 $string['config_showmarked'] = 'Show marked activities';
 $string['config_showmarked_help'] = '<p>This setting allows whether to show .</p>
 <p> or hide the marked activities in block.</p>';
-
 $string['config_showsaved'] = 'Show draft activities';
 $string['config_showsaved_help'] = '<p>This setting allows whether to show .</p>
 <p> or hide the student draft activities in block.</p>';
-
 $string['config_unsubmitted'] = 'Show unsubmitted activities';
 $string['config_unsubmitted_help'] = '<p>This setting allows whether to show </p>
 <p> or hide the not submitted activities in block.</p>';
-
-
 $string['config_showgradeslink'] = 'Show grade link';
-$string['config_showgradeslink_help'] = '<p>This setting allows whether to show </p>
-<p> or hide the grade link in block.</p>';
-
 $string['config_showreportlink'] = 'Show report link';
 $string['config_showreportlink_help'] = '<p>This setting allows whether to show </p>
 <p> or hide the report link in block.</p>';
-
-
-
-$string['config_shownotloggedinuser'] = 'Show not logged in user';
-$string['config_shownotloggedinuser_help'] = '<p>This setting allows whether to show </p>
-<p> or hide the number of student not loggedin in previous week.</p>';
-
-
-$string['config_showstudentnotsubmittedassignment'] = 'Show student not submitted assignment';
-$string['config_showstudentnotsubmittedassignment_help'] = '<p>This setting allows whether to show </p>
-<p> or hide the number of student not submitted assignment last week .</p>';
-
-
-
-$string['config_showstudentmarkslessthanfiftypercent'] = 'Show student marks less than 50%';
-$string['config_showstudentmarkslessthanfiftypercent_help'] = '<p>This setting allows whether to show </p>
-<p> or hide the number of student marks less that 50%.</p>';
-
+$string['config_shownotloggedinuser'] = 'Students not logged in for X days';
+$string['config_shownotloggedinuser_desc'] = 'This setting allows whether to show or hide the number of student not
+loggedin in previous week.';
+$string['config_showstudentnotsubmittedassignment'] = 'Students not submitted for X days';
+$string['config_showstudentnotsubmittedassignment_desc'] = 'This setting allows whether to show or hide the number
+of student not submitted assignment last week .';
+$string['config_showstudentmarkslessthanfiftypercent'] = 'Students with overall grade less than X percent';
+$string['config_showstudentmarkslessthanfiftypercent_desc'] = 'This setting allows whether to show or hide the number
+of student marks less that 50%.';
 $string['config_days'] = 'Set the number of student not logged in x days';
 $string['config_days_help'] = '<p>This setting allows to set  </p>
 <p>the number of days that student have not logged in course.</p>';
-
 $string['config_percent'] = 'Set the percent of marks';
 $string['config_percent_help'] = '<p>This setting allows to set  </p>
 <p>the percent of marks and after setting the percent you will see the number of student marks below x percent.</p>';
@@ -127,7 +106,6 @@ $string['fn_marking:viewreadonly'] = 'View readonly';
 $string['simplegradebook'] = 'Progress Report';
 $string['studentlist'] = 'Student List';
 $string['moodlegradebook'] = 'Open Moodle Gradebook';
-
 $string['descconfig'] = '<p>Activate this option to hide all blocks when viewing the Marking Manager interface
 and provide a less cluttered look. Note that before activating this option, you will need to add this code
 to <b><em>yourmoodlesite/theme/base/config.php</em>.</b></p>
@@ -141,11 +119,10 @@ to <b><em>yourmoodlesite/theme/base/config.php</em>.</b></p>
 ),
 </code></pre>
 After you add the above code, your file should look like the image <a href="http://moodlefn.com/docs/marking_manager_no_blocks.png">shown here</a>.  ';
-
 $string['labelnoblocks'] = 'Hide all blocks';
 $string['showtopmessage'] = 'Show message above interface';
 $string['topmessage'] = 'Message to show';
-$string['include_orphaned'] = 'Include orphaned activities';
+$string['include_orphaned'] = 'Include orphaned (stealth) activities';
 $string['forum'] = 'Forum';
 $string['quiz'] = 'Quiz';
 $string['assign'] = 'Assignment';
@@ -162,8 +139,7 @@ $string['morethan10'] = 'There are more than 10 courses with ungraded work.';
 $string['student'] = 'Student';
 $string['close'] = 'Close';
 $string['sectiontitles'] = 'Section titles';
-$string['config_sectiontitles'] = 'Section titles';
-$string['config_sectiontitles_help'] = '<p>blank=course default.</p>';
+$string['sectiontitles_desc'] = 'blank=course default';
 $string['fn_marking:myaddinstance'] = 'Add a new Marking Manager block to Dashboard';
 $string['listcourseszeroungraded'] = 'List courses with zero ungraded activities';
 $string['version'] = 'Version';
@@ -223,3 +199,13 @@ $string['enrolledcourses'] = 'Enrolled courses';
 $string['allcourses'] = 'All courses';
 $string['blocksitesettings'] = 'Block site settings';
 $string['opensitesettingspage'] = 'Open site settings page';
+$string['titlesforlinkclusters'] = 'Titles for link clusters inside block';
+$string['markingmanager'] = 'Marking manager';
+$string['quicklinks'] = 'Quick links';
+$string['notices'] = 'Notices';
+$string['othersettings'] = 'Other settings';
+$string['blocktitlesitelevel'] = 'Block title - site level';
+$string['blocktitlecourselevel'] = 'Block title - course level';
+$string['teachertools'] = 'Teacher Tools';
+$string['generalsettings'] = 'General settings';
+$string['layoutandformat'] = 'Layout and format';

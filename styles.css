@@ -1018,3 +1018,13 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 #page-blocks-fn_marking-progress_report .course-average-warning {
     color: red;
 }
+.block_fn_marking .block-subtitle.first {
+    margin: 5px 0 1px 0 !important;
+}
+.block_fn_marking .block-subtitle {
+    color: #6c6c6c;
+    margin: 10px 0 1px 0;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    font-weight: bold;
+}

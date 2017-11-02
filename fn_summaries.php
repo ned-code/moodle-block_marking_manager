@@ -28,6 +28,7 @@ require_once($CFG->dirroot . '/grade/querylib.php');
 $id = required_param('id', PARAM_INT);      // Course id.
 $show = optional_param('show', 'notloggedin', PARAM_ALPHA);
 $days = required_param('days', PARAM_INT); // Days to look back.
+$daysnotsubmited = required_param('daysnotsubmited', PARAM_INT); // Days to look back.
 $percent = optional_param('percent', 0, PARAM_INT);
 
 $datestring = new stdClass();
@@ -103,12 +104,12 @@ switch ($show) {
         break;
 
     case 'notsubmittedany':
-        $lastweek = time() - (60 * 60 * 24 * $days);
+        $lastweek = time() - (60 * 60 * 24 * $daysnotsubmited);
         $studentsresult = block_fn_marking_get_notsubmittedany($course, $lastweek, false, $sections, $students);
         // Students array is indexed by studentid; paging needs it to be sequential.
         $studentsresult = array_values($studentsresult);
         $name = get_string('blocktitle', 'block_fn_marking');
-        $title = "" . get_string('title:notsubmittedanyactivity', 'block_fn_marking') . " $days days";
+        $title = "" . get_string('title:notsubmittedanyactivity', 'block_fn_marking') . " $daysnotsubmited days";
         break;
 
     case 'failing':
@@ -135,10 +136,19 @@ echo "<h4 class='head-title'>$title</h4>\n";
 
 // Use paging.
 $totalcount = count($studentsresult);
-$baseurl = 'fn_summaries.php?id=' . $id . '&show=' . $show . '&navlevel=top&days=' . $days . '&percent=' . $percent . '';
+
+$baseurl = new moodle_url('/blocks/fn_marking/fn_summaries.php',
+    array(
+        'id' => $id,
+        'show' => $show,
+        'navlevel' => 'top',
+        'days' => $days,
+        'daysnotsubmited' => $daysnotsubmited,
+        'percent' => $percent,
+    )
+);
 $pagingbar = new paging_bar($totalcount, $page, $perpage, $baseurl, 'page');
 echo $OUTPUT->render($pagingbar);
-
 
 echo '<table width="96%" class="markingmanagercontainerList" border="0" cellpadding="0" cellspacing="0" align="center">' .
     '<tr><td class="intd">';
