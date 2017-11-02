@@ -84,22 +84,16 @@ if (!$course = $DB->get_record("course", array("id" => $courseid))) {
 
 require_login($course);
 
-// Check teacher's group.
-/*
- if (($course->groupmode == SEPARATEGROUPS) && ($course->groupmodeforce)) {
-    if ($usergroups = groups_get_all_groups($courseid, $USER->id)) {
-        if (!isset($usergroups[$group])) {
-            $group = key($usergroups);
-        }
-    }
-}*/
 $SESSION->currentgroup[$courseid] = $group;
 
-// KEEP SEPARATE CONFIG.
+
 $keepseparate = 1; // Default value.
 if ($blockconfig = block_fn_marking_get_block_config ($courseid)) {
     if (isset($blockconfig->keepseparate)) {
         $keepseparate = $blockconfig->keepseparate;
+    }
+    if (isset($blockconfig->include_orphaned)) {
+        $includeorphaned = $blockconfig->include_orphaned;
     }
 }
 

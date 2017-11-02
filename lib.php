@@ -699,12 +699,7 @@ function block_fn_marking_count_unmarked_students(&$course, $mod, $info='unmarke
 
     global $CFG, $DB;
 
-    $keepseparate = 1; // Default value.
-    if ($blockconfig = block_fn_marking_get_block_config ($course->id)) {
-        if (isset($blockconfig->keepseparate)) {
-            $keepseparate = $blockconfig->keepseparate;
-        }
-    }
+    $keepseparate = get_config('block_fn_marking', 'keepseparate');
 
     $context = context_course::instance($course->id);
 
@@ -773,6 +768,12 @@ function block_fn_marking_count_unmarked_activities(&$course, $info='unmarked', 
     $marker = has_capability('moodle/grade:viewall', $context);
 
     $includeorphaned = get_config('block_fn_marking', 'include_orphaned');
+    if ($blockconfig = block_fn_marking_get_block_config ($course->id)) {
+        if (isset($blockconfig->include_orphaned)) {
+            $includeorphaned = $blockconfig->include_orphaned;
+        }
+    }
+
 
     // FIND CURRENT WEEK.
     $courseformatoptions = course_get_format($course)->get_format_options();
