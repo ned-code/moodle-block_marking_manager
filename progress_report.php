@@ -98,7 +98,9 @@ $simplegradebook = array();
 $weekactivitycount = array();
 
 foreach ($students as $key => $value) {
-    $simplegradebook[$key]['name'] = $value->firstname.' '.substr($value->lastname, 0, 1).'.';
+    if (!$value->suspended) {
+        $simplegradebook[$key]['name'] = $value->firstname . ' ' . substr($value->lastname, 0, 1) . '.';
+    }
 }
 
 // Get a list of all students.
