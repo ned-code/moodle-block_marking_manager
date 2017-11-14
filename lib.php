@@ -27,11 +27,6 @@ require_once($CFG->dirroot . '/lib/grade/grade_grade.php');
 require_once($CFG->dirroot . '/lib/grade/grade_item.php');
 require_once($CFG->dirroot . '/mod/assignment/lib.php');
 
-define('FN_VIEW_USERS_SUSPENDED_NONE', 0);
-define('FN_VIEW_USERS_SUSPENDED_ENROLLMENTS', 1);
-define('FN_VIEW_USERS_SUSPENDED_ACCOUNTS', 2);
-define('FN_VIEW_USERS_SUSPENDED_BOTH', 3);
-
 function block_fn_marking_assignment_count_ungraded($assignment, $graded, $students, $show='unmarked', $extra=false, $instance) {
     global $DB;
 
@@ -3996,34 +3991,4 @@ function block_fn_marking_frontapage_cache_update_time($userid) {
 
     }
     return $time;
-}
-
-function block_fn_marking_tools_suspended_users_view($courseid) {
-    if (has_capability('moodle/course:viewsuspendedusers', context_course::instance($courseid))) {
-        return (int)get_config('block_fn_marking', 'suspendeduserstoshow');
-    }
-    return 0;
-}
-function block_fn_marking_suspended_users_view_vars($courseid) {
-    $suspendedusersview  = block_fn_marking_tools_suspended_users_view($courseid);
-
-    switch ($suspendedusersview) {
-        case FN_VIEW_USERS_SUSPENDED_NONE:
-            $onlyactiveenrollments = true;
-            $showsuspendedaccounts = false;
-            break;
-        case FN_VIEW_USERS_SUSPENDED_ENROLLMENTS:
-            $onlyactiveenrollments = false;
-            $showsuspendedaccounts = false;
-            break;
-        case FN_VIEW_USERS_SUSPENDED_ACCOUNTS:
-            $onlyactiveenrollments = true;
-            $showsuspendedaccounts = true;
-            break;
-        case FN_VIEW_USERS_SUSPENDED_BOTH:
-            $onlyactiveenrollments = false;
-            $showsuspendedaccounts = true;
-            break;
-    }
-    return array($onlyactiveenrollments, $showsuspendedaccounts);
 }
