@@ -23,7 +23,7 @@
  * @developer  Michael Gardener <mgardener@cissq.com>
  */
 
-$plugin->version  = 2017110700;
+$plugin->version  = 2017111300;
 $plugin->requires = 2015111600; // Moodle 3.0.x, 3.1.x or 3.2.x is required.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'block_fn_marking';

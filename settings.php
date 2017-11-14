@@ -136,6 +136,20 @@ $settings->add( new admin_setting_configempty('block_fn_marking/courseselection'
 );
 $settings->add(
     new admin_setting_configselect(
+        'block_fn_marking/suspendeduserstoshow',
+        get_string('suspendeduserstoshow', 'block_fn_marking'),
+        '',
+        0,
+        array(
+            '0' => get_string('none', 'block_fn_marking'),
+            '1' => get_string('suspendedenrollments', 'block_fn_marking'),
+            '2' => get_string('suspendedusers', 'block_fn_marking'),
+            '3' => get_string('both', 'block_fn_marking')
+        )
+    )
+);
+$settings->add(
+    new admin_setting_configselect(
         'block_fn_marking/editortoggle',
         get_string('editortoggle', 'block_fn_marking'),
         get_string('experimental', 'block_fn_marking'),
