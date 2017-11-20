@@ -3408,7 +3408,8 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
     $counter = 0;
     if (!is_null($progressbar)) {
         $donepercent = floor($counter / $numberofitems * 100);
-        $progressbar->update_full($donepercent, "$counter of $numberofitems");
+        $progressbar->update_full($donepercent, "$counter of $numberofitems ".
+            get_string('courses', 'block_fn_marking'));
     }
     foreach ($cachecourses as $filtercourse) {
         if ($course = $DB->get_record('course', array('id' => $filtercourse))) {
@@ -3483,7 +3484,8 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
                 $countermodule++;
                 if (!is_null($progressbar)) {
                     $donepercent = floor(($counter + ($countermodule / $numberomodules)) / $numberofitems * 100);
-                    $progressbar->update_full($donepercent, "$counter of $numberofitems");
+                    $progressbar->update_full($donepercent, "$counter of $numberofitems ".
+                        get_string('courses', 'block_fn_marking'));
                 }
             }
 
@@ -3492,7 +3494,8 @@ function block_fn_marking_cache_course_data ($courseid, progress_bar $progressba
         $counter++;
         if (!is_null($progressbar)) {
             $donepercent = floor($counter / $numberofitems * 100);
-            $progressbar->update_full($donepercent, "$counter of $numberofitems");
+            $progressbar->update_full($donepercent, "$counter of $numberofitems ".
+                get_string('courses', 'block_fn_marking'));
         }
     }
 
