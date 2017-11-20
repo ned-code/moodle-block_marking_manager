@@ -169,7 +169,6 @@ class block_fn_marking extends block_list {
 
             // Settings.
             $cachedatalast = get_config('block_fn_marking', 'cachedatalast_'.$this->page->course->id);
-            $refreshmodecourse = get_config('block_fn_marking', 'refreshmodecourse');
             $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
             $showunmarked = get_config('block_fn_marking', 'showunmarked');
             $showmarked = get_config('block_fn_marking', 'showmarked');
@@ -191,25 +190,13 @@ class block_fn_marking extends block_list {
                 $params[] = 0;
             }
 
-            if ($refreshmodecourse == 'pageload') {
-                $summary =  block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked', '', $USER->id);
-                $numunmarked = $summary['unmarked'];
-                $nummarked = $summary['marked'];
-                $numunsubmitted = $summary['unsubmitted'];
-                $numsaved = $summary['saved'];
-            }
+            $summary =  block_fn_marking_count_unmarked_activities($this->page->course, 'unmarked', '', $USER->id);
+            $numunmarked = $summary['unmarked'];
+            $nummarked = $summary['marked'];
+            $numunsubmitted = $summary['unsubmitted'];
+            $numsaved = $summary['saved'];
 
             if ($showunmarked) {
-                if ($refreshmodecourse == 'manual') {
-                    $sql = "SELECT SUM(m.unmarked) unmarked
-                              FROM {block_fn_marking_mod_cache} m
-                             WHERE m.courseid = ?
-                               AND m.modname {$insql}
-                               AND m.userid = ?
-                               AND m.expired = 0";
-                    $modcache = $DB->get_record_sql($sql, $params);
-                    $numunmarked = $modcache->unmarked;
-                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unmarked' .
                     '&navlevel=top">'. $numunmarked.' ' .get_string('unmarked', 'block_fn_marking').'</a>';
@@ -218,16 +205,6 @@ class block_fn_marking extends block_list {
             }
 
             if ($showmarked) {
-                if ($refreshmodecourse == 'manual') {
-                    $sql = "SELECT SUM(m.marked) marked
-                              FROM {block_fn_marking_mod_cache} m
-                             WHERE m.courseid = ?
-                               AND m.modname {$insql}
-                               AND m.userid = ?
-                               AND m.expired = 0";
-                    $modcache = $DB->get_record_sql($sql, $params);
-                    $nummarked = $modcache->marked;
-                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=marked' .
                     '&navlevel=top">' . $nummarked . ' ' .get_string('marked', 'block_fn_marking').'</a>';
@@ -236,16 +213,6 @@ class block_fn_marking extends block_list {
             }
 
             if ($showunsubmitted) {
-                if ($refreshmodecourse == 'manual') {
-                    $sql = "SELECT SUM(m.unsubmitted) unsubmitted
-                              FROM {block_fn_marking_mod_cache} m
-                             WHERE m.courseid = ?
-                               AND m.modname {$insql}
-                               AND m.userid = ?
-                               AND m.expired = 0";
-                    $modcache = $DB->get_record_sql($sql, $params);
-                    $numunsubmitted = $modcache->unsubmitted;
-                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=unsubmitted' .
                     '&navlevel=top">' . $numunsubmitted . ' '.get_string('unsubmitted', 'block_fn_marking').'</a>';
@@ -254,16 +221,6 @@ class block_fn_marking extends block_list {
             }
 
             if (isset($this->config->showsaved) && $this->config->showsaved) {
-                if ($refreshmodecourse == 'manual') {
-                    $sql = "SELECT SUM(m.saved) saved
-                              FROM {block_fn_marking_mod_cache} m
-                             WHERE m.courseid = ?
-                               AND m.modname {$insql}
-                               AND m.userid = ?
-                               AND m.expired = 0";
-                    $modcache = $DB->get_record_sql($sql, $params);
-                    $numsaved = $modcache->saved;
-                }
                 $this->content->items[] = '<a href="' . $CFG->wwwroot . '/blocks/fn_marking/fn_gradebook.php?courseid=' .
                     $this->page->course->id . '&show=saved' .
                     '&navlevel=top">' . $numsaved . ' '.get_string('saved', 'block_fn_marking').'</a>';
@@ -349,37 +306,6 @@ class block_fn_marking extends block_list {
                         '/blocks/fn_marking/pix/exclamation.png" class="icon" alt="">';
                 }
             }
-
-
-            if ($refreshmodecourse == 'manual') {
-                if ($cachedatalast === false) {
-                    $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
-                    $showrefreshbutton = true;
-                    $this->content->items = array();
-                    $this->content->icons = array();
-                } else if ($cachedatalast > 0) {
-                    $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
-                    $showrefreshbutton = true;
-                } else {
-                    $humantime = get_string('lastrefreshupdating', 'block_fn_marking');
-                    $showrefreshbutton = false;
-                }
-
-                if ($showrefreshbutton) {
-                    $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
-                    $refreshbutton = $refreshicon . ' ' . html_writer::link(
-                            new moodle_url('/blocks/fn_marking/update_cache.php', array('id' => $this->page->course->id)),
-                            get_string('refreshnow', 'block_fn_marking'),
-                            array('class' => 'btn btn-secondary fn_refresh_btn')
-                        );
-                    $refresh = html_writer::div(
-                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
-                        'fn_refresh_wrapper_footer'
-                    );
-
-                    $this->content->footer = $refresh;
-                }
-            }
         }
         return $this->content;
     }
@@ -412,6 +338,7 @@ class block_fn_marking extends block_list {
 
         // CACHE.
         $refreshmodefrontpage = get_config('block_fn_marking', 'refreshmodefrontpage');
+        $minsbeforerefreshrequired = get_config('block_fn_marking', 'minsbeforerefreshrequired');
         $adminfrontpage = get_config('block_fn_marking', 'adminfrontpage');
         $refresh = '';
 
@@ -446,7 +373,7 @@ class block_fn_marking extends block_list {
                     if ($cachedatalast === false) {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
                         $text = '';
-                    } else if ($cachedatalast > 0) {
+                    } else if (($cachedatalast > 0) && (time() < $cachedatalast + $minsbeforerefreshrequired * 60)) {
                         $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
                     } else {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
@@ -493,7 +420,7 @@ class block_fn_marking extends block_list {
                     if ($cachedatalast === false) {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
                         $text = '';
-                    } else if ($cachedatalast > 0) {
+                    } else if (($cachedatalast > 0) && (time() < $cachedatalast + $minsbeforerefreshrequired * 60)) {
                         $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
                     } else {
                         $humantime = get_string('lastrefreshrequired', 'block_fn_marking');

@@ -70,15 +70,13 @@ $settings->add(
     )
 );
 $settings->add(
-    new admin_setting_configselect(
-        'block_fn_marking/refreshmodecourse',
-        get_string('refreshmodecourse', 'block_fn_marking'),
+    new admin_setting_configtext(
+        'block_fn_marking/minsbeforerefreshrequired',
+        get_string('minsbeforerefreshrequired', 'block_fn_marking'),
         '',
-        'pageload',
-        array(
-            'pageload' => get_string('pageload', 'block_fn_marking'),
-            'manual' => get_string('manual', 'block_fn_marking')
-        )
+        '60',
+        PARAM_INT,
+        10
     )
 );
 $settings->add(

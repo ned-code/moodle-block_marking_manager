@@ -1028,3 +1028,8 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     font-size: 0.8em;
     font-weight: bold;
 }
+#page-blocks-fn_marking-update_cache .progress-desc {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}

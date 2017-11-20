@@ -52,6 +52,7 @@ $PAGE->navbar->add($title);
 if ($process) {
     echo $OUTPUT->header();
     require_sesskey();
+    echo html_writer::div(get_string('calcnumofactivities', 'block_fn_marking'), 'progress-desc');
     $progressbar = new progress_bar();
     $progressbar->create();
     core_php_time_limit::raise(HOURSECS);
