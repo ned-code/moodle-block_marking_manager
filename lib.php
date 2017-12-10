@@ -3562,18 +3562,44 @@ function block_fn_marking_mygroup_members($courseid, $userid) {
 
     if ($groups = $DB->get_records_sql($sql, array($courseid, $userid))) {
         foreach ($groups as $group) {
-            if($groupmembers = groups_get_members_by_role($group->id, $courseid)) {
-                foreach ($groupmembers as $groupmember) {
-                    if ((!empty($groupmember->shortname)) && ($groupmember->shortname == 'student')) {
-                        $members +=$groupmember->users;
-                    }
-                }
+            if($groupmembers = block_fn_marking_groups_get_members_student($group->id, $courseid)) {
+                $members += $groupmembers;
             }
         }
         return $members;
     } else  {
         return false;
     }
+}
+
+function block_fn_marking_groups_get_members_student($groupid, $courseid, $fields='u.*',
+                                                            $sort=null, $extrawheretest='', $whereorsortparams=array()) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // We are looking for all users with this role assigned in this context or higher.
+    list($relatedctxsql, $relatedctxparams) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'relatedctx');
+
+    if ($extrawheretest) {
+        $extrawheretest = ' AND ' . $extrawheretest;
+    }
+
+    if (is_null($sort)) {
+        list($sort, $sortparams) = users_order_by_sql('u');
+        $whereorsortparams = array_merge($whereorsortparams, $sortparams);
+    }
+
+    $sql = "SELECT $fields
+              FROM {groups_members} gm
+              JOIN {user} u ON u.id = gm.userid
+         LEFT JOIN {role_assignments} ra ON (ra.userid = u.id AND ra.contextid $relatedctxsql)
+         LEFT JOIN {role} r ON r.id = ra.roleid
+             WHERE gm.groupid=:mgroupid AND r.shortname = 'student'
+                   ".$extrawheretest."
+          ORDER BY r.sortorder, $sort";
+    $whereorsortparams = array_merge($whereorsortparams, $relatedctxparams, array('mgroupid' => $groupid));
+    return  $DB->get_records_sql($sql, $whereorsortparams);
 }
 
 function block_fn_marking_groups_print_course_menu($course, $urlroot, $return=false, $activegroup=false) {
