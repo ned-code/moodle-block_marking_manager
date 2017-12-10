@@ -87,7 +87,8 @@ $PAGE->set_context($context);
 //$currentgroup = get_current_group($course->id);
 $currentgroup = $SESSION->currentgroup[$course->id];
 
-if (($groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id)) && ($currentgroup === 0)) {
+$groupstudents = block_fn_marking_mygroup_members($course->id, $USER->id);
+if (is_array($groupstudents) && ($currentgroup === 0)) {
     $students = $groupstudents;
 } else {
     $students = get_enrolled_users($context, 'mod/assign:submit', $currentgroup, 'u.*', 'u.firstname');
