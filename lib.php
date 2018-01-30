@@ -163,14 +163,13 @@ function block_fn_marking_assign_count_ungraded($assign, $graded, $students,
                            AND s.status='submitted'
                            AND g.grade IS NULL";
 
+        $students = explode(',', $studentlist);
         if ($unmarkedstus = $DB->get_records_sql($sqlunmarked)) {
-            $students = explode(',', $studentlist);
-
             foreach ($unmarkedstus as $unmarkedstu) {
                 $students = array_diff($students, array($unmarkedstu->userid));
             }
-            $studentlistmarked = implode(',', $students);
         }
+        $studentlistmarked = implode(',', $students);
     }
     if (empty($studentlistmarked)) {
         $var['marked'] = 0;

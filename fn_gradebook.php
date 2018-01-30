@@ -443,9 +443,11 @@ foreach ($selectedsection as $sectionnum) {
                         if (!empty($modgrades)) {
                             // Store the number of ungraded entries for this group.
                             if (is_array($modgrades->grades)) {
+
                                 $gradedarray = array_intersect(array_keys($students), array_keys($modgrades->grades));
                                 $numgraded = count($gradedarray);
                                 $numstudents = count($students);
+
                                 $ungradedfunction = 'block_fn_marking_' . $mod->modname . '_count_ungraded';
                                 if (function_exists($ungradedfunction)) {
                                     $extra = false;

@@ -366,17 +366,20 @@ class block_fn_marking extends block_list {
 
             if ($courses = $DB->get_records_sql($sqlcourse, array(1, 1))) {
 
-                $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, $classforhide, $showzeroungraded, 10);
+                $text = block_fn_marking_build_ungraded_tree($courses, $supportedmodules, $classforhide, $showzeroungraded, 10);
 
                 if ($refreshmodefrontpage == 'manual') {
                     $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
                     if ($cachedatalast === false) {
-                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking').
+                            html_writer::empty_tag('br');
                         $text = '';
                     } else if (($cachedatalast > 0) && (time() < $cachedatalast + $minsbeforerefreshrequired * 60)) {
-                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
+                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast)).
+                            html_writer::empty_tag('br');
                     } else {
-                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $text = html_writer::div(get_string('listexpiredrefreshrequired', 'block_ned_teacher_tools'), 'list-expired-msg');
+                        $humantime = '';
                     }
 
                     $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
@@ -386,7 +389,7 @@ class block_fn_marking extends block_list {
                             array('class' => 'btn btn-secondary fn_refresh_btn')
                         );
                     $refresh = html_writer::div(
-                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                        $humantime . $refreshbutton,
                         'fn_refresh_wrapper_footer'
                     );
 
@@ -413,17 +416,20 @@ class block_fn_marking extends block_list {
                         $courses[] = $course;
                     }
                 }
-                $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules);
+                $text = block_fn_marking_build_ungraded_tree ($courses, $supportedmodules, '', $showzeroungraded);
 
                 if ($refreshmodefrontpage == 'manual') {
                     $cachedatalast = block_fn_marking_frontapage_cache_update_time($USER->id);
                     if ($cachedatalast === false) {
-                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking').
+                            html_writer::empty_tag('br');
                         $text = '';
                     } else if (($cachedatalast > 0) && (time() < $cachedatalast + $minsbeforerefreshrequired * 60)) {
-                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast));
+                        $humantime = get_string('lastrefreshtime', 'block_fn_marking', block_fn_marking_human_timing($cachedatalast)).
+                            html_writer::empty_tag('br');
                     } else {
-                        $humantime = get_string('lastrefreshrequired', 'block_fn_marking');
+                        $text = html_writer::div(get_string('listexpiredrefreshrequired', 'block_ned_teacher_tools'), 'list-expired-msg');
+                        $humantime = '';
                     }
 
                     $refreshicon = html_writer::img($OUTPUT->pix_url('refresh_button', 'block_fn_marking'), '', null);
@@ -433,7 +439,7 @@ class block_fn_marking extends block_list {
                             array('class' => 'btn btn-secondary fn_refresh_btn')
                         );
                     $refresh = html_writer::div(
-                        $humantime . html_writer::empty_tag('br') . $refreshbutton,
+                        $humantime . $refreshbutton,
                         'fn_refresh_wrapper_footer'
                     );
 

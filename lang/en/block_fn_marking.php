@@ -219,3 +219,4 @@ $string['showsuspendedusers'] = 'Show suspended users';
 $string['minsbeforerefreshrequired'] = 'Minutes before refresh required';
 $string['calcnumofactivities'] = 'Calculation the number of activities that require grading...';
 $string['courses'] = 'Course(s)';
+$string['listexpiredrefreshrequired'] = 'List has expired. Refresh required.';

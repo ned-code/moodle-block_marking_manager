@@ -607,7 +607,6 @@ table.simplegradebook td.empty-week {
 .fn-menuwrapper {
     text-align: right;
     margin: 0 auto 10px;
-    width: 852px;
 }
 div.fn-menuwrapper div.groupselector div.singleselect{
     margin: 1px 0 !important;
@@ -788,14 +787,15 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
 }
 
 .block_fn_marking .togglezero {
-    background: none;
-    cursor: none;
-    display: block;
-    float: left;
-    height: 16px;
-    left: 0;
     position: relative;
+    left: 0;
+    display: block;
     width: 16px;
+    height: 16px;
+    float: left;
+    cursor: pointer;
+    margin-right: 5px;
+    background: transparent url('[[pix:core|i/navigationitem]]') no-repeat 50% 50%;
 }
 
 .block_fn_marking .bullet {
@@ -813,6 +813,7 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     background: transparent url('[[pix:core|t/collapsed]]') no-repeat 50% 50% !important;
 }
 
+.block_fn_marking .togglezero + a,
 .block_fn_marking .toggle.open + a {
     font-weight: normal !important;
 }
@@ -1032,4 +1033,9 @@ th.fn-student, th.fn-posts,th.fn-replies, th.fn-rating {
     text-align: center;
     font-size: 1.2em;
     margin-bottom: 20px;
+}
+.block_fn_marking .list-expired-msg {
+    text-align: center;
+    color: red;
+    margin: 15px 0;
 }
