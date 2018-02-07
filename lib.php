@@ -3294,7 +3294,7 @@ function block_fn_marking_get_selected_courses($category, &$filtercourses) {
     }
     if ($category->categories) {
         foreach ($category->categories as $subcat) {
-            block_fn_marking_get_selected_courses($subcat, $course);
+            block_fn_marking_get_selected_courses($subcat, $filtercourses);
         }
     }
 };
